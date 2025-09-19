@@ -12,10 +12,10 @@
 
 #### formatting and linting
 
-- `format:check`: check if there are any formatting issues
-- `format:write`: format everything
-- `lint`: check if there are any lint issues
-- `lint:fix`: try to fix any lint issues
+- `npm run format:check`: check if there are any formatting issues
+- `npm run format:write`: format everything
+- `npm run lint`: check if there are any lint issues
+- `npm run lint:fix`: try to fix any lint issues
 
 ### dev notes
 
