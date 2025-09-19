@@ -8,7 +8,13 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
-  globalIgnores(["dist", "dist-zip", "package-lock.json", "tsconfig.json"]),
+  globalIgnores([
+    "dist",
+    "dist-zip",
+    "package-lock.json",
+    "tsconfig.json",
+    "coverage",
+  ]),
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },
