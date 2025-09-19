@@ -4,23 +4,27 @@
 
 ### vite
 
-handles tsc/esbuild, dev server with hot reload, production builds, etc.
+- handles tsc/esbuild, dev server with hot reload, production builds, etc.
 
 #### vite-plugin-zip-pack
 
-itch website expects a .zip with an index.html inside, this handles that
+- itch website expects a .zip with an index.html inside, this handles that
+
+### vitest
+
+- vitest is a test runner that seamlessly integrates with vite
 
 ### prettier
 
-prettier prevents any formatting bikeshedding
+- prettier prevents any formatting bikeshedding
 
 ### eslint
 
-eslint helps catch common code quality issues
+- eslint helps catch common code quality issues
 
 #### eslint-config-prettier
 
-eslint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
+- eslint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
 
 ## todos
 
