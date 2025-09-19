@@ -4,9 +4,18 @@
 
 ### npm scripts
 
+#### building and running
+
 - `npm run dev`: run a fast local dev server (no type checking)
 - `npm run build`: type-check with tsc, then generate an optimized production bundle and zip it for easy upload to itch.io
 - `npm run preview`: serve built production bundle locally
+
+#### formatting and linting
+
+- `format:check`: check if there are any formatting issues
+- `format:write`: format everything
+- `lint`: check if there are any lint issues
+- `lint:fix`: try to fix any lint issues
 
 ### dev notes
 
