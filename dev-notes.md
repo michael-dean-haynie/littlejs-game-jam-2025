@@ -10,6 +10,18 @@ handles tsc/esbuild, dev server with hot reload, production builds, etc.
 
 itch website expects a .zip with an index.html inside, this handles that
 
+### prettier
+
+prettier prevents any formatting bikeshedding
+
+### eslint
+
+eslint helps catch common code quality issues
+
+#### eslint-config-prettier
+
+eslint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
+
 ## todos
 
 1. the package.json is temporarily using a file reference to a local copy of the littlejsengine repo. This is because there's a fix not yet released on npm. https://github.com/KilledByAPixel/LittleJS/issues/153
