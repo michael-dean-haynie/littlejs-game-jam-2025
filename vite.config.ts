@@ -1,12 +1,24 @@
 /// <reference types="vitest" />
 
 import { defineConfig } from "vite";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import zipPack from "vite-plugin-zip-pack";
 
 export default defineConfig({
   // make index.html use relative base path for asset urls
   // so they resolve properly when embedded inside itch.io's webpage
   base: "./",
-  // automatically zip the /dist folder after build for easy upload to itch.io
-  plugins: [zipPack()],
+  plugins: [
+    // include boxd2 assets from node_modules
+    viteStaticCopy({
+      targets: [
+        {
+          src: "node_modules/littlejsengine/plugins/box2d.*",
+          dest: "box2d",
+        },
+      ],
+    }),
+    // automatically zip the /dist folder after build for easy upload to itch.io
+    zipPack(),
+  ],
 });

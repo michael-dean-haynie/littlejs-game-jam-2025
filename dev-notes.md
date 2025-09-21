@@ -10,6 +10,10 @@
 
 - itch website expects a .zip with an index.html inside, this handles that
 
+#### vite-plugin-static-copy
+
+- littlejs's box2d plugin is included via script url in the index.html. this copies the assets from node_modules for dev server and production build
+
 ### vitest
 
 - vitest is a test runner that seamlessly integrates with vite

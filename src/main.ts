@@ -1,6 +1,6 @@
 import {
+  box2dEngineInit,
   drawTextScreen,
-  engineInit,
   mainCanvasSize,
   setShowSplashScreen,
 } from "littlejsengine";
@@ -42,6 +42,11 @@ function gameRenderPost() {
 setShowSplashScreen(true);
 
 // Startup LittleJS Engine
-engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, [
-  "tiles.png",
-]);
+box2dEngineInit(
+  gameInit,
+  gameUpdate,
+  gameUpdatePost,
+  gameRender,
+  gameRenderPost,
+  ["tiles.png"],
+);
