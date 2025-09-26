@@ -34,6 +34,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "littlejsengine": "^1.12.4"
+    "littlejsengine": "file:../LittleJS"
   }
 }

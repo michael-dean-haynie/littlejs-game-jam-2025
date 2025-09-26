@@ -1,5 +1,9 @@
 # dev notes
 
+## External Tools
+
+- https://www.pixilart.com/
+
 ## technology decisions
 
 ### vite
