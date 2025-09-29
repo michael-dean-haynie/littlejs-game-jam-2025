@@ -25,6 +25,7 @@
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.4.0",
+    "jsdom": "^27.0.0",
     "prettier": "3.6.2",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.44.0",
@@ -34,6 +35,8 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "littlejsengine": "file:../LittleJS"
+    "inversify": "^7.10.1",
+    "littlejsengine": "file:../LittleJS",
+    "reflect-metadata": "^0.2.2"
   }
 }

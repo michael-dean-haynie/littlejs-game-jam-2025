@@ -1,17 +1,39 @@
-import * as LJS from "littlejsengine";
-import { vec2 } from "littlejsengine";
+import { inject } from "inversify";
+import {
+  setShowSplashScreen,
+  engineInit,
+  box2dInit,
+  setCameraPos,
+  vec2,
+} from "littlejsengine";
+import { Autoloadable } from "./autoload/autoloadable";
+import {
+  WARRIOR_FACTORY_TOKEN,
+  type IWarriorFactory,
+} from "./warrior-factory.contracts";
+import { GAME_TOKEN, type IGame } from "./game.contracts";
 
-export class Game {
+@Autoloadable({
+  serviceIdentifier: GAME_TOKEN,
+})
+export class Game implements IGame {
+  private readonly _warriorFactory: IWarriorFactory;
+
+  constructor(@inject(WARRIOR_FACTORY_TOKEN) warriorFactory: IWarriorFactory) {
+    this._warriorFactory = warriorFactory;
+  }
+
   start(): void {
-    LJS.setShowSplashScreen(true);
+    // pre-init setup
+    setShowSplashScreen(true);
 
-    LJS.engineInit(
+    engineInit(
       this._gameInit.bind(this),
       this._gameUpdate.bind(this),
       this._gameUpdatePost.bind(this),
       this._gameRender.bind(this),
       this._gameRenderPost.bind(this),
-      ["tiles.png"],
+      ["Warrior_Idle.png"],
     );
   }
 
@@ -21,40 +43,26 @@ export class Game {
    */
   private async _gameInit(): Promise<void> {
     // start up LittleJS Box2D plugin
-    await LJS.box2dInit();
+    await box2dInit();
 
     // michael: organize
-    LJS.setCameraPos(vec2(0, 0));
+    setCameraPos(vec2(0, 0));
 
-    const squareTileInfo = LJS.tile(0, 16, 0, 1);
+    this._warriorFactory.createWarrior();
 
-    const b2Obj = new LJS.Box2dObject(
-      vec2(0, 0),
-      vec2(1, 1),
-      //   undefined,
-      squareTileInfo,
-      0,
-      LJS.WHITE,
-      LJS.box2d.bodyTypeDynamic,
-    );
-    b2Obj.drawSize = b2Obj.size.scale(1.02); // slightly enlarge to cover gaps
-    b2Obj.addBox(b2Obj.size);
-    // michael: remove
-
-    // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any --- temp debugging in chrome console
-    (window as unknown as any).b2Obj = b2Obj;
+    // (window as unknown as any).b2Obj = b2Obj;
 
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
     // b2Obj.setLinearDamping(0.5); // slippery
-    b2Obj.setLinearDamping(1); // slide
+    // b2Obj.setLinearDamping(1); // slide
     // b2Obj.setLinearDamping(2); // scootch
     // b2Obj.setLinearDamping(3); // budge
 
     // figuring out physics
     // b2Obj.applyAcceleration(vec2(1)); // ignores mass
-    b2Obj.applyForce(vec2(100)); // does not ignore mass
+    // b2Obj.applyForce(vec2(100)); // does not ignore mass
   }
 
   /**

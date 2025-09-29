@@ -21,4 +21,14 @@ export default defineConfig({
     // automatically zip the /dist folder after build for easy upload to itch.io
     zipPack(),
   ],
+  // configure vitest for browser-like env (so littlejsengine can reference 'window')
+  test: {
+    environment: "jsdom",
+    setupFiles: [
+      // stub out AudioContext (not provided by jsdom)
+      "src/test/audio-context.stub.ts",
+      // autoload test double files
+      "src/autoload/autoload-test.ts",
+    ],
+  },
 });
