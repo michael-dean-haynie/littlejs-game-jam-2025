@@ -73,4 +73,4 @@
 
 ## todos
 
-1. the package.json is temporarily using a file reference to a local copy of the littlejsengine repo. This is because there's a fix not yet released on npm. https://github.com/KilledByAPixel/LittleJS/issues/153
+(no todos atm)
