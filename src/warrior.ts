@@ -1,22 +1,24 @@
-import { box2d, Box2dObject, tile, vec2, WHITE } from "littlejsengine";
+import type { IBox2dObjectAdapter } from "./box-2d-object";
+import { SpriteAnimation } from "./sprite-animation/sprite-animation";
 
-export class Warrior extends Box2dObject {
-  constructor() {
-    super(
-      vec2(0),
-      vec2(10),
-      tile(0, 192, 0, 0),
-      0,
-      WHITE,
-      box2d.bodyTypeDynamic,
-    );
+export class Warrior {
+  private readonly _box2dObjectAdapter: IBox2dObjectAdapter;
+  private readonly _spriteAnimation: SpriteAnimation;
+  constructor(
+    box2dObjectAdapter: IBox2dObjectAdapter,
+    spriteAnimation: SpriteAnimation,
+  ) {
+    this._box2dObjectAdapter = box2dObjectAdapter;
+    this._box2dObjectAdapter.onRender = this.render.bind(this);
 
-    // michael: test if this is needed and remove? maybe matters for collision?
-    // this.drawSize = this.size.scale(1.02); // slightly enlarge to cover gaps
-    this.addBox(this.size);
+    this._spriteAnimation = spriteAnimation;
   }
 
-  override render() {
-    super.render();
+  render() {
+    if (this._spriteAnimation.update()) {
+      this._box2dObjectAdapter.tileInfo =
+        this._spriteAnimation.currentFrame.tileInfo;
+    }
+    // console.log("render THIS", this);
   }
 }

@@ -6,12 +6,12 @@ import {
   setCameraPos,
   vec2,
 } from "littlejsengine";
-import { Autoloadable } from "./autoload/autoloadable";
+import { GAME_TOKEN, type IGame } from "./game.contracts";
 import {
   WARRIOR_FACTORY_TOKEN,
   type IWarriorFactory,
-} from "./warrior-factory.contracts";
-import { GAME_TOKEN, type IGame } from "./game.contracts";
+} from "../warrior-factory/warrior-factory.contracts";
+import { Autoloadable } from "../core/autoload/autoloadable";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -48,7 +48,7 @@ export class Game implements IGame {
     // michael: organize
     setCameraPos(vec2(0, 0));
 
-    this._warriorFactory.createWarrior();
+    this._warriorFactory.createWarrior(vec2(0));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any --- temp debugging in chrome console
     // (window as unknown as any).b2Obj = b2Obj;

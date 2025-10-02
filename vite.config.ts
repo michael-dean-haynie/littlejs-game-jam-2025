@@ -28,7 +28,7 @@ export default defineConfig({
       // stub out AudioContext (not provided by jsdom)
       "src/test/audio-context.stub.ts",
       // autoload test double files
-      "src/autoload/autoload-test.ts",
+      "src/core/autoload/autoload-test.ts",
     ],
   },
 });
