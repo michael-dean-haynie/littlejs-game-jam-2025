@@ -55,6 +55,10 @@
 
 - eslint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
 
+#### @eslint/compat
+
+- automatically imports .gitignore patterns into eslint's ignore configuration
+
 ## external tools
 
 - https://www.pixilart.com/

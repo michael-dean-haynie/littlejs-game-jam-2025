@@ -4,17 +4,24 @@ import tseslint from "typescript-eslint";
 import json from "@eslint/json";
 import markdown from "@eslint/markdown";
 import css from "@eslint/css";
-import { defineConfig, globalIgnores } from "eslint/config";
+import { defineConfig } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
+import { includeIgnoreFile } from "@eslint/compat";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, ".gitignore");
 
 export default defineConfig([
-  globalIgnores([
-    "dist",
-    "dist-zip",
-    "package-lock.json",
-    "tsconfig.json",
-    "coverage",
-  ]),
+  // Auto-import .gitignore patterns
+  includeIgnoreFile(gitignorePath),
+
+  // ESLint-specific ignores (not in .gitignore)
+  {
+    ignores: ["package-lock.json", "tsconfig.json"],
+  },
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },

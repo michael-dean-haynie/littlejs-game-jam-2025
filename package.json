@@ -17,6 +17,7 @@
     "letsgo": "echo \"\n\n✅ ✅ ✅ ✅ ✅ LET'S GOOOOO! ✅ ✅ ✅ ✅ ✅\n\n\""
   },
   "devDependencies": {
+    "@eslint/compat": "^1.4.0",
     "@eslint/css": "^0.11.0",
     "@eslint/js": "^9.35.0",
     "@eslint/json": "^0.13.2",
@@ -36,7 +37,7 @@
   },
   "dependencies": {
     "inversify": "^7.10.1",
-    "littlejsengine": "file:../LittleJS",
+    "littlejsengine": "^1.13.4",
     "reflect-metadata": "^0.2.2"
   }
 }
