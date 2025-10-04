@@ -1,3 +1,4 @@
+/** Eagerly loads all test-double-like files for IoC container autoloading in the test execution context */
 import.meta.glob(
   [
     "../../**/*.dummy.ts",

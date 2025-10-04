@@ -2,7 +2,7 @@ import { Container, type Newable } from "inversify";
 import type { ExecutionContext } from "./execution-context";
 import { autoloadedRegistrations } from "./autoload/autoloadable";
 
-/** initialize an ioc container for a particular execution context */
+/** Initializes an IoC container for a particular execution context */
 export function initIocContainer(context: ExecutionContext): Container {
   const container = new Container({ defaultScope: "Singleton" });
 

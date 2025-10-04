@@ -1,39 +1,85 @@
-import type { Engine } from "../engine/engine.al";
-import type { IEngine } from "../engine/engine.contracts";
+import { Subject } from "rxjs";
+import { noCap } from "../core/util/no-cap";
 import type { SpriteAnimationFrame } from "./sprite-animation-frame";
+import type {
+  FrameChangedData,
+  ISpriteAnimation,
+} from "./sprite-animation.types";
+import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 
-/** handles the logic of animating sprites */
-export class SpriteAnimation {
-  /** animation frames */
+/** A sprite animation that progresses and tracks its own state */
+export class SpriteAnimation implements ISpriteAnimation {
   private readonly _frames: ReadonlyArray<SpriteAnimationFrame>;
-  private readonly _engine: IEngine;
+  private readonly _ljs: ILJS;
 
-  /** the index of the current animation frame */
-  private _currentFrame = 0;
+  /** The index of the current animation frame */
+  private _currentFrameIndex: number | null = null;
 
-  /** the engine frame at which `_currentFrame` was first rendered */
-  private _engineFrame: number | null = null;
+  /** Then engine time (in seconds) at which this animation started */
+  private _startTime: number | null = null;
 
-  constructor(frames: ReadonlyArray<SpriteAnimationFrame>, engine: Engine) {
+  /** The duration of each frame summed together in seconds */
+  private readonly _fullDuration: number;
+
+  /** The offest start of each animation frame */
+  private readonly _offsets: number[];
+
+  private _frameChanged$ = new Subject<FrameChangedData>();
+  public frameChanged$ = this._frameChanged$.asObservable();
+
+  private _stopped$ = new Subject<void>();
+  public stopped$ = this._stopped$.asObservable();
+
+  constructor(frames: ReadonlyArray<SpriteAnimationFrame>, ljs: ILJS) {
     this._frames = frames;
-    this._engine = engine;
+    this._ljs = ljs;
+
+    this._fullDuration = 0;
+    this._offsets = [];
+    for (const frame of this._frames) {
+      this._offsets.push(this._fullDuration);
+      this._fullDuration += frame.duration;
+    }
   }
 
-  get currentFrame(): SpriteAnimationFrame {
-    return this._frames[this._currentFrame];
+  /** Starts or restarts the animation from the begining */
+  restart(): void {
+    this._currentFrameIndex = 0;
+    this._startTime = this._ljs.time;
   }
 
-  /** return true if the next animation frame should be rendered */
-  update(): boolean {
-    const newFrame = this._engine.frame;
-    const delta = newFrame - (this._engineFrame ?? 0);
+  /** Stops the animation */
+  stop(): void {
+    this._currentFrameIndex = null;
+    this._startTime = null;
+    this._stopped$.next();
+  }
 
-    if (delta > this._frames[this._currentFrame].duration) {
-      this._engineFrame = newFrame;
-      this._currentFrame = ++this._currentFrame % this._frames.length;
-      return true;
+  /** Updates the current frame based on engine time */
+  progress() {
+    noCap.notNull(this._currentFrameIndex);
+    noCap.notNull(this._startTime);
+
+    const engineTimeNow = this._ljs.time;
+    const delta = (engineTimeNow - this._startTime) % this._fullDuration;
+
+    const startingFrameIndex = this._currentFrameIndex;
+    for (let idx = 0; idx < this._frames.length; idx++) {
+      const frame = this._frames[idx];
+      const offset = this._offsets[idx];
+      const lower = offset;
+      const upper = offset + frame.duration;
+      if (lower <= delta && delta < upper) {
+        this._currentFrameIndex = idx;
+        break;
+      }
     }
 
-    return false;
+    if (startingFrameIndex !== this._currentFrameIndex) {
+      this._frameChanged$.next({
+        frame: this._frames[this._currentFrameIndex],
+        frameIndex: this._currentFrameIndex,
+      });
+    }
   }
 }

@@ -23,6 +23,8 @@ export default defineConfig({
   ],
   // configure vitest for browser-like env (so littlejsengine can reference 'window')
   test: {
+    printConsoleTrace: true,
+    reporters: ["verbose"],
     environment: "jsdom",
     setupFiles: [
       // stub out AudioContext (not provided by jsdom)

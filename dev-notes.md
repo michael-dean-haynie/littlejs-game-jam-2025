@@ -1,63 +1,57 @@
-# dev notes
+# Dev Notes
 
-## codebase conventions
+## Codebase Conventions
 
-### autoloading ioc dependencies
+### Architectural Boundaries
 
-- files ending in `.al.ts` are auto loaded and bound to the inversify ioc container (see `autoload-app.ts`)
-- test doubles are similarly auto loaded during text executions (see `autoload-test.ts`)
-- the `@Autoloadable()` decorator declaratively configures dependencies
+- We want to prevent littlejs global implmentations with impure side effects bleeding into the game logic.
+- Only the files inside `src/littlejsengine/` can import from the lib directly.
+- All other files can import the nessesary littlejs types from the "barrel" export files.
+- They help to distinguish pure from impure members in a succinct, type-safe manner.
+- There is an eslint rule set up to help enforce the convention.
 
-### `type` vs `interface`
+### Autoloading IoC Dependencies
 
-- generally try to use `type` for data shapes and `interface` for behovioral contracts
+- Files ending in `.al.ts` are auto loaded and bound to the inversify ioc container (see `autoload-app.ts`)
+- Test doubles are similarly auto loaded during text executions (see `autoload-test.ts`)
+- The `@Autoloadable()` decorator declaratively configures dependencies
 
-## technology decisions
+### Types and Naming Things
 
-### vite
+- Generally try to use `type` for data shapes and `interface` for behovioral contracts
+- Previx private members with `_` for clarity of internal implementation details
+- Suffix rxjs observables with `$` for clarity of async/steamed data (angular convention)
 
-- handles tsc/esbuild, dev server with hot reload, production builds, etc.
+### Factories
 
-#### vite-plugin-zip-pack
+Generally, factories are for instantiating types with normal parameters as well as IoC dependencies.
 
-- itch website expects a .zip with an index.html inside, this handles that
+## Game Development Conventions
 
-#### vite-plugin-static-copy
+### Gameplay / Animation Durations
 
-- littlejs's box2d plugin is included via script url in the index.html. this copies the assets from node_modules for dev server and production build
+- Express durations in (gametime) seconds, NOT frames.
+  - Seconds instead of milliseconds because that's what littlejsengine uses by default.
+  - Time-base units provide better semantic clarity for both the code-base and the player.
+  - This keeps game state decoupled from framerates for consistent experience across different machines.
 
-#### vitest
+## Technology Decisions
 
-- vitest is a test runner that seamlessly integrates with vite
-
-##### jsdom
-
-- provides browser apis so the littlejs engine can be present for unit test executions (for convenience)
-
-### inversify
-
-- provides ioc container which helps keep things losely coupled, testable, and declaratively composable
-
-#### reflect-metadata
-
-- dependency of inversify. enables the experimental flavor typescript decorators
-- also, enables custom `@Autoloadable()` decorator
-
-### prettier
-
-- prettier prevents any formatting bikeshedding
-
-### eslint
-
-- eslint helps catch common code quality issues
-
-#### eslint-config-prettier
-
-- eslint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
-
-#### @eslint/compat
-
-- automatically imports .gitignore patterns into eslint's ignore configuration
+- `littlejsengine`: The LittleJS game engine
+- `vite`: Handles tsc/esbuild, dev server with hot reload, production builds, etc.
+  - `vite-plugin-zip-pack`: Iitch.io website expects a .zip with an index.html inside, this handles that
+  - `vite-plugin-static-copy`: LittleJS's box2d plugin is included via script url in the index.html. This copies the assets from node_modules for dev server and production build
+  - `vitest`: Test runner that seamlessly integrates with vite
+    - `jsdom`: Provides browser apis so the littlejs engine can be present for unit test executions (for convenience)
+    - `@vitest/coverage-v8`: Coverage reporting for vitest
+- `inversify`: Provides ioc container which helps keep things losely coupled, testable, and declaratively composable
+  - `reflect-metadata`: Dependency of inversify. enables the experimental flavor typescript decorators. Also, enables custom `@Autoloadable()` decorator
+- `rxjs`: Provides convenient api for pub-sub / async patterns
+- `prettier`: Prevents any formatting bikeshedding
+- `eslint`: Helps catch common code quality issues
+  - `eslint-config-prettier`: ESLint CAN do formatting stuff, but this extension disables those rules so that it doesn't collide with prettier
+  - `@eslint/compat`: Automatically imports .gitignore patterns into eslint's ignore configuration
+- `globals`: Global variable definitions for various environments
 
 ## external tools
 
@@ -73,4 +67,4 @@
 
 ## todos
 
-(no todos atm)
+- make changes to animation

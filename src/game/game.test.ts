@@ -1,6 +1,6 @@
 import { Container } from "inversify";
 import { beforeEach, describe, expect, test } from "vitest";
-import { GAME_TOKEN, type IGame } from "./game.contracts";
+import { GAME_TOKEN, type IGame } from "./game.types";
 import { Game } from "./game.al";
 import { setupTestContainerFor } from "../test/setup-test-container-for";
 
@@ -17,7 +17,7 @@ describe("Game", () => {
     expect(game).toBeDefined();
   });
 
-  // actually initializing the littlejs engine will require a ton of mocking/stubbing canvas, audio context, etc.
+  // NOTE: actually initializing the littlejs engine will require a ton of mocking/stubbing canvas, audio context, etc.
   // jsdom seems to be pretty limited, actually.
   test.skip("start should not throw", () => {
     expect(() => game.start()).not.toThrow();

@@ -1,7 +1,9 @@
-import type { TileInfo } from "littlejsengine";
+import type { TileInfo } from "../littlejsengine/littlejsengine.types";
 
+/** An individual frame in an animation sequence */
 export type SpriteAnimationFrame = Readonly<{
   tileInfo: TileInfo;
-  /** duration in engine frames */
+
+  /** The duration of this animation frame in seconds */
   duration: number;
 }>;

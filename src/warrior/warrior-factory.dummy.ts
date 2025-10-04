@@ -1,9 +1,9 @@
 import { Autoloadable } from "../core/autoload/autoloadable";
-import type { Warrior } from "../warrior";
+import type { Warrior } from "./warrior";
 import {
   WARRIOR_FACTORY_TOKEN,
   type IWarriorFactory,
-} from "./warrior-factory.contracts";
+} from "./warrior-factory.types";
 
 @Autoloadable({
   serviceIdentifier: WARRIOR_FACTORY_TOKEN,

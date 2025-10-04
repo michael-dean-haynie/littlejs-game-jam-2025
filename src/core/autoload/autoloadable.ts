@@ -1,7 +1,7 @@
 import { injectable, type ServiceIdentifier } from "inversify";
 import type { ExecutionContext } from "../execution-context";
 
-/** dependency registration. used for autoloading */
+/** Dependency registration metadata used for IoC container autoloading */
 export type Registration = {
   executionContext: ExecutionContext;
   serviceIdentifier: ServiceIdentifier;
@@ -11,7 +11,7 @@ export type Registration = {
 
 const registrations: Registration[] = [];
 
-/** registrations that have been autoloaded */
+/** Read-only array of all dependency registrations collected by `@Autoloadable()` decorators */
 export const autoloadedRegistrations: ReadonlyArray<Registration> =
   registrations;
 
@@ -30,7 +30,7 @@ export const defaultAutoloadableParams: OptionalAutoloadableParams = {
   executionContext: "app",
 };
 
-/** decorator factory. applies the `@injectable()` decorator, and registers the dependency for autoloading */
+/** Class decorator factory that marks a class as injectable and automatically registers it for IoC container binding */
 export function Autoloadable(
   parameters: RequiredAutoloadableParams & Partial<OptionalAutoloadableParams>,
 ): ClassDecorator {

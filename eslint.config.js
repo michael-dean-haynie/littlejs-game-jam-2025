@@ -22,6 +22,8 @@ export default defineConfig([
   {
     ignores: ["package-lock.json", "tsconfig.json"],
   },
+
+  // Apply linting rules for file types
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },
@@ -59,6 +61,37 @@ export default defineConfig([
     language: "css/css",
     extends: ["css/recommended"],
   },
+
   // turn off rules that would conflict with prettier
   eslintConfigPrettier,
+
+  // ============================================
+  // RESTRICT littlejsengine IMPORTS
+  // ============================================
+  {
+    files: ["**/*.{js,ts}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "littlejsengine",
+              message:
+                "Don't import from 'littlejsengine' directly. Use 'src/littlejsengine/littlejsengine.types.ts' for types or pure impls. Inject ImpureLJS for impure impls.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // michael: explain approach in dev-notes
+  // Allow specific files to import from littlejsengine
+  {
+    files: ["src/littlejsengine/**/*"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
 ]);
