@@ -24,8 +24,7 @@ describe("WarriorFactory", () => {
     expect(warriorFactory).toBeDefined();
   });
 
-  // michael: pu@ figure out how to mock box2d plugin separately or include in ljs
-  test.skip("createWarrior should create a warrior", () => {
+  test("createWarrior should create a warrior", () => {
     expect(warriorFactory.createWarrior(vec2(0))).toBeDefined();
   });
 });

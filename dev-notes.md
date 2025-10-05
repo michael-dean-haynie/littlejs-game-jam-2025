@@ -44,6 +44,7 @@ Generally, factories are for instantiating types with normal parameters as well 
   - `vitest`: Test runner that seamlessly integrates with vite
     - `jsdom`: Provides browser apis so the littlejs engine can be present for unit test executions (for convenience)
     - `@vitest/coverage-v8`: Coverage reporting for vitest
+    - `vitest-mock-extended`: for mocking interfaces - helpful especially with littlejsengine and box2d
 - `inversify`: Provides ioc container which helps keep things losely coupled, testable, and declaratively composable
   - `reflect-metadata`: Dependency of inversify. enables the experimental flavor typescript decorators. Also, enables custom `@Autoloadable()` decorator
 - `rxjs`: Provides convenient api for pub-sub / async patterns
@@ -53,11 +54,11 @@ Generally, factories are for instantiating types with normal parameters as well 
   - `@eslint/compat`: Automatically imports .gitignore patterns into eslint's ignore configuration
 - `globals`: Global variable definitions for various environments
 
-## external tools
+## External Tools
 
 - https://www.pixilart.com/
 
-## references
+## References
 
 - [littlejs](https://github.com/KilledByAPixel/LittleJS)
 - [box2d](https://box2d.org/documentation/index.html)
@@ -65,6 +66,13 @@ Generally, factories are for instantiating types with normal parameters as well 
 - [inversify (more details)](https://doc.inversify.cloud/en/)
 - [test double terminology](https://medium.com/@matiasglessi/mock-stub-spy-and-other-test-doubles-a1869265ac47)
 
+## Misc Notes
+
+- During `npm run build`, vite will produce the following warning, but it's fine to ignore since the script get's statically coppied.
+  ```txt
+  <script src="./box2d/box2d.wasm.js"> in "/index.html" can't be bundled without type="module" attribute
+  ```
+
 ## todos
 
-- make changes to animation
+- figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts

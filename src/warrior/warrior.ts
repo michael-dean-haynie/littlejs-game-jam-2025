@@ -1,15 +1,15 @@
 import { Subject, takeUntil, tap } from "rxjs";
-import { SpriteAnimation } from "../sprite-animation/sprite-animation";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
+import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 
 export class Warrior {
   private readonly _box2dObjectAdapter: IBox2dObjectAdapter;
-  private readonly _spriteAnimation: SpriteAnimation;
+  private readonly _spriteAnimation: ISpriteAnimation;
   private readonly _destroyRef$ = new Subject<void>();
 
   constructor(
     box2dObjectAdapter: IBox2dObjectAdapter,
-    spriteAnimation: SpriteAnimation,
+    spriteAnimation: ISpriteAnimation,
   ) {
     this._box2dObjectAdapter = box2dObjectAdapter;
     this._box2dObjectAdapter.render$

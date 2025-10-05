@@ -12,30 +12,37 @@ import { inject } from "inversify";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
-import { Box2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter";
 import { vec2, WHITE } from "../littlejsengine/littlejsengine.pure";
+import {
+  BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN,
+  type IBox2dObjectAdapterFactory,
+} from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter-factory.types";
 
 @Autoloadable({
   serviceIdentifier: WARRIOR_FACTORY_TOKEN,
 })
 export class WarriorFactory implements IWarriorFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
+  private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
   private readonly _ljs: ILJS;
 
   constructor(
     @inject(SPRITE_ANIMATION_FACTORY_TOKEN)
     spriteAnimationFactory: ISpriteAnimationFactory,
+    @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
+    box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
     @inject(LJS_TOKEN)
     engine: ILJS,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
+    this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
     this._ljs = engine;
   }
 
   createWarrior(position: Vector2): Warrior {
     const size = vec2(10);
 
-    const b2ObjAdpt = new Box2dObjectAdapter(
+    const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
       size,
       this._ljs.tile(0, 192, 0, 0),
@@ -43,11 +50,6 @@ export class WarriorFactory implements IWarriorFactory {
       WHITE,
       this._ljs.box2d.bodyTypeDynamic,
     );
-
-    // michael: test if this is needed and remove? maybe matters for collision?
-    // this.drawSize = this.size.scale(1.02); // slightly enlarge to cover gaps
-
-    b2ObjAdpt.addBox(b2ObjAdpt.size);
 
     const spriteAnimation = this._spriteAnimationFactory.createSpriteAnimation([
       { tileInfo: this._ljs.tile(0, 192, 0, 0), duration: 0.2 },

@@ -12,4 +12,5 @@ export interface ISpriteAnimation {
   progress(): void;
 
   frameChanged$: Observable<FrameChangedData>;
+  stopped$: Observable<void>;
 }

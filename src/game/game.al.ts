@@ -50,9 +50,6 @@ export class Game implements IGame {
 
     this._warriorFactory.createWarrior(vec2(0));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any --- temp debugging in chrome console
-    // (window as unknown as any).b2Obj = b2Obj;
-
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
     // b2Obj.setLinearDamping(0.5); // slippery

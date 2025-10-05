@@ -1,5 +1,5 @@
-import type { SpriteAnimation } from "./sprite-animation";
 import type { SpriteAnimationFrame } from "./sprite-animation-frame";
+import type { ISpriteAnimation } from "./sprite-animation.types";
 
 export const SPRITE_ANIMATION_FACTORY_TOKEN =
   "SPRITE_ANIMATION_FACTORY_TOKEN" as const;
@@ -7,5 +7,5 @@ export const SPRITE_ANIMATION_FACTORY_TOKEN =
 export interface ISpriteAnimationFactory {
   createSpriteAnimation(
     frames: ReadonlyArray<SpriteAnimationFrame>,
-  ): SpriteAnimation;
+  ): ISpriteAnimation;
 }

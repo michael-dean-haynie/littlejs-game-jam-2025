@@ -86,7 +86,6 @@ export default defineConfig([
     },
   },
 
-  // michael: explain approach in dev-notes
   // Allow specific files to import from littlejsengine
   {
     files: ["src/littlejsengine/**/*"],
