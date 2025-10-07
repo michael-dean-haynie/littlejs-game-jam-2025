@@ -17,6 +17,10 @@ import {
   BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN,
   type IBox2dObjectAdapterFactory,
 } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter-factory.types";
+import {
+  INPUT_MANAGER_TOKEN,
+  type IInputManager,
+} from "../input/input-manager.types";
 
 @Autoloadable({
   serviceIdentifier: WARRIOR_FACTORY_TOKEN,
@@ -25,6 +29,7 @@ export class WarriorFactory implements IWarriorFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
   private readonly _ljs: ILJS;
+  private readonly _inputManager: IInputManager;
 
   constructor(
     @inject(SPRITE_ANIMATION_FACTORY_TOKEN)
@@ -33,10 +38,13 @@ export class WarriorFactory implements IWarriorFactory {
     box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
     @inject(LJS_TOKEN)
     engine: ILJS,
+    @inject(INPUT_MANAGER_TOKEN)
+    inputManager: IInputManager,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
     this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
     this._ljs = engine;
+    this._inputManager = inputManager;
   }
 
   createWarrior(position: Vector2): Warrior {
@@ -62,6 +70,6 @@ export class WarriorFactory implements IWarriorFactory {
       { tileInfo: this._ljs.tile(7, 192, 0, 0), duration: 0.2 },
     ]);
 
-    return new Warrior(b2ObjAdpt, spriteAnimation);
+    return new Warrior(b2ObjAdpt, spriteAnimation, this._inputManager);
   }
 }

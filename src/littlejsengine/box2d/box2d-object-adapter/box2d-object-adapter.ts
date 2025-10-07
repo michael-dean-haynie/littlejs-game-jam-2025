@@ -22,12 +22,12 @@ export class Box2dObjectAdapter
   }
 
   override update(): void {
-    super.update();
     this._update$.next();
+    super.update();
   }
 
   override render(): void {
-    super.render();
     this._render$.next();
+    super.render();
   }
 }

@@ -8,6 +8,10 @@ import { Autoloadable } from "../core/autoload/autoloadable";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import {
+  INPUT_MANAGER_TOKEN,
+  type IInputManager,
+} from "../input/input-manager.types";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -15,13 +19,16 @@ import { vec2 } from "../littlejsengine/littlejsengine.pure";
 export class Game implements IGame {
   private readonly _ljs: ILJS;
   private readonly _warriorFactory: IWarriorFactory;
+  private readonly _inputManager: IInputManager;
 
   constructor(
     @inject(LJS_TOKEN) ljs: ILJS,
     @inject(WARRIOR_FACTORY_TOKEN) warriorFactory: IWarriorFactory,
+    @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
   ) {
     this._ljs = ljs;
     this._warriorFactory = warriorFactory;
+    this._inputManager = inputManager;
   }
 
   start(): void {
@@ -72,7 +79,10 @@ export class Game implements IGame {
    * Called after physics and objects are updated
    * Setup camera and prepare for render
    */
-  private _gameUpdatePost(): void {}
+  private _gameUpdatePost(): void {
+    // clear the input buffer now that it's been processed
+    this._inputManager.clearBuffer();
+  }
 
   /**
    * Called before objects are rendered
