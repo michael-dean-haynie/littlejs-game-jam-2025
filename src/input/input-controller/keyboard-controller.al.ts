@@ -11,10 +11,13 @@ import {
   type IKeyboardController,
   type KeyupOrKeydown,
   type KeyboardInput,
+  MovementKeyboardInputs,
+  MovementKeyboardInputVectors,
 } from "./keyboard-controller.types";
 import type { IGameInputCommand } from "../game-inputs/game-input.types";
 import { Move } from "../game-inputs/move";
 import { vec2 } from "../../littlejsengine/littlejsengine.pure";
+import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
 
 @Autoloadable({
   serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
@@ -87,7 +90,7 @@ export class KeyboardController implements IKeyboardController {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _process(key: string, _upOrDown: KeyupOrKeydown): void {
     const inputMatches = this._matchKeyToInputs(key);
-    if (inputMatches.some((im) => this._inputIsMovement(im))) {
+    if (inputMatches.some((im) => MovementKeyboardInputs.includes(im))) {
       this._inputs$.next(this._getGameInputCommandForMovement());
     }
 
@@ -98,55 +101,26 @@ export class KeyboardController implements IKeyboardController {
     const activeMovementInputs = [...this._activeKeys]
       .map((key) => {
         return this._matchKeyToInputs(key).find((input) =>
-          this._inputIsMovement(input),
+          MovementKeyboardInputs.includes(input),
         );
       })
       .filter((input) => input !== undefined);
 
-    // michael: maybe we can skip the combos and just build the vector combining x and y
-    const reducedMovementInput: KeyboardInput =
-      activeMovementInputs.reduceRight((acc, curr) => {
-        if (acc === "stopMoving") {
-          return curr;
-        }
+    const reducedMovementVec: Vector2 = activeMovementInputs.reduce(
+      (acc, cur) => {
+        const curVec = MovementKeyboardInputVectors[cur];
 
-        const pair = [acc, curr];
-        if (pair.includes("moveLeft") && pair.includes("moveUp")) {
-          return "moveLeftUp";
-        }
-        if (pair.includes("moveLeft") && pair.includes("moveDown")) {
-          return "moveLeftDown";
-        }
-        if (pair.includes("moveRight") && pair.includes("moveUp")) {
-          return "moveRightUp";
-        }
-        if (pair.includes("moveRight") && pair.includes("moveDown")) {
-          return "moveRightDown";
-        }
+        // replace x/y with more recent inputs.
+        // simply summing would make left + right = 0 instead of favoring the most recent
+        return vec2(
+          curVec.x !== 0 ? curVec.x : acc.x,
+          curVec.y !== 0 ? curVec.y : acc.y,
+        );
+      },
+      vec2(0, 0),
+    );
 
-        return curr;
-      }, "stopMoving");
-
-    switch (reducedMovementInput) {
-      case "stopMoving":
-        return new Move(vec2(0, 0));
-      case "moveLeft":
-        return new Move(vec2(-1, 0));
-      case "moveLeftUp":
-        return new Move(vec2(-1, 1));
-      case "moveUp":
-        return new Move(vec2(0, 1));
-      case "moveRightUp":
-        return new Move(vec2(1, 1));
-      case "moveRight":
-        return new Move(vec2(1, 0));
-      case "moveRightDown":
-        return new Move(vec2(1, -1));
-      case "moveDown":
-        return new Move(vec2(0, -1));
-      case "moveLeftDown":
-        return new Move(vec2(-1, -1));
-    }
+    return new Move(reducedMovementVec);
   }
 
   private _matchKeyToInputs(key: string): KeyboardInput[] {
@@ -179,16 +153,6 @@ export class KeyboardController implements IKeyboardController {
       case "forbidden":
         return this._activeModifiers[modifier] === undefined;
     }
-  }
-
-  private _inputIsMovement(input: KeyboardInput): boolean {
-    const movementInputs: KeyboardInput[] = [
-      "moveLeft",
-      "moveRight",
-      "moveUp",
-      "moveDown",
-    ];
-    return movementInputs.includes(input);
   }
 
   // michael: remember if shift+a starts ability letting go of shift and then letting go of a should deactivate it (for HOLD setting)
