@@ -11,7 +11,7 @@ import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import {
   INPUT_MANAGER_TOKEN,
   type IInputManager,
-} from "../input/input-manager.types";
+} from "../input/input-manager/input-manager.types";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -54,6 +54,8 @@ export class Game implements IGame {
 
     // michael: organize
     this._ljs.setCameraPos(vec2(0, 0));
+    // michael: remove
+    this._ljs.setObjectDefaultDamping(0);
 
     this._warriorFactory.createWarrior(vec2(0));
 
@@ -65,8 +67,8 @@ export class Game implements IGame {
     // b2Obj.setLinearDamping(3); // budge
 
     // figuring out physics
-    // b2Obj.applyAcceleration(vec2(1)); // ignores mass
-    // b2Obj.applyForce(vec2(100)); // does not ignore mass
+    // b2Obj.applyAcceleration(vec2(1)); // ljs: ignores mass; b2d: impulse
+    // b2Obj.applyForce(vec2(100)); // ljs: does not ignore mass; b2d: force
   }
 
   /**

@@ -20,7 +20,7 @@ import {
 import {
   INPUT_MANAGER_TOKEN,
   type IInputManager,
-} from "../input/input-manager.types";
+} from "../input/input-manager/input-manager.types";
 
 @Autoloadable({
   serviceIdentifier: WARRIOR_FACTORY_TOKEN,
@@ -48,7 +48,7 @@ export class WarriorFactory implements IWarriorFactory {
   }
 
   createWarrior(position: Vector2): Warrior {
-    const size = vec2(10);
+    const size = vec2(5);
 
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
@@ -58,6 +58,8 @@ export class WarriorFactory implements IWarriorFactory {
       WHITE,
       this._ljs.box2d.bodyTypeDynamic,
     );
+
+    b2ObjAdpt.setLinearDamping(0);
 
     const spriteAnimation = this._spriteAnimationFactory.createSpriteAnimation([
       { tileInfo: this._ljs.tile(0, 192, 0, 0), duration: 0.2 },

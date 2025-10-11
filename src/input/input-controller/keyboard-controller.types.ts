@@ -1,19 +1,37 @@
 import type { Observable } from "rxjs";
 import { enumerationFactory } from "../../core/enumeration-factory";
-import type { GameInput } from "../game-input.types";
+import type { IGameInputCommand } from "../game-inputs/game-input.types";
 
 export const KEYBOARD_CONTROLLER_TOKEN = "KEYBOARD_CONTROLLER_TOKEN" as const;
 
 export interface IKeyboardController {
-  inputs$: Observable<GameInput>;
+  inputs$: Observable<IGameInputCommand>;
 }
 
-export type KeyboardControllerProfile = Partial<{
-  [index in GameInput]: KeyboardInputMatcher[];
+/** These are the inputs for the keyboard that users can map to particular keys via a profile */
+export const KeyboardInputs = enumerationFactory(
+  "moveLeft",
+  "moveRight",
+  "moveUp",
+  "moveDown",
+  "stopMoving",
+  "moveLeftUp",
+  "moveLeftDown",
+  "moveRightUp",
+  "moveRightDown",
+);
+export type KeyboardInput = ReturnType<typeof KeyboardInputs.values>[number];
+
+export type KeyboardProfile = Partial<{
+  [index in KeyboardInput]: KeyboardInputMatcher[];
 }>;
+
+export type HoldOrToggle = "hold" | "toggle";
+export type KeyupOrKeydown = "keyup" | "keydown";
 
 export type KeyboardInputMatcher = {
   key: string;
+  holdOrToggle?: HoldOrToggle | undefined;
 } & Partial<{
   [index in KeyboardModifier]: KeyboardModifierMatcher;
 }>;

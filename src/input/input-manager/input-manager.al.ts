@@ -1,10 +1,10 @@
-import { Autoloadable } from "../core/autoload/autoloadable";
-import { INPUT_MANAGER_TOKEN, type IInputManager } from "./input-manager.types";
-import type { GameInput } from "./game-input.types";
+import { Autoloadable } from "../../core/autoload/autoloadable";
 import { inject } from "inversify";
-import { KEYBOARD_CONTROLLER_TOKEN } from "./input-controller/keyboard-controller.types";
-import type { KeyboardController } from "./input-controller/keyboard-controller.al";
+import { KEYBOARD_CONTROLLER_TOKEN } from "../input-controller/keyboard-controller.types";
+import type { KeyboardController } from "../input-controller/keyboard-controller.al";
 import { tap } from "rxjs";
+import { INPUT_MANAGER_TOKEN, type IInputManager } from "./input-manager.types";
+import type { IGameInputCommand } from "../game-inputs/game-input.types";
 
 @Autoloadable({
   serviceIdentifier: INPUT_MANAGER_TOKEN,
@@ -12,8 +12,8 @@ import { tap } from "rxjs";
 export class InputManager implements IInputManager {
   private readonly _keyboardController: KeyboardController;
 
-  private _buffer: GameInput[] = [];
-  get buffer(): ReadonlyArray<GameInput> {
+  private _buffer: IGameInputCommand[] = [];
+  get buffer(): ReadonlyArray<IGameInputCommand> {
     return this._buffer;
   }
 

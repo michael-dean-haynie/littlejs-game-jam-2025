@@ -3,12 +3,16 @@
 import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import zipPack from "vite-plugin-zip-pack";
+import checker from "vite-plugin-checker";
 
 export default defineConfig({
   // make index.html use relative base path for asset urls
   // so they resolve properly when embedded inside itch.io's webpage
   base: "./",
   plugins: [
+    checker({
+      typescript: true, // Enable TypeScript checking
+    }),
     // include boxd2 assets from node_modules
     viteStaticCopy({
       targets: [

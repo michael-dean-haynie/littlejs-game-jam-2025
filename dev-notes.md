@@ -39,6 +39,7 @@ Generally, factories are for instantiating types with normal parameters as well 
 
 - `littlejsengine`: The LittleJS game engine
 - `vite`: Handles tsc/esbuild, dev server with hot reload, production builds, etc.
+  - `vite-plugin-checker`: displays typescript errors in browser overlay and console during development
   - `vite-plugin-zip-pack`: Iitch.io website expects a .zip with an index.html inside, this handles that
   - `vite-plugin-static-copy`: LittleJS's box2d plugin is included via script url in the index.html. This copies the assets from node_modules for dev server and production build
   - `vitest`: Test runner that seamlessly integrates with vite
@@ -65,6 +66,8 @@ Generally, factories are for instantiating types with normal parameters as well 
 - [inversify](https://inversify.io/docs/introduction/getting-started/)
 - [inversify (more details)](https://doc.inversify.cloud/en/)
 - [test double terminology](https://medium.com/@matiasglessi/mock-stub-spy-and-other-test-doubles-a1869265ac47)
+- https://gamedev.stackexchange.com/questions/166531/how-to-program-smooth-player-2d-movements
+- https://gameprogrammingpatterns.com/state.html
 
 ## Misc Notes
 

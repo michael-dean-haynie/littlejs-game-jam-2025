@@ -1,5 +1,5 @@
 import { mock } from "vitest-mock-extended";
-import { Autoloadable } from "../core/autoload/autoloadable";
+import { Autoloadable } from "../../core/autoload/autoloadable";
 import { INPUT_MANAGER_TOKEN, type IInputManager } from "./input-manager.types";
 
 @Autoloadable({
