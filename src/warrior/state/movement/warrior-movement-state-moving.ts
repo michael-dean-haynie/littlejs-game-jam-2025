@@ -1,8 +1,8 @@
-import type { IGameInputCommand } from "../../../input/game-inputs/game-input.types";
-import { Move } from "../../../input/game-inputs/move";
 import type { Vector2 } from "../../../littlejsengine/littlejsengine.types";
+import { WarriorCommandMove } from "../../commands/warrior-command-move";
+import type { IWarriorCommand } from "../../commands/warrior-commands.types";
 import type { Warrior } from "../../warrior";
-import { WarriorMovementStateIdle } from "./warrior-movement-state-idle";
+import { WarriorMovementStateStill } from "./warrior-movement-state-still";
 import type { IWarriorMovementState } from "./warrior-movement-state.types";
 
 export class WarriorMovementStateMoving implements IWarriorMovementState {
@@ -14,11 +14,11 @@ export class WarriorMovementStateMoving implements IWarriorMovementState {
     this._warrior.switchAnimation(this._warrior.runAnimation);
   }
 
-  processGameInputCommand(command: IGameInputCommand): void {
-    if (command instanceof Move) {
+  processCommand(command: IWarriorCommand): void {
+    if (command instanceof WarriorCommandMove) {
       // transition to moving
       if (command.direction.length() === 0) {
-        this._warrior.movementState = new WarriorMovementStateIdle(
+        this._warrior.movementState = new WarriorMovementStateStill(
           this._warrior,
         );
         return;

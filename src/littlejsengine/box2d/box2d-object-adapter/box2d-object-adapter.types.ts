@@ -12,6 +12,7 @@ export type IBox2dObjectAdapter = Pick<
   | "applyAcceleration"
   | "applyForce"
   | "getLinearVelocity"
+  | "getCenterOfMass"
   | "setLinearDamping"
   | "setLinearVelocity"
 > & {

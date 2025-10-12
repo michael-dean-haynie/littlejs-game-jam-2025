@@ -1,5 +1,5 @@
 import { mock } from "vitest-mock-extended";
-import { Autoloadable } from "../../core/autoload/autoloadable";
+import { Autoloadable } from "../../../core/autoload/autoloadable";
 import {
   KEYBOARD_CONTROLLER_TOKEN,
   type IKeyboardController,

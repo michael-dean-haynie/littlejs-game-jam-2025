@@ -1,13 +1,16 @@
 import type { Observable } from "rxjs";
-import { enumerationFactory } from "../../core/enumeration-factory";
-import type { IGameInputCommand } from "../game-inputs/game-input.types";
-import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
-import { vec2 } from "../../littlejsengine/littlejsengine.pure";
+import { enumerationFactory } from "../../../core/enumeration-factory";
+import type { IGameInputCommand } from "../../game-inputs/game-input.types";
+import type { Vector2 } from "../../../littlejsengine/littlejsengine.types";
+import { vec2 } from "../../../littlejsengine/littlejsengine.pure";
 
 export const KEYBOARD_CONTROLLER_TOKEN = "KEYBOARD_CONTROLLER_TOKEN" as const;
 
 export interface IKeyboardController {
   inputs$: Observable<IGameInputCommand>;
+
+  /** Most inputs are processed during browser events. This is for input that should happen frame by frame. */
+  triggerFrameDrivenInputs(): void;
 }
 
 /** These are the inputs for the keyboard that users can map to particular keys via a profile */

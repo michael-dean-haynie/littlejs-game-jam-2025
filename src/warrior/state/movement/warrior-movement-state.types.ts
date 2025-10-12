@@ -1,5 +1,5 @@
-import type { IGameInputCommand } from "../../../input/game-inputs/game-input.types";
+import type { IWarriorCommand } from "../../commands/warrior-commands.types";
 
 export interface IWarriorMovementState {
-  processGameInputCommand(command: IGameInputCommand): void;
+  processCommand(command: IWarriorCommand): void;
 }

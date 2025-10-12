@@ -1,13 +1,10 @@
 import { inject } from "inversify";
 import { GAME_TOKEN, type IGame } from "./game.types";
-import {
-  WARRIOR_FACTORY_TOKEN,
-  type IWarriorFactory,
-} from "../warrior/warrior-factory.types";
 import { Autoloadable } from "../core/autoload/autoloadable";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import { PLAYER_TOKEN, type IPlayer } from "../player/player.types";
 import {
   INPUT_MANAGER_TOKEN,
   type IInputManager,
@@ -18,17 +15,17 @@ import {
 })
 export class Game implements IGame {
   private readonly _ljs: ILJS;
-  private readonly _warriorFactory: IWarriorFactory;
   private readonly _inputManager: IInputManager;
+  private readonly _player: IPlayer;
 
   constructor(
     @inject(LJS_TOKEN) ljs: ILJS,
-    @inject(WARRIOR_FACTORY_TOKEN) warriorFactory: IWarriorFactory,
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
+    @inject(PLAYER_TOKEN) player: IPlayer,
   ) {
     this._ljs = ljs;
-    this._warriorFactory = warriorFactory;
     this._inputManager = inputManager;
+    this._player = player;
   }
 
   start(): void {
@@ -41,7 +38,12 @@ export class Game implements IGame {
       this._gameUpdatePost.bind(this),
       this._gameRender.bind(this),
       this._gameRenderPost.bind(this),
-      ["Warrior_Idle.png", "Warrior_Run.png"],
+      [
+        "Warrior_Idle.png",
+        "Warrior_Run.png",
+        "Warrior_Attack1.png",
+        "Warrior_Attack2.png",
+      ],
     );
   }
 
@@ -55,7 +57,7 @@ export class Game implements IGame {
     // michael: organize
     this._ljs.setCameraPos(vec2(0, 0));
 
-    this._warriorFactory.createWarrior(vec2(0));
+    this._player.spawnUnit();
 
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
@@ -73,16 +75,15 @@ export class Game implements IGame {
    * Called every frame at 60 frames per second
    * Handle input and update the game state
    */
-  private _gameUpdate(): void {}
+  private _gameUpdate(): void {
+    this._inputManager.triggerFrameDrivenInputs();
+  }
 
   /**
    * Called after physics and objects are updated
    * Setup camera and prepare for render
    */
-  private _gameUpdatePost(): void {
-    // clear the input buffer now that it's been processed
-    this._inputManager.clearBuffer();
-  }
+  private _gameUpdatePost(): void {}
 
   /**
    * Called before objects are rendered
