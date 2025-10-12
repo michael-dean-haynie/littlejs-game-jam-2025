@@ -15,7 +15,6 @@ export class Box2dObjectAdapter
 
   constructor(...args: ConstructorParameters<typeof Box2dObject>) {
     super(...args);
-    this.addBox(this.size);
 
     // michael: test if this is needed and remove? maybe matters for collision?
     // this.drawSize = this.size.scale(1.02); // slightly enlarge to cover gaps

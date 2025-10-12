@@ -5,6 +5,10 @@ import type { Box2dObject } from "../../littlejsengine.types";
 export type IBox2dObjectAdapter = Pick<
   Box2dObject,
   | "tileInfo"
+  | "drawSize"
+  | "mirror"
+  | "addBox"
+  | "addCircle"
   | "applyAcceleration"
   | "applyForce"
   | "getLinearVelocity"

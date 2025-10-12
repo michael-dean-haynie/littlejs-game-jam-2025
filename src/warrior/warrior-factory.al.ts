@@ -48,7 +48,7 @@ export class WarriorFactory implements IWarriorFactory {
   }
 
   createWarrior(position: Vector2): Warrior {
-    const size = vec2(5);
+    const size = vec2(3);
 
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
@@ -59,19 +59,36 @@ export class WarriorFactory implements IWarriorFactory {
       this._ljs.box2d.bodyTypeDynamic,
     );
 
-    b2ObjAdpt.setLinearDamping(0);
+    // fit circle diameter to similar size of box around body
+    b2ObjAdpt.addCircle(size.scale(0.75).length());
+    // make the sprite tile fit to the physics body shape
+    b2ObjAdpt.drawSize = size.scale(2);
 
-    const spriteAnimation = this._spriteAnimationFactory.createSpriteAnimation([
-      { tileInfo: this._ljs.tile(0, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(1, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(2, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(3, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(4, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(5, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(6, 192, 0, 0), duration: 0.2 },
-      { tileInfo: this._ljs.tile(7, 192, 0, 0), duration: 0.2 },
+    const idleAnimation = this._spriteAnimationFactory.createSpriteAnimation([
+      { tileInfo: this._ljs.tile(0, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(1, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(2, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(3, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(4, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(5, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(6, 192, 0, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(7, 192, 0, 0), duration: 0.1 },
     ]);
 
-    return new Warrior(b2ObjAdpt, spriteAnimation, this._inputManager);
+    const runAnimation = this._spriteAnimationFactory.createSpriteAnimation([
+      { tileInfo: this._ljs.tile(0, 192, 1, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(1, 192, 1, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(2, 192, 1, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(3, 192, 1, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(4, 192, 1, 0), duration: 0.1 },
+      { tileInfo: this._ljs.tile(5, 192, 1, 0), duration: 0.1 },
+    ]);
+
+    return new Warrior(
+      b2ObjAdpt,
+      this._inputManager,
+      idleAnimation,
+      runAnimation,
+    );
   }
 }

@@ -41,7 +41,7 @@ export class Game implements IGame {
       this._gameUpdatePost.bind(this),
       this._gameRender.bind(this),
       this._gameRenderPost.bind(this),
-      ["Warrior_Idle.png"],
+      ["Warrior_Idle.png", "Warrior_Run.png"],
     );
   }
 
@@ -54,8 +54,6 @@ export class Game implements IGame {
 
     // michael: organize
     this._ljs.setCameraPos(vec2(0, 0));
-    // michael: remove
-    this._ljs.setObjectDefaultDamping(0);
 
     this._warriorFactory.createWarrior(vec2(0));
 
