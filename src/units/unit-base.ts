@@ -8,10 +8,6 @@ import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.type
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
 
-/**
- * NOTE: lots of public members so states can manipulate the Warrior (context)
- * michael: doc state as design pattern with link
- */
 export abstract class UnitBase implements IUnit {
   private _box2dObjectAdapterRenderSub$: Subscription;
   private _box2dObjectAdapterUpdateSub$: Subscription;

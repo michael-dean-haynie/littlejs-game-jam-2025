@@ -5,8 +5,6 @@ import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitBase } from "../unit-base";
 
-// michael: TODO: credit https://pixelfrog-assets.itch.io/tiny-swords
-
 export class Lancer extends UnitBase {
   private readonly _idleAnimation: ISpriteAnimation;
   private readonly _moveAnimation: ISpriteAnimation;
