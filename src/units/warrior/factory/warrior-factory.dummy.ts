@@ -1,5 +1,5 @@
-import { Autoloadable } from "../core/autoload/autoloadable";
-import type { Warrior } from "./warrior";
+import { Autoloadable } from "../../../core/autoload/autoloadable";
+import type { Warrior } from "../warrior";
 import {
   WARRIOR_FACTORY_TOKEN,
   type IWarriorFactory,

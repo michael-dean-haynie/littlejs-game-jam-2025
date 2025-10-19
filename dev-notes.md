@@ -78,4 +78,6 @@ Generally, factories are for instantiating types with normal parameters as well 
 
 ## todos
 
+- organize sprite animation init
+- maybe use base unit factory and/or facade
 - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts

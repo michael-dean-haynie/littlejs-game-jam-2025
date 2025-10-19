@@ -18,12 +18,12 @@ import type { IGameInputCommand } from "../../game-inputs/game-input.types";
 import { Move } from "../../game-inputs/move";
 import { vec2 } from "../../../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../../../littlejsengine/littlejsengine.types";
-import { keyboardProfileLaptop } from "./profiles/keyboard-profile-laptop";
 import { FaceDirection } from "../../game-inputs/face-direction";
 import { FacePosition } from "../../game-inputs/face-position";
 import { inject } from "inversify";
 import { LJS_TOKEN } from "../../../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../../../littlejsengine/littlejsengine.impure";
+import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
 
 @Autoloadable({
   serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
@@ -40,14 +40,14 @@ export class KeyboardController implements IKeyboardController {
   // michael: document decision about character facing mouse limitation for laptop touchpad
   // also find some way to incorporate it into the profile
   // maybe if gameplay ends up requiring cursor, maybe no need.
-  private readonly _profile: KeyboardProfile = keyboardProfileLaptop;
-  private readonly _useCursor = false;
+  // private readonly _profile: KeyboardProfile = keyboardProfileLaptop;
+  // private readonly _useCursor = false;
+
+  private readonly _profile: KeyboardProfile = keyboardProfileKenisis;
+  private readonly _useCursor = true;
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
     this._ljs = ljs;
-
-    // michael: remove
-    // (window as any).ljs = this._ljs;
 
     document.addEventListener("keydown", this._onKeyDown.bind(this));
     document.addEventListener("keyup", this._onKeyUp.bind(this));

@@ -5,8 +5,8 @@ import {
   type IWarriorFactory,
 } from "./warrior-factory.types";
 import { WarriorFactory } from "./warrior-factory.al";
-import { setupTestContainerFor } from "../test/setup-test-container-for";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import { setupTestContainerFor } from "../../../test/setup-test-container-for";
+import { vec2 } from "../../../littlejsengine/littlejsengine.pure";
 
 describe("WarriorFactory", () => {
   let container: Container;
@@ -24,7 +24,7 @@ describe("WarriorFactory", () => {
     expect(warriorFactory).toBeDefined();
   });
 
-  test("createWarrior should create a warrior", () => {
+  test("should create a warrior", () => {
     expect(warriorFactory.createWarrior(vec2(0))).toBeDefined();
   });
 });

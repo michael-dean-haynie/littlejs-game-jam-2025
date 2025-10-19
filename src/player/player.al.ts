@@ -9,16 +9,18 @@ import { tap } from "rxjs";
 import {
   WARRIOR_FACTORY_TOKEN,
   type IWarriorFactory,
-} from "../warrior/warrior-factory.types";
-import type { Warrior } from "../warrior/warrior";
-import { Move } from "../input/game-inputs/move";
-import { WarriorCommandMove } from "../warrior/commands/warrior-command-move";
+} from "../units/warrior/factory/warrior-factory.types";
 import type { IGameInputCommand } from "../input/game-inputs/game-input.types";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import { Move } from "../input/game-inputs/move";
+import { createUnitMoveMessage } from "../units/unit-messages.types";
 import { FaceDirection } from "../input/game-inputs/face-direction";
-import { WarriorCommandFaceDirection } from "../warrior/commands/warrior-command-face-direction";
 import { FacePosition } from "../input/game-inputs/face-position";
-import { WarriorCommandFacePosition } from "../warrior/commands/warrior-command-face-position";
+import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import type { IUnit } from "../units/unit.types";
+import {
+  LANCER_FACTORY_TOKEN,
+  type ILancerFactory,
+} from "../units/lancer/factory/lancer-factory.types";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
@@ -26,15 +28,18 @@ import { WarriorCommandFacePosition } from "../warrior/commands/warrior-command-
 export class Player implements IPlayer {
   private readonly _inputManager: IInputManager;
   private readonly _warriorFactory: IWarriorFactory;
+  private readonly _lancerFactory: ILancerFactory;
 
-  private _warrior: Warrior | null = null;
+  private _unit: IUnit | null = null;
 
   constructor(
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(WARRIOR_FACTORY_TOKEN) warriorFactory: IWarriorFactory,
+    @inject(LANCER_FACTORY_TOKEN) lancerFactory: ILancerFactory,
   ) {
     this._inputManager = inputManager;
     this._warriorFactory = warriorFactory;
+    this._lancerFactory = lancerFactory;
 
     this._inputManager.commands$
       .pipe(
@@ -47,23 +52,26 @@ export class Player implements IPlayer {
   // michael: improve organization, consider many commands and many units possible
   private _processGameInputCommand(giCommand: IGameInputCommand): void {
     if (giCommand instanceof Move) {
-      this._warrior?.enqueueCommand(
-        new WarriorCommandMove(giCommand.direction),
-      );
+      this._unit?.enqueueMessage(createUnitMoveMessage(giCommand.direction));
     }
     if (giCommand instanceof FaceDirection) {
-      this._warrior?.enqueueCommand(
-        new WarriorCommandFaceDirection(giCommand.direction),
-      );
+      this._unit?.enqueueMessage({
+        id: "unit.faceDirection",
+        direction: giCommand.direction,
+      });
     }
     if (giCommand instanceof FacePosition) {
-      this._warrior?.enqueueCommand(
-        new WarriorCommandFacePosition(giCommand.position),
-      );
+      this._unit?.enqueueMessage({
+        id: "unit.facePosition",
+        position: giCommand.position,
+      });
     }
   }
 
   spawnUnit(): void {
-    this._warrior = this._warriorFactory.createWarrior(vec2(0));
+    this._unit = this._warriorFactory.createWarrior(vec2(0));
+    this._unit.destroy();
+
+    this._unit = this._lancerFactory.createLancer(vec2(0));
   }
 }

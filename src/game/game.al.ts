@@ -43,6 +43,8 @@ export class Game implements IGame {
         "Warrior_Run.png",
         "Warrior_Attack1.png",
         "Warrior_Attack2.png",
+        "Lancer_Idle.png",
+        "Lancer_Run.png",
       ],
     );
   }
