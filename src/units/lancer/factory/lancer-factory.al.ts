@@ -56,29 +56,13 @@ export class LancerFactory implements ILancerFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(3.5);
 
-    const idleAnimation = this._spriteAnimationFactory.createSpriteAnimation([
-      { tileInfo: this._ljs.tile(0, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(1, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(2, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(3, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(4, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(5, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(6, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(7, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(8, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(9, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(10, 320, 4, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(11, 320, 4, 0), duration: 0.1 },
-    ]);
+    const idleAnimation = this._spriteAnimationFactory.createSpriteAnimation(
+      "units.lancer.idling",
+    );
 
-    const runAnimation = this._spriteAnimationFactory.createSpriteAnimation([
-      { tileInfo: this._ljs.tile(0, 320, 5, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(1, 320, 5, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(2, 320, 5, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(3, 320, 5, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(4, 320, 5, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(5, 320, 5, 0), duration: 0.1 },
-    ]);
+    const runAnimation = this._spriteAnimationFactory.createSpriteAnimation(
+      "units.lancer.moving",
+    );
 
     // const attack1Animation = this._spriteAnimationFactory.createSpriteAnimation(
     //   [

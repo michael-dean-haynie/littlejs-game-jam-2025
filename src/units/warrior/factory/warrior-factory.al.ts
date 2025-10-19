@@ -56,43 +56,13 @@ export class WarriorFactory implements IWarriorFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(2);
 
-    const idleAnimation = this._spriteAnimationFactory.createSpriteAnimation([
-      { tileInfo: this._ljs.tile(0, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(1, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(2, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(3, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(4, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(5, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(6, 192, 0, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(7, 192, 0, 0), duration: 0.1 },
-    ]);
+    const idleAnimation = this._spriteAnimationFactory.createSpriteAnimation(
+      "units.warrior.idling",
+    );
 
-    const runAnimation = this._spriteAnimationFactory.createSpriteAnimation([
-      { tileInfo: this._ljs.tile(0, 192, 1, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(1, 192, 1, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(2, 192, 1, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(3, 192, 1, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(4, 192, 1, 0), duration: 0.1 },
-      { tileInfo: this._ljs.tile(5, 192, 1, 0), duration: 0.1 },
-    ]);
-
-    // const attack1Animation = this._spriteAnimationFactory.createSpriteAnimation(
-    //   [
-    //     { tileInfo: this._ljs.tile(0, 192, 2, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(1, 192, 2, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(2, 192, 2, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(3, 192, 2, 0), duration: 0.1 },
-    //   ],
-    // );
-
-    // const attack2Animation = this._spriteAnimationFactory.createSpriteAnimation(
-    //   [
-    //     { tileInfo: this._ljs.tile(0, 192, 3, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(1, 192, 3, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(2, 192, 3, 0), duration: 0.1 },
-    //     { tileInfo: this._ljs.tile(3, 192, 3, 0), duration: 0.1 },
-    //   ],
-    // );
+    const runAnimation = this._spriteAnimationFactory.createSpriteAnimation(
+      "units.warrior.moving",
+    );
 
     return new Warrior(b2ObjAdpt, idleAnimation, runAnimation);
   }

@@ -69,9 +69,9 @@ export class Player implements IPlayer {
   }
 
   spawnUnit(): void {
-    this._unit = this._warriorFactory.createWarrior(vec2(0));
+    this._unit = this._lancerFactory.createLancer(vec2(0));
     this._unit.destroy();
 
-    this._unit = this._lancerFactory.createLancer(vec2(0));
+    this._unit = this._warriorFactory.createWarrior(vec2(0));
   }
 }

@@ -9,6 +9,7 @@ import {
   INPUT_MANAGER_TOKEN,
   type IInputManager,
 } from "../input/input-manager/input-manager.types";
+import { textures } from "../textures/textures.types";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -38,14 +39,7 @@ export class Game implements IGame {
       this._gameUpdatePost.bind(this),
       this._gameRender.bind(this),
       this._gameRenderPost.bind(this),
-      [
-        "Warrior_Idle.png",
-        "Warrior_Run.png",
-        "Warrior_Attack1.png",
-        "Warrior_Attack2.png",
-        "Lancer_Idle.png",
-        "Lancer_Run.png",
-      ],
+      textures.map((txt) => txt.src),
     );
   }
 
