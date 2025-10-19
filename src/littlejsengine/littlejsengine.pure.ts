@@ -1,1 +1,1 @@
-export { vec2, min, WHITE } from "littlejsengine";
+export { vec2, min, WHITE, CLEAR_WHITE } from "littlejsengine";

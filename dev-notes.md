@@ -68,6 +68,7 @@ Generally, factories are for instantiating types with normal parameters as well 
 - [test double terminology](https://medium.com/@matiasglessi/mock-stub-spy-and-other-test-doubles-a1869265ac47)
 - https://gamedev.stackexchange.com/questions/166531/how-to-program-smooth-player-2d-movements
 - https://gameprogrammingpatterns.com/state.html
+- https://sc2mapster.fandom.com/wiki/Data/Actors
 - https://refactoring.guru/design-patterns/state
 
 ## Misc Notes

@@ -1,19 +1,30 @@
 import { Subject, Subscription, takeUntil, tap } from "rxjs";
 import { noCap } from "../core/util/no-cap";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
-import type { IUnit } from "./unit.types";
+import type { IUnit, UnitType } from "./unit.types";
 import { type Vector2 } from "../littlejsengine/littlejsengine.types";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
+import type { ISpriteAnimationFactory } from "../sprite-animation/sprite-animation-factory.types";
+import type { TextureId } from "../textures/textures.types";
 
 export abstract class UnitBase implements IUnit {
+  abstract readonly type: UnitType;
+
   private _box2dObjectAdapterRenderSub$: Subscription;
   private _box2dObjectAdapterUpdateSub$: Subscription;
   readonly box2dObjectAdapter: IBox2dObjectAdapter;
 
-  constructor(box2dObjectAapter: IBox2dObjectAdapter) {
+  constructor(
+    box2dObjectAapter: IBox2dObjectAdapter,
+    spriteAnimationFactory: ISpriteAnimationFactory,
+    textureIds: TextureId[],
+  ) {
+    this._spriteAnimationFactory = spriteAnimationFactory;
+
+    // wire up to box2dObjectAdapter
     this.box2dObjectAdapter = box2dObjectAapter;
     this._box2dObjectAdapterRenderSub$ = this.box2dObjectAdapter.render$
       .pipe(
@@ -31,6 +42,14 @@ export abstract class UnitBase implements IUnit {
         }),
       )
       .subscribe();
+
+    // initialize animations
+    for (const textureId of textureIds) {
+      this._animationMap.set(
+        textureId,
+        this._spriteAnimationFactory.createSpriteAnimation(textureId),
+      );
+    }
   }
 
   // destroy
@@ -43,10 +62,16 @@ export abstract class UnitBase implements IUnit {
   }
 
   // animation
+  private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
+  private readonly _animationMap: Map<TextureId, ISpriteAnimation> = new Map();
+
   protected _animation?: ISpriteAnimation;
   protected _animationFrameChangedSub?: Subscription;
-  swapAnimation(newAnimation: ISpriteAnimation): void {
+  swapAnimation(textureId: TextureId): void {
     this._animationFrameChangedSub?.unsubscribe();
+
+    const newAnimation = this._animationMap.get(textureId);
+    noCap(newAnimation !== undefined);
 
     this._animation = newAnimation;
     this._animation.restart();

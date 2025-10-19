@@ -1,5 +1,5 @@
 import { vec2 } from "../../littlejsengine/littlejsengine.pure";
-import type { ISpriteAnimation } from "../../sprite-animation/sprite-animation.types";
+import type { TextureId } from "../../textures/textures.types";
 import type { IUnit } from "../unit.types";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
@@ -7,11 +7,11 @@ import { UnitStateBase } from "./unit-state-base";
 export class UnitStateMoving extends UnitStateBase {
   state: UnitState = "moving";
 
-  private readonly _animation: ISpriteAnimation;
+  private readonly _textureId: TextureId;
 
-  constructor(unit: IUnit, animation: ISpriteAnimation) {
+  constructor(unit: IUnit, textureId: TextureId) {
     super(unit);
-    this._animation = animation;
+    this._textureId = textureId;
 
     // transition handlers
     this._transitionHandlers["idling"] = () => {
@@ -33,7 +33,7 @@ export class UnitStateMoving extends UnitStateBase {
   }
 
   override onEnter(): void {
-    this._unit.swapAnimation(this._animation);
+    this._unit.swapAnimation(this._textureId);
   }
 
   override onExit(): void {

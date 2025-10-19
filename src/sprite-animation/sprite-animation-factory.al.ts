@@ -11,6 +11,7 @@ import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimation } from "./sprite-animation.types";
 import { textures, type TextureId } from "../textures/textures.types";
 import { noCap } from "../core/util/no-cap";
+import type { TileInfo } from "littlejsengine";
 
 @Autoloadable({
   serviceIdentifier: SPRITE_ANIMATION_FACTORY_TOKEN,
@@ -47,5 +48,13 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
     }
 
     return new SpriteAnimation(frames, this._ljs);
+  }
+
+  createTileInfo(textureId: TextureId): TileInfo {
+    const textureIdx = textures.findIndex((txt) => txt.id === textureId);
+    noCap(textureIdx !== -1);
+    const texture = textures[textureIdx];
+
+    return this._ljs.tile(0, texture.size, textureIdx, 0);
   }
 }

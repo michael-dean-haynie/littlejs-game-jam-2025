@@ -1,5 +1,11 @@
 export const textures = [
   {
+    id: "empty",
+    src: "empty.png",
+    frames: 1,
+    size: 32,
+  },
+  {
     id: "units.warrior.idling",
     src: "units/warrior/Warrior_Idle.png",
     frames: 8,
@@ -22,6 +28,18 @@ export const textures = [
     src: "units/lancer/Lancer_Run.png",
     frames: 6,
     size: 320,
+  },
+  {
+    id: "units.spider.idling",
+    src: "units/spider/Spider_Idle.png",
+    frames: 8,
+    size: 192,
+  },
+  {
+    id: "units.spider.moving",
+    src: "units/spider/Spider_Run.png",
+    frames: 5,
+    size: 192,
   },
 ] as const;
 

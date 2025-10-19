@@ -6,8 +6,8 @@ import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitBase } from "../unit-base";
 import type { UnitType } from "../unit.types";
 
-export class Lancer extends UnitBase {
-  readonly type: UnitType = "lancer";
+export class Spider extends UnitBase {
+  readonly type: UnitType = "spider";
 
   protected _stateMap: Map<UnitState, IUnitState>;
 
@@ -18,13 +18,13 @@ export class Lancer extends UnitBase {
     spriteAnimationFactory: ISpriteAnimationFactory,
   ) {
     super(box2dObjectAapter, spriteAnimationFactory, [
-      "units.lancer.idling",
-      "units.lancer.moving",
+      "units.spider.idling",
+      "units.spider.moving",
     ]);
 
     this._stateMap = new Map<UnitState, IUnitState>([
-      ["idling", new UnitStateIdling(this, "units.lancer.idling")],
-      ["moving", new UnitStateMoving(this, "units.lancer.moving")],
+      ["idling", new UnitStateIdling(this, "units.spider.idling")],
+      ["moving", new UnitStateMoving(this, "units.spider.moving")],
     ]);
     this._initState("idling");
   }

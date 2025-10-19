@@ -1,5 +1,5 @@
 import { vec2 } from "../../littlejsengine/littlejsengine.pure";
-import type { ISpriteAnimation } from "../../sprite-animation/sprite-animation.types";
+import type { TextureId } from "../../textures/textures.types";
 import type { IUnit } from "../unit.types";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
@@ -7,11 +7,11 @@ import { UnitStateBase } from "./unit-state-base";
 export class UnitStateIdling extends UnitStateBase {
   readonly state: UnitState = "idling";
 
-  private readonly _animation: ISpriteAnimation;
+  private readonly _textureId: TextureId;
 
-  constructor(unit: IUnit, animation: ISpriteAnimation) {
+  constructor(unit: IUnit, textureId: TextureId) {
     super(unit);
-    this._animation = animation;
+    this._textureId = textureId;
 
     // transition handlers
     this._transitionHandlers["moving"] = () => {
@@ -26,7 +26,7 @@ export class UnitStateIdling extends UnitStateBase {
   }
 
   override onEnter(): void {
-    this._unit.swapAnimation(this._animation);
+    this._unit.swapAnimation(this._textureId);
 
     this._unit.moveDirection = vec2(0, 0);
     this._unit.box2dObjectAdapter.setLinearVelocity(

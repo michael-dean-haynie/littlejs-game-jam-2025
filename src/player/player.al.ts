@@ -6,10 +6,6 @@ import {
   type IInputManager,
 } from "../input/input-manager/input-manager.types";
 import { tap } from "rxjs";
-import {
-  WARRIOR_FACTORY_TOKEN,
-  type IWarriorFactory,
-} from "../units/warrior/factory/warrior-factory.types";
 import type { IGameInputCommand } from "../input/game-inputs/game-input.types";
 import { Move } from "../input/game-inputs/move";
 import { createUnitMoveMessage } from "../units/unit-messages.types";
@@ -18,28 +14,25 @@ import { FacePosition } from "../input/game-inputs/face-position";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { IUnit } from "../units/unit.types";
 import {
-  LANCER_FACTORY_TOKEN,
-  type ILancerFactory,
-} from "../units/lancer/factory/lancer-factory.types";
+  UNIT_FACTORY_TOKEN,
+  type IUnitFactory,
+} from "../units/factory/unit-factory.types";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
 })
 export class Player implements IPlayer {
   private readonly _inputManager: IInputManager;
-  private readonly _warriorFactory: IWarriorFactory;
-  private readonly _lancerFactory: ILancerFactory;
+  private readonly _unitFactory: IUnitFactory;
 
   private _unit: IUnit | null = null;
 
   constructor(
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
-    @inject(WARRIOR_FACTORY_TOKEN) warriorFactory: IWarriorFactory,
-    @inject(LANCER_FACTORY_TOKEN) lancerFactory: ILancerFactory,
+    @inject(UNIT_FACTORY_TOKEN) unitFactory: IUnitFactory,
   ) {
     this._inputManager = inputManager;
-    this._warriorFactory = warriorFactory;
-    this._lancerFactory = lancerFactory;
+    this._unitFactory = unitFactory;
 
     this._inputManager.commands$
       .pipe(
@@ -69,9 +62,6 @@ export class Player implements IPlayer {
   }
 
   spawnUnit(): void {
-    this._unit = this._lancerFactory.createLancer(vec2(0));
-    this._unit.destroy();
-
-    this._unit = this._warriorFactory.createWarrior(vec2(0));
+    this._unit = this._unitFactory.createUnit("spider", vec2(0));
   }
 }
