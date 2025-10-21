@@ -24,6 +24,8 @@ import { inject } from "inversify";
 import { LJS_TOKEN } from "../../../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../../../littlejsengine/littlejsengine.impure";
 import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
+import { GuardToggle } from "../../game-inputs/guard-toggle";
+import { Attack } from "../../game-inputs/attack";
 
 @Autoloadable({
   serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
@@ -110,10 +112,10 @@ export class KeyboardController implements IKeyboardController {
     this._process(key, "keyup");
   }
 
-  // michael: remove once I use the param
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private _process(key: string, _upOrDown: KeyupOrKeydown): void {
-    const inputMatches = this._matchKeyToInputs(key);
+  private _process(key: string, upOrDown: KeyupOrKeydown): void {
+    const inputMatches = this._matchKeyToInputs(key, upOrDown);
+
+    // process movement inputs
     if (inputMatches.some((im) => MovementKeyboardInputs.includes(im))) {
       const moveCommand = this._getMoveCommand();
       if (!this._useCursor) {
@@ -123,13 +125,19 @@ export class KeyboardController implements IKeyboardController {
       this._inputs$.next(moveCommand);
     }
 
-    // michael: process non-movement inputs
+    // process non-movement inputs
+    if (inputMatches.includes("guard")) {
+      this._inputs$.next(new GuardToggle());
+    }
+    if (inputMatches.includes("attack")) {
+      this._inputs$.next(new Attack());
+    }
   }
 
   private _getMoveCommand(): Move {
     const activeMovementInputs = [...this._activeKeys]
       .map((key) => {
-        return this._matchKeyToInputs(key).find((input) =>
+        return this._matchKeyToInputs(key, "keydown").find((input) =>
           MovementKeyboardInputs.includes(input),
         );
       })
@@ -152,14 +160,21 @@ export class KeyboardController implements IKeyboardController {
     return new Move(reducedMovementVec);
   }
 
-  private _matchKeyToInputs(key: string): KeyboardInput[] {
+  private _matchKeyToInputs(
+    key: string,
+    upOrDown: KeyupOrKeydown,
+  ): KeyboardInput[] {
     return (
       Object.entries(this._profile) as [KeyboardInput, KeyboardInputMatcher[]][]
     )
       .filter(([, matchers]) => {
         return matchers.some((matcher) => {
           return (
+            // key matches
             matcher.key === key &&
+            // hold/toggle matches
+            (matcher.holdOrToggle === "hold" ? true : upOrDown === "keydown") &&
+            // modifiers match
             KeyboardModifiers.values().every((mod) =>
               this._modifierMatches(mod, matcher[mod]),
             )

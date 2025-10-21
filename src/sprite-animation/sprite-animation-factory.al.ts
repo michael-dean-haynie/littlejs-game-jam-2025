@@ -8,10 +8,14 @@ import {
 import type { SpriteAnimationFrame } from "./sprite-animation-frame";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import type { ISpriteAnimation } from "./sprite-animation.types";
+import type {
+  ISpriteAnimation,
+  DirToTextureMap,
+  DirToFramesMap,
+} from "./sprite-animation.types";
 import { textures, type TextureId } from "../textures/textures.types";
 import { noCap } from "../core/util/no-cap";
-import type { TileInfo } from "littlejsengine";
+import type { TileInfo } from "../littlejsengine/littlejsengine.types";
 
 @Autoloadable({
   serviceIdentifier: SPRITE_ANIMATION_FACTORY_TOKEN,
@@ -29,25 +33,25 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
     this._ljs = ljs;
   }
 
-  createSpriteAnimation(textureId: TextureId): ISpriteAnimation {
-    const textureIdx = textures.findIndex((txt) => txt.id === textureId);
-    noCap(textureIdx !== -1);
-    const texture = textures[textureIdx];
-
-    const frames: SpriteAnimationFrame[] = [];
-    for (let i = 0; i < texture.frames; i++) {
-      frames.push({
-        tileInfo: this._ljs.tile(
-          i,
-          texture.size,
-          textureIdx,
-          this._defaultFramePadding,
-        ),
-        duration: this._defaultFrameDuration,
-      });
+  createSpriteAnimation(
+    textureData: TextureId | DirToTextureMap,
+  ): ISpriteAnimation {
+    let textureMap: DirToTextureMap;
+    if (typeof textureData === "string") {
+      textureMap = this._createTextureMapFromTexture(textureData);
+    } else {
+      textureMap = textureData;
     }
 
-    return new SpriteAnimation(frames, this._ljs);
+    const framesMap: DirToFramesMap = {
+      n: this._convertTextureToFrames(textureMap.n),
+      ne: this._convertTextureToFrames(textureMap.ne),
+      e: this._convertTextureToFrames(textureMap.e),
+      se: this._convertTextureToFrames(textureMap.se),
+      s: this._convertTextureToFrames(textureMap.s),
+    };
+
+    return new SpriteAnimation(framesMap, this._ljs);
   }
 
   createTileInfo(textureId: TextureId): TileInfo {
@@ -56,5 +60,37 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
     const texture = textures[textureIdx];
 
     return this._ljs.tile(0, texture.size, textureIdx, 0);
+  }
+
+  private _createTextureMapFromTexture(textureId: TextureId): DirToTextureMap {
+    return {
+      n: textureId,
+      e: textureId,
+      s: textureId,
+      ne: textureId,
+      se: textureId,
+    };
+  }
+
+  private _convertTextureToFrames(
+    textureId: TextureId,
+  ): SpriteAnimationFrame[] {
+    const textureIdx = textures.findIndex((txt) => txt.id === textureId);
+    noCap(textureIdx !== -1);
+    const texture = textures[textureIdx];
+
+    const frames: SpriteAnimationFrame[] = [];
+    for (let i = 0; i < texture.frames; i++) {
+      frames.push({
+        tileInfo: this._ljs.tile(
+          i + texture.offset,
+          texture.size,
+          textureIdx,
+          this._defaultFramePadding,
+        ),
+        duration: this._defaultFrameDuration,
+      });
+    }
+    return frames;
   }
 }

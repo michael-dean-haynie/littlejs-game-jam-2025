@@ -1,14 +1,15 @@
+import type { Ability } from "../abilities/abilities.types";
 import { enumerationFactory } from "../core/enumeration-factory";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
-import type { TextureId } from "../textures/textures.types";
+import type { Message } from "../messages/messages.types";
 import type { UnitState } from "./states/states.types";
 
 export interface IUnit {
   readonly type: UnitType;
   destroy(): void;
-  enqueueMessage(command: object): void;
-  swapAnimation(textureId: TextureId): void;
+  enqueueMessage(command: Message): void;
+  swapAnimation(stateOrAbility: UnitState | Ability): void;
   pushState(state: UnitState): void;
   popState(): void;
   set moveDirection(direction: Vector2);
@@ -41,6 +42,8 @@ export const UnitTypes = enumerationFactory(
 );
 export type UnitType = ReturnType<typeof UnitTypes.values>[number];
 
+// michael: can I find a way to put all this in the unit class?
+/** data that the factory needs for initializing the box2d adapter */
 export const UnitTypeInitDataMap: {
   [K in UnitType]: {
     size: number;

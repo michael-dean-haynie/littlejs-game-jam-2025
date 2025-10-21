@@ -17,6 +17,10 @@ import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
 import { Warrior } from "../warrior/warrior";
 import { Lancer } from "../lancer/lancer";
 import { Spider } from "../spider/spider";
+import {
+  ABILITY_FACTORY_TOKEN,
+  type IAbilityFactory,
+} from "../../abilities/factory/ability-factory.types";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -24,6 +28,7 @@ import { Spider } from "../spider/spider";
 export class UnitFactory implements IUnitFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
+  private readonly _abilityFactory: IAbilityFactory;
   private readonly _ljs: ILJS;
 
   constructor(
@@ -31,11 +36,14 @@ export class UnitFactory implements IUnitFactory {
     spriteAnimationFactory: ISpriteAnimationFactory,
     @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
     box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
+    @inject(ABILITY_FACTORY_TOKEN)
+    abilityFactory: IAbilityFactory,
     @inject(LJS_TOKEN)
     ljs: ILJS,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
     this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
+    this._abilityFactory = abilityFactory;
     this._ljs = ljs;
   }
 
@@ -59,11 +67,23 @@ export class UnitFactory implements IUnitFactory {
 
     switch (unitType) {
       case "warrior":
-        return new Warrior(b2ObjAdpt, this._spriteAnimationFactory);
+        return new Warrior(
+          b2ObjAdpt,
+          this._spriteAnimationFactory,
+          this._abilityFactory,
+        );
       case "lancer":
-        return new Lancer(b2ObjAdpt, this._spriteAnimationFactory);
+        return new Lancer(
+          b2ObjAdpt,
+          this._spriteAnimationFactory,
+          this._abilityFactory,
+        );
       case "spider":
-        return new Spider(b2ObjAdpt, this._spriteAnimationFactory);
+        return new Spider(
+          b2ObjAdpt,
+          this._spriteAnimationFactory,
+          this._abilityFactory,
+        );
       default:
         throw new Error("unit type not matched");
     }

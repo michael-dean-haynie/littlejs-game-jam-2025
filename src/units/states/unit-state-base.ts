@@ -1,4 +1,3 @@
-import { noCap } from "../../core/util/no-cap";
 import type {
   Message,
   MessageId,
@@ -13,13 +12,8 @@ export type MessageHandlerMap = {
   ) => MessagePostProcessAction;
 };
 
-export type TransitionHandlerMap = {
-  [K in UnitState]: () => void;
-};
-
 export abstract class UnitStateBase implements IUnitState {
   abstract readonly state: UnitState;
-  protected readonly _transitionHandlers: Partial<TransitionHandlerMap> = {};
   protected readonly _messageHandlers: Partial<MessageHandlerMap> = {};
   protected readonly _unit: IUnit;
 
@@ -38,13 +32,11 @@ export abstract class UnitStateBase implements IUnitState {
     };
   }
 
-  canTransitionTo(state: UnitState): boolean {
-    return this._transitionHandlers[state] !== undefined;
-  }
-
   onEnter(): void {}
 
   onExit(): void {}
+
+  onUpdate(): void {}
 
   processMessage(message: Message): MessagePostProcessAction {
     const handler = this._messageHandlers[message.id];
@@ -55,10 +47,5 @@ export abstract class UnitStateBase implements IUnitState {
     // michael: maybe improve - might be design or ts limitation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return handler(message as any);
-  }
-
-  protected _transitionTo(state: UnitState) {
-    noCap(this.canTransitionTo(state));
-    this._transitionHandlers[state]!();
   }
 }

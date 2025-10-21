@@ -19,6 +19,8 @@ export const KeyboardInputs = enumerationFactory(
   "moveRight",
   "moveUp",
   "moveDown",
+  "guard",
+  "attack",
 );
 export type KeyboardInput = ReturnType<typeof KeyboardInputs.values>[number];
 

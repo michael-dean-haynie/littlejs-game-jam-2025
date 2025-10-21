@@ -5,6 +5,8 @@ export const GameInputs = enumerationFactory(
   "move",
   "faceDirection",
   "facePosition",
+  "guardToggle",
+  "attack",
 );
 export type GameInput = ReturnType<typeof GameInputs.values>[number];
 

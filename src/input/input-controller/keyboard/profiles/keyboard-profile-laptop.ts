@@ -1,6 +1,20 @@
 export const keyboardProfileLaptop = {
-  moveLeft: [{ key: "a" }, { key: "arrowleft" }],
-  moveRight: [{ key: "d" }, { key: "arrowright" }],
-  moveUp: [{ key: "w" }, { key: "arrowup" }],
-  moveDown: [{ key: "s" }, { key: "arrowdown" }],
+  moveLeft: [
+    { key: "a", holdOrToggle: "hold" },
+    { key: "arrowleft", holdOrToggle: "hold" },
+  ],
+  moveRight: [
+    { key: "d", holdOrToggle: "hold" },
+    { key: "arrowright", holdOrToggle: "hold" },
+  ],
+  moveUp: [
+    { key: "w", holdOrToggle: "hold" },
+    { key: "arrowup", holdOrToggle: "hold" },
+  ],
+  moveDown: [
+    { key: "s", holdOrToggle: "hold" },
+    { key: "arrowdown", holdOrToggle: "hold" },
+  ],
+  attack: [{ key: "j" }],
+  guard: [{ key: "k", holdOrToggle: "hold" }],
 };

@@ -1,9 +1,12 @@
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
+import type { Ability } from "../abilities/abilities.types";
 
 export type UnitMessage =
   | UnitMoveMessage
   | UnitFacePositionMessage
-  | UnitFaceDirectionMessage;
+  | UnitFaceDirectionMessage
+  | UnitCastMessage
+  | UnitToggleCastMessage;
 
 export type UnitMessageId = UnitMessage["id"];
 
@@ -27,4 +30,14 @@ export type UnitFacePositionMessage = {
 export type UnitFaceDirectionMessage = {
   id: "unit.faceDirection";
   direction: Vector2;
+};
+
+export type UnitCastMessage = {
+  id: "unit.cast";
+  ability: Ability;
+};
+
+export type UnitToggleCastMessage = {
+  id: "unit.toggleCast";
+  ability: Ability;
 };

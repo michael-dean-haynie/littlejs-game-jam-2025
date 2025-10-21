@@ -7,8 +7,7 @@ import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
-import type { ISpriteAnimationFactory } from "../sprite-animation/sprite-animation-factory.types";
-import type { TextureId } from "../textures/textures.types";
+import type { Ability } from "../abilities/abilities.types";
 
 export abstract class UnitBase implements IUnit {
   abstract readonly type: UnitType;
@@ -17,20 +16,14 @@ export abstract class UnitBase implements IUnit {
   private _box2dObjectAdapterUpdateSub$: Subscription;
   readonly box2dObjectAdapter: IBox2dObjectAdapter;
 
-  constructor(
-    box2dObjectAapter: IBox2dObjectAdapter,
-    spriteAnimationFactory: ISpriteAnimationFactory,
-    textureIds: TextureId[],
-  ) {
-    this._spriteAnimationFactory = spriteAnimationFactory;
-
+  constructor(box2dObjectAapter: IBox2dObjectAdapter) {
     // wire up to box2dObjectAdapter
     this.box2dObjectAdapter = box2dObjectAapter;
     this._box2dObjectAdapterRenderSub$ = this.box2dObjectAdapter.render$
       .pipe(
         takeUntil(this._destroyRef$),
         tap(() => {
-          this._animation?.progress();
+          this._animation?.progress(this._faceDirection);
         }),
       )
       .subscribe();
@@ -39,17 +32,10 @@ export abstract class UnitBase implements IUnit {
         takeUntil(this._destroyRef$),
         tap(() => {
           this._processMessages();
+          this._update();
         }),
       )
       .subscribe();
-
-    // initialize animations
-    for (const textureId of textureIds) {
-      this._animationMap.set(
-        textureId,
-        this._spriteAnimationFactory.createSpriteAnimation(textureId),
-      );
-    }
   }
 
   // destroy
@@ -62,19 +48,24 @@ export abstract class UnitBase implements IUnit {
   }
 
   // animation
-  private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
-  private readonly _animationMap: Map<TextureId, ISpriteAnimation> = new Map();
+  private readonly _animationMap: Map<UnitState | Ability, ISpriteAnimation> =
+    new Map();
+  protected _registerAnimation(
+    stateOrAbility: UnitState | Ability,
+    animation: ISpriteAnimation,
+  ): void {
+    this._animationMap.set(stateOrAbility, animation);
+  }
 
   protected _animation?: ISpriteAnimation;
   protected _animationFrameChangedSub?: Subscription;
-  swapAnimation(textureId: TextureId): void {
+  swapAnimation(stateOrAbility: UnitState | Ability): void {
     this._animationFrameChangedSub?.unsubscribe();
 
-    const newAnimation = this._animationMap.get(textureId);
+    const newAnimation = this._animationMap.get(stateOrAbility);
     noCap(newAnimation !== undefined);
 
     this._animation = newAnimation;
-    this._animation.restart();
     this._animationFrameChangedSub = this._animation.frameChanged$
       .pipe(
         takeUntil(this._destroyRef$),
@@ -83,10 +74,11 @@ export abstract class UnitBase implements IUnit {
         }),
       )
       .subscribe();
+    this._animation.restart();
   }
 
   // state machine
-  protected abstract _stateMap: Map<UnitState, IUnitState>;
+  protected readonly _stateMap: Map<UnitState, IUnitState> = new Map();
   private _stateStack: UnitState[] = [];
   private get _state(): UnitState {
     const peeked = this._stateStack.at(-1);
@@ -165,5 +157,9 @@ export abstract class UnitBase implements IUnit {
     }
 
     this._messageBuffer.push(...skippedMessages);
+  }
+
+  private _update(): void {
+    this._getStateObj().onUpdate();
   }
 }

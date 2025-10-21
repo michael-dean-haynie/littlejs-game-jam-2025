@@ -17,6 +17,8 @@ import {
   UNIT_FACTORY_TOKEN,
   type IUnitFactory,
 } from "../units/factory/unit-factory.types";
+import { GuardToggle } from "../input/game-inputs/guard-toggle";
+import { Attack } from "../input/game-inputs/attack";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
@@ -59,9 +61,25 @@ export class Player implements IPlayer {
         position: giCommand.position,
       });
     }
+    if (giCommand instanceof GuardToggle) {
+      this._unit?.enqueueMessage({
+        id: "unit.toggleCast",
+        ability: "guard",
+      });
+    }
+    if (giCommand instanceof Attack) {
+      this._unit?.enqueueMessage({
+        id: "unit.cast",
+        ability: "attack",
+      });
+    }
   }
 
   spawnUnit(): void {
-    this._unit = this._unitFactory.createUnit("spider", vec2(0));
+    this._unit = this._unitFactory.createUnit("warrior", vec2(0));
+
+    // michael: remove
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).unit = this._unit;
   }
 }

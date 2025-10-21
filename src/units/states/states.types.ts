@@ -16,8 +16,8 @@ export type UnitState = ReturnType<typeof UnitStates.values>[number];
 
 export interface IUnitState {
   state: UnitState;
-  canTransitionTo(state: UnitState): boolean;
   onEnter(): void;
   onExit(): void;
+  onUpdate(): void;
   processMessage(message: Message): MessagePostProcessAction;
 }
