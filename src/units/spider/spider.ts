@@ -35,7 +35,7 @@ export class Spider extends UnitBase {
     );
 
     // register abilities
-    this.abilityMap.set("attack", new Attack(this, ljs, 0, 0.3));
+    this.abilityMap.set("attack", new Attack(this, ljs, 0, 0.8));
 
     // register states
     this._stateMap.set("idling", new UnitStateIdling(this));

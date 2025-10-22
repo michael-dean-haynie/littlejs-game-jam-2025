@@ -3,7 +3,6 @@ import type { IAbility } from "../../abilities/abilities.types";
 import type { IUnit } from "../unit.types";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
-import { noCap } from "../../core/util/no-cap";
 
 export class UnitStateCasting extends UnitStateBase {
   state: UnitState = "casting";
@@ -17,9 +16,11 @@ export class UnitStateCasting extends UnitStateBase {
     // message handlers
     this._messageHandlers["unit.cast"] = (msg) => {
       if (this._ability === null) {
-        const ability = this._unit.abilityMap.get(msg.ability);
-        noCap.notUndefined(ability, "Ability seems not to be registered.");
-        this._ability = ability;
+        this._ability = this._unit.abilityMap.get(msg.ability) ?? null;
+        if (this._ability === null) {
+          console.warn("Ability triggered, but missing on unit");
+          return "none";
+        }
 
         this._abilityCompleteSub = this._ability.phase$
           .pipe(
@@ -36,9 +37,11 @@ export class UnitStateCasting extends UnitStateBase {
 
     this._messageHandlers["unit.toggleCast"] = (msg) => {
       if (this._ability === null) {
-        const ability = this._unit.abilityMap.get(msg.ability);
-        noCap.notUndefined(ability, "Ability seems not to be registered.");
-        this._ability = ability;
+        this._ability = this._unit.abilityMap.get(msg.ability) ?? null;
+        if (this._ability === null) {
+          console.warn("Ability triggered, but missing on unit");
+          return "none";
+        }
 
         this._abilityCompleteSub = this._ability.phase$
           .pipe(

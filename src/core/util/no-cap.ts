@@ -47,7 +47,7 @@ noCap.notUndefined = function notUndefined<T>(
 ): asserts value is Exclude<T, undefined> {
   if (import.meta.env.PROD) return;
   if (value === undefined) {
-    doError(Error(capMsg(msg, "Expected value NOT to be undefined.")));
+    doError(Error(capMsg(msg, "Expected undefined value to be defined.")));
   }
 };
 

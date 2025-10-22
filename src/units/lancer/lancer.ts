@@ -1,4 +1,5 @@
 import { Attack } from "../../abilities/attack";
+import { Guard } from "../../abilities/guard";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
@@ -51,6 +52,7 @@ export class Lancer extends UnitBase {
 
     // register abilities
     this.abilityMap.set("attack", new Attack(this, ljs, 0, 0.3));
+    this.abilityMap.set("guard", new Guard(this, ljs));
 
     // register states
     this._stateMap.set("idling", new UnitStateIdling(this));
