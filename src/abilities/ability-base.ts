@@ -46,12 +46,15 @@ export abstract class AbilityBase implements IAbility {
         if (this.getPhaseDelta() >= this._backswingDuration) {
           this._phaseStart = this._ljs.time;
           this._phase$.next("complete");
-          this.progress();
         }
         break;
       case "complete":
         break;
     }
+  }
+
+  restart(): void {
+    this._phase$.next("init");
   }
 
   protected abstract _applyEffect(): void;

@@ -17,10 +17,7 @@ import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
 import { Warrior } from "../warrior/warrior";
 import { Lancer } from "../lancer/lancer";
 import { Spider } from "../spider/spider";
-import {
-  ABILITY_FACTORY_TOKEN,
-  type IAbilityFactory,
-} from "../../abilities/factory/ability-factory.types";
+import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -28,7 +25,6 @@ import {
 export class UnitFactory implements IUnitFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
-  private readonly _abilityFactory: IAbilityFactory;
   private readonly _ljs: ILJS;
 
   constructor(
@@ -36,14 +32,11 @@ export class UnitFactory implements IUnitFactory {
     spriteAnimationFactory: ISpriteAnimationFactory,
     @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
     box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
-    @inject(ABILITY_FACTORY_TOKEN)
-    abilityFactory: IAbilityFactory,
     @inject(LJS_TOKEN)
     ljs: ILJS,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
     this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
-    this._abilityFactory = abilityFactory;
     this._ljs = ljs;
   }
 
@@ -65,25 +58,19 @@ export class UnitFactory implements IUnitFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(drawSizeScale);
 
+    const args: [IBox2dObjectAdapter, ISpriteAnimationFactory, ILJS] = [
+      b2ObjAdpt,
+      this._spriteAnimationFactory,
+      this._ljs,
+    ];
+
     switch (unitType) {
       case "warrior":
-        return new Warrior(
-          b2ObjAdpt,
-          this._spriteAnimationFactory,
-          this._abilityFactory,
-        );
+        return new Warrior(...args);
       case "lancer":
-        return new Lancer(
-          b2ObjAdpt,
-          this._spriteAnimationFactory,
-          this._abilityFactory,
-        );
+        return new Lancer(...args);
       case "spider":
-        return new Spider(
-          b2ObjAdpt,
-          this._spriteAnimationFactory,
-          this._abilityFactory,
-        );
+        return new Spider(...args);
       default:
         throw new Error("unit type not matched");
     }

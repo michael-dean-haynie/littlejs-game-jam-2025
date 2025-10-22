@@ -13,6 +13,7 @@ import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 /** A sprite animation that progresses and tracks its own state */
 export class SpriteAnimation implements ISpriteAnimation {
   private _frames: ReadonlyArray<SpriteAnimationFrame>;
+  private _direction: AnimationDirection;
   private readonly _dirToFramesMap: DirToFramesMap;
   private readonly _ljs: ILJS;
 
@@ -39,6 +40,7 @@ export class SpriteAnimation implements ISpriteAnimation {
     this._ljs = ljs;
 
     // assumption: each texture has the same duration and number of frames
+    this._direction = "e";
     this._frames = this._dirToFramesMap.e;
     this._fullDuration = 0;
     this._offsets = [];
@@ -68,6 +70,7 @@ export class SpriteAnimation implements ISpriteAnimation {
     noCap.notNull(this._startTime);
 
     // update
+    const startingDirection = this._direction;
     this._updateActiveFramesForDirection(faceDirection);
 
     const engineTimeNow = this._ljs.time;
@@ -85,7 +88,10 @@ export class SpriteAnimation implements ISpriteAnimation {
       }
     }
 
-    if (startingFrameIndex !== this._currentFrameIndex) {
+    if (
+      startingFrameIndex !== this._currentFrameIndex ||
+      startingDirection !== this._direction
+    ) {
       this._emitFrameChanged();
     }
   }
@@ -104,7 +110,8 @@ export class SpriteAnimation implements ISpriteAnimation {
     // map angles for (top, topRight, right, bottomRight, bottom) to (0, 1, 2, 3, 4)
     const idx = Math.round((semiPct * dirCount) / 2);
 
-    this._frames = this._dirToFramesMap[directions[idx]];
+    this._direction = directions[idx];
+    this._frames = this._dirToFramesMap[this._direction];
   }
 
   private _emitFrameChanged(): void {

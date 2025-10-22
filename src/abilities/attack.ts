@@ -6,11 +6,20 @@ import { AbilityBase } from "./ability-base";
 export class Attack extends AbilityBase {
   readonly type: Ability = "attack";
 
-  protected readonly _preswingDuration = 0;
-  protected readonly _backswingDuration = 0.2;
+  protected readonly _preswingDuration: number;
+  protected readonly _backswingDuration: number;
 
-  constructor(unit: IUnit, ljs: ILJS) {
+  // michael: pu@ make this flexible for different timings, damage, aoe, mele/missle etc.
+  // then work on registering abilities in the unit class rather than in the casting state
+  constructor(
+    unit: IUnit,
+    ljs: ILJS,
+    preswingDuration: number,
+    backswingDuration: number,
+  ) {
     super(unit, ljs);
+    this._preswingDuration = preswingDuration;
+    this._backswingDuration = backswingDuration;
   }
 
   protected _applyEffect(): void {}

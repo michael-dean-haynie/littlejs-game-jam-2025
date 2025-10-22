@@ -23,9 +23,9 @@ import { FacePosition } from "../../game-inputs/face-position";
 import { inject } from "inversify";
 import { LJS_TOKEN } from "../../../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../../../littlejsengine/littlejsengine.impure";
-import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
 import { GuardToggle } from "../../game-inputs/guard-toggle";
 import { Attack } from "../../game-inputs/attack";
+import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
 
 @Autoloadable({
   serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
@@ -85,7 +85,7 @@ export class KeyboardController implements IKeyboardController {
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
   private _onKeyDown(event: KeyboardEvent): void {
     const key = this._normalizeKey(event.key);
-    // michael: remove this for rapid fire?
+    // michael: rapid fire might require removing this
     if (event.repeat) return;
     this._activeKeys.add(key);
     this._updateActiveModifiers();
@@ -115,10 +115,11 @@ export class KeyboardController implements IKeyboardController {
   private _process(key: string, upOrDown: KeyupOrKeydown): void {
     const inputMatches = this._matchKeyToInputs(key, upOrDown);
 
+    // michael: pu@ fix issue where moving and then attacking starts the attack in the old direction from before the move
     // process movement inputs
     if (inputMatches.some((im) => MovementKeyboardInputs.includes(im))) {
       const moveCommand = this._getMoveCommand();
-      if (!this._useCursor) {
+      if (!this._useCursor && moveCommand.direction.length() > 0) {
         const faceCommand = new FaceDirection(moveCommand.direction);
         this._inputs$.next(faceCommand);
       }

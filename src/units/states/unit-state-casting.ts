@@ -1,26 +1,26 @@
 import { filter, Subscription, tap } from "rxjs";
 import type { IAbility } from "../../abilities/abilities.types";
-import type { IAbilityFactory } from "../../abilities/factory/ability-factory.types";
 import type { IUnit } from "../unit.types";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
+import { noCap } from "../../core/util/no-cap";
 
 export class UnitStateCasting extends UnitStateBase {
   state: UnitState = "casting";
 
-  private readonly _abilityFactory: IAbilityFactory;
   private _ability: IAbility | null = null;
   private _abilityCompleteSub?: Subscription;
 
-  constructor(unit: IUnit, abilityFactory: IAbilityFactory) {
+  constructor(unit: IUnit) {
     super(unit);
-
-    this._abilityFactory = abilityFactory;
 
     // message handlers
     this._messageHandlers["unit.cast"] = (msg) => {
       if (this._ability === null) {
-        this._ability = this._abilityFactory.createAbility(msg.ability, unit);
+        const ability = this._unit.abilityMap.get(msg.ability);
+        noCap.notUndefined(ability, "Ability seems not to be registered.");
+        this._ability = ability;
+
         this._abilityCompleteSub = this._ability.phase$
           .pipe(
             filter((phase) => phase === "complete"),
@@ -36,7 +36,10 @@ export class UnitStateCasting extends UnitStateBase {
 
     this._messageHandlers["unit.toggleCast"] = (msg) => {
       if (this._ability === null) {
-        this._ability = this._abilityFactory.createAbility(msg.ability, unit);
+        const ability = this._unit.abilityMap.get(msg.ability);
+        noCap.notUndefined(ability, "Ability seems not to be registered.");
+        this._ability = ability;
+
         this._abilityCompleteSub = this._ability.phase$
           .pipe(
             filter((phase) => phase === "complete"),
@@ -60,6 +63,7 @@ export class UnitStateCasting extends UnitStateBase {
 
   override onExit(): void {
     this._abilityCompleteSub?.unsubscribe();
+    this._ability?.restart();
     this._ability = null;
   }
 

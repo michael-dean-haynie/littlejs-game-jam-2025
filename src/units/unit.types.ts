@@ -1,4 +1,4 @@
-import type { Ability } from "../abilities/abilities.types";
+import type { Ability, IAbility } from "../abilities/abilities.types";
 import { enumerationFactory } from "../core/enumeration-factory";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
@@ -16,6 +16,7 @@ export interface IUnit {
   set faceDirection(direction: Vector2);
   readonly box2dObjectAdapter: IBox2dObjectAdapter;
   readonly moveSpeed: number;
+  readonly abilityMap: Map<Ability, IAbility>;
 }
 
 export const UnitTypes = enumerationFactory(
@@ -79,7 +80,7 @@ export const UnitTypeInitDataMap: {
     drawSizeScale: 2,
   },
   spider: {
-    size: 1,
+    size: 3,
     drawSizeScale: 2,
   },
   troll: {

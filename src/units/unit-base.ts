@@ -7,7 +7,7 @@ import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
-import type { Ability } from "../abilities/abilities.types";
+import type { Ability, IAbility } from "../abilities/abilities.types";
 
 export abstract class UnitBase implements IUnit {
   abstract readonly type: UnitType;
@@ -31,7 +31,6 @@ export abstract class UnitBase implements IUnit {
       .pipe(
         takeUntil(this._destroyRef$),
         tap(() => {
-          this._processMessages();
           this._update();
         }),
       )
@@ -46,6 +45,9 @@ export abstract class UnitBase implements IUnit {
     this.box2dObjectAdapter.destroy();
     this._destroyRef$.next();
   }
+
+  // abilities
+  readonly abilityMap: Map<Ability, IAbility> = new Map();
 
   // animation
   private readonly _animationMap: Map<UnitState | Ability, ISpriteAnimation> =
@@ -63,7 +65,7 @@ export abstract class UnitBase implements IUnit {
     this._animationFrameChangedSub?.unsubscribe();
 
     const newAnimation = this._animationMap.get(stateOrAbility);
-    noCap(newAnimation !== undefined);
+    noCap(newAnimation !== undefined, "Could not find animation to swap to.");
 
     this._animation = newAnimation;
     this._animationFrameChangedSub = this._animation.frameChanged$
@@ -121,7 +123,8 @@ export abstract class UnitBase implements IUnit {
     return this._faceDirection;
   }
   public set faceDirection(direction: Vector2) {
-    this._faceDirection = direction.normalize(1);
+    this._faceDirection =
+      direction.length() === 0 ? direction : direction.normalize(1);
 
     // update mirror for sprite animation
     if (direction.x === 0) return;
@@ -160,6 +163,7 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
+    this._processMessages();
     this._getStateObj().onUpdate();
   }
 }

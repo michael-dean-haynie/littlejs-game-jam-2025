@@ -1,5 +1,6 @@
-import type { IAbilityFactory } from "../../abilities/factory/ability-factory.types";
+import { Attack } from "../../abilities/attack";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
+import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
@@ -15,7 +16,7 @@ export class Spider extends UnitBase {
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,
     spriteAnimationFactory: ISpriteAnimationFactory,
-    abilityFactory: IAbilityFactory,
+    ljs: ILJS,
   ) {
     super(box2dObjectAapter);
 
@@ -28,13 +29,20 @@ export class Spider extends UnitBase {
       "moving",
       spriteAnimationFactory.createSpriteAnimation("units.spider.moving"),
     );
+    this._registerAnimation(
+      "attack",
+      spriteAnimationFactory.createSpriteAnimation("units.spider.attack"),
+    );
+
+    // register abilities
+    this.abilityMap.set("attack", new Attack(this, ljs, 0, 0.3));
 
     // register states
     this._stateMap.set("idling", new UnitStateIdling(this));
     this._stateMap.set("moving", new UnitStateMoving(this));
-    this._stateMap.set("casting", new UnitStateCasting(this, abilityFactory));
+    this._stateMap.set("casting", new UnitStateCasting(this));
 
-    // initi state
+    // initial state
     this._initState("idling");
   }
 }

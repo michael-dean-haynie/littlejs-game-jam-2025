@@ -1,4 +1,6 @@
-export const keyboardProfileLaptop = {
+import type { KeyboardProfile } from "../keyboard-controller.types";
+
+export const keyboardProfileLaptop: KeyboardProfile = {
   moveLeft: [
     { key: "a", holdOrToggle: "hold" },
     { key: "arrowleft", holdOrToggle: "hold" },
