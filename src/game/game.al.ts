@@ -10,6 +10,10 @@ import {
   type IInputManager,
 } from "../input/input-manager/input-manager.types";
 import { textures } from "../textures/textures.types";
+import {
+  TERRAIN_THING_TOKEN,
+  type ITerrainThing,
+} from "../terrain/terrain-thing.types";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -18,15 +22,18 @@ export class Game implements IGame {
   private readonly _ljs: ILJS;
   private readonly _inputManager: IInputManager;
   private readonly _player: IPlayer;
+  private readonly _terrainThing: ITerrainThing;
 
   constructor(
     @inject(LJS_TOKEN) ljs: ILJS,
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(PLAYER_TOKEN) player: IPlayer,
+    @inject(TERRAIN_THING_TOKEN) terrainThing: ITerrainThing,
   ) {
     this._ljs = ljs;
     this._inputManager = inputManager;
     this._player = player;
+    this._terrainThing = terrainThing;
   }
 
   start(): void {
@@ -54,6 +61,8 @@ export class Game implements IGame {
     this._ljs.setCameraPos(vec2(0, 0));
 
     this._player.spawnUnit();
+
+    this._terrainThing.doTheThing();
 
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey

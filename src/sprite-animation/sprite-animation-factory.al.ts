@@ -13,9 +13,9 @@ import type {
   DirToTextureMap,
   DirToFramesMap,
 } from "./sprite-animation.types";
-import { textures, type TextureId } from "../textures/textures.types";
-import { noCap } from "../core/util/no-cap";
+import { type AnimationTextureId } from "../textures/textures.types";
 import type { TileInfo } from "../littlejsengine/littlejsengine.types";
+import { getAnimationTexture } from "../textures/get-texture";
 
 @Autoloadable({
   serviceIdentifier: SPRITE_ANIMATION_FACTORY_TOKEN,
@@ -34,7 +34,7 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
   }
 
   createSpriteAnimation(
-    textureData: TextureId | DirToTextureMap,
+    textureData: AnimationTextureId | DirToTextureMap,
   ): ISpriteAnimation {
     let textureMap: DirToTextureMap;
     if (typeof textureData === "string") {
@@ -54,15 +54,15 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
     return new SpriteAnimation(framesMap, this._ljs);
   }
 
-  createTileInfo(textureId: TextureId): TileInfo {
-    const textureIdx = textures.findIndex((txt) => txt.id === textureId);
-    noCap(textureIdx !== -1);
-    const texture = textures[textureIdx];
+  createTileInfo(textureId: AnimationTextureId): TileInfo {
+    const [texture, textureIdx] = getAnimationTexture(textureId);
 
     return this._ljs.tile(0, texture.size, textureIdx, 0);
   }
 
-  private _createTextureMapFromTexture(textureId: TextureId): DirToTextureMap {
+  private _createTextureMapFromTexture(
+    textureId: AnimationTextureId,
+  ): DirToTextureMap {
     return {
       n: textureId,
       e: textureId,
@@ -73,11 +73,9 @@ export class SpriteAnimationFactory implements ISpriteAnimationFactory {
   }
 
   private _convertTextureToFrames(
-    textureId: TextureId,
+    textureId: AnimationTextureId,
   ): SpriteAnimationFrame[] {
-    const textureIdx = textures.findIndex((txt) => txt.id === textureId);
-    noCap(textureIdx !== -1);
-    const texture = textures[textureIdx];
+    const [texture, textureIdx] = getAnimationTexture(textureId);
 
     const frames: SpriteAnimationFrame[] = [];
     for (let i = 0; i < texture.frames; i++) {

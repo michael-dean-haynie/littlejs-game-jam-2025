@@ -1,0 +1,13 @@
+import type { TileTexture } from "./textures.types";
+
+export type TerrainTileTextureId = (typeof terrainTileTextures)[number]["id"];
+
+export const terrainTileTextures = [
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // empty
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  {
+    id: "empty",
+    src: "empty.png",
+  },
+] as const satisfies TileTexture[];
