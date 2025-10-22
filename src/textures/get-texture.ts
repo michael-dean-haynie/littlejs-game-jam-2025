@@ -19,12 +19,10 @@ export function getTexture(id: TextureId): [Texture, number] {
 export function getAnimationTexture(
   id: AnimationTextureId,
 ): [AnimationTexture, number] {
-  const [texture, idx] = getTexture(id);
-  return [texture as AnimationTexture, idx];
+  return getTexture(id) as [AnimationTexture, number];
 }
 
 // michael: use type guards or something better
 export function getTileTexture(id: TileTextureId): [TileTexture, number] {
-  const [texture, idx] = getTexture(id);
-  return [texture as TileTexture, idx];
+  return getTexture(id) as [TileTexture, number];
 }
