@@ -8,7 +8,7 @@ export const unitAnimationTextures = [
   // empty
   /////////////////////////////////////////////////////////////////////////////////////////////
   {
-    id: "empty",
+    id: "units.empty",
     src: "empty.png",
     offset: 0,
     frames: 1,

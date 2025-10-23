@@ -47,7 +47,7 @@ export class UnitFactory implements IUnitFactory {
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
       size,
-      this._spriteAnimationFactory.createTileInfo("empty"),
+      this._spriteAnimationFactory.createTileInfo("units.empty"),
       0,
       WHITE,
       this._ljs.box2d.bodyTypeDynamic,

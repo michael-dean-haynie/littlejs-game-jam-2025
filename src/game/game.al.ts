@@ -62,7 +62,7 @@ export class Game implements IGame {
 
     this._player.spawnUnit();
 
-    this._terrainThing.doTheThing();
+    this._terrainThing.render();
 
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
@@ -94,7 +94,10 @@ export class Game implements IGame {
    * Called before objects are rendered
    * Draw any background effects that appear behind objects
    */
-  private _gameRender(): void {}
+  private _gameRender(): void {
+    // michael: remove
+    this._terrainThing.render();
+  }
 
   /**
    * Called after objects are rendered

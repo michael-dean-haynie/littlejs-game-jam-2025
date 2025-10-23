@@ -115,7 +115,6 @@ export class KeyboardController implements IKeyboardController {
   private _process(key: string, upOrDown: KeyupOrKeydown): void {
     const inputMatches = this._matchKeyToInputs(key, upOrDown);
 
-    // michael: pu@ fix issue where moving and then attacking starts the attack in the old direction from before the move
     // process movement inputs
     if (inputMatches.some((im) => MovementKeyboardInputs.includes(im))) {
       const moveCommand = this._getMoveCommand();
