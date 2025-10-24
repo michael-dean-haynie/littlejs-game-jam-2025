@@ -82,5 +82,6 @@ Generally, factories are for instantiating types with normal parameters as well 
 
 - make guard not interrupt attack but requeue so it doesn't get stuck toggled on
 - make attack able to interrupt guard and then go right back
-- fix issue with units not having ability throwing error when ability key is hit
+- search for something better that custom events with lit (lame typesafety), maybe try signals? or rxjs?
+- re-work ioc and data flow for lit overlay
 - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts

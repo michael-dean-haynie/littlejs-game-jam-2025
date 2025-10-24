@@ -8,3 +8,15 @@ export type ITerrainThing = {
   /** Sample the noise function for a particular point in the world space. Returns value where -1 < v < 1. */
   sample(point: Vector2): number;
 };
+
+export type TerrainConfig = {
+  paintTerrain: boolean;
+  cameraZoom: number;
+  extent: number;
+  seed: number;
+  scale: number;
+  octaves: number;
+  persistance: number;
+  lacunarity: number;
+  offset: Vector2;
+};

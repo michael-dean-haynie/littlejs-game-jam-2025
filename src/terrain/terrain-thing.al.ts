@@ -1,13 +1,18 @@
 import { inject } from "inversify";
 import { Autoloadable } from "../core/autoload/autoloadable";
-import { TERRAIN_THING_TOKEN, type ITerrainThing } from "./terrain-thing.types";
+import {
+  TERRAIN_THING_TOKEN,
+  type ITerrainThing,
+  type TerrainConfig,
+} from "./terrain-thing.types";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import alea from "alea";
 import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
-import { rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
+import { percent, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { Color, Vector2 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
+import { tap } from "rxjs";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -35,13 +40,27 @@ export class TerrainThing implements ITerrainThing {
 
   private _litOverlay!: LitOverlay;
 
-  private _gridExtent: number = 10;
+  private _terrainConfig!: TerrainConfig;
+
+  private _noiseMap!: number[][];
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
     this._ljs = ljs;
 
     this._prng = alea(this.seed);
     this._noise2D = createNoise2D(this._prng);
+
+    this._terrainConfig = {
+      paintTerrain: false,
+      cameraZoom: this._ljs.cameraScale,
+      extent: 10,
+      seed: 1027,
+      scale: 25,
+      octaves: 4,
+      persistance: 0.75,
+      lacunarity: 2.5,
+      offset: vec2(0),
+    };
 
     this._initLitOverlay();
   }
@@ -58,9 +77,9 @@ export class TerrainThing implements ITerrainThing {
       y = value2!;
     }
 
-    let result = this._noise2D(x, y);
-    result = this._reRangeSample(result);
-    result = this._quantize(result, this._terrainColors.length);
+    const result = this._noise2D(x, y);
+    // result = this._reRangeSample(result);
+    // result = this._quantize(result, this._terrainColors.length);
     return result;
   }
 
@@ -108,15 +127,23 @@ export class TerrainThing implements ITerrainThing {
     //   this._ljs.tile(vec2(0), vec2(576, 384), textureIdx, 0),
     // );
 
-    // michael: move these
+    this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
 
-    const size = this._extToSize(this._gridExtent);
+    if (!this._terrainConfig.paintTerrain) return;
 
-    const [lower, upper] = this._sizeToBounds(size);
-    for (let x = lower; x <= upper; x++) {
-      for (let y = lower; y <= upper; y++) {
-        const sample = this.sample(x, y);
-        this._ljs.drawRect(vec2(x, y), vec2(1), this._terrainColors[sample]);
+    const size = this._extToSize(this._terrainConfig.extent);
+
+    const [offset] = this._sizeToBounds(size);
+    for (let x = 0; x < size; x++) {
+      for (let y = 0; y < size; y++) {
+        const noise = this._noiseMap[x][y];
+        this._ljs.drawRect(
+          vec2(x + offset, y + offset),
+          vec2(1),
+          this._terrainColors[
+            this._quantize(noise, this._terrainColors.length)
+          ],
+        );
       }
     }
   }
@@ -125,23 +152,106 @@ export class TerrainThing implements ITerrainThing {
   private _initLitOverlay(): void {
     this._litOverlay = document
       .querySelector("body")
-      ?.insertAdjacentElement("beforeend", new LitOverlay()) as LitOverlay;
+      ?.insertAdjacentElement(
+        "beforeend",
+        new LitOverlay(this._terrainConfig),
+      ) as LitOverlay;
+
+    this._litOverlay.hidden = true; // start hidden
+
+    this._litOverlay.terrainConfig$
+      .pipe(
+        tap((tc) => {
+          this._terrainConfig = tc;
+          this._noiseMap = this._generateNoiseMapFromConfig();
+        }),
+      )
+      .subscribe();
 
     window.addEventListener("keydown", (ev: KeyboardEvent) => {
       if (ev.key !== "`") return;
       this._litOverlay.hidden = !this._litOverlay.hidden;
     });
-
-    this._litOverlay.addEventListener("grid-extent-input", (ev) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this._gridExtent = (ev as any).detail;
-      this._updateLitOverlay();
-    });
-
-    this._updateLitOverlay();
   }
 
-  private _updateLitOverlay(): void {
-    this._litOverlay.gridExtent = this._gridExtent;
+  private _generateNoiseMapFromConfig(): number[][] {
+    this.seed = this._terrainConfig.seed;
+    const size = this._extToSize(this._terrainConfig.extent);
+    return this._generateNoiseMap(
+      size,
+      size,
+      this._terrainConfig.scale,
+      this._terrainConfig.octaves,
+      this._terrainConfig.persistance,
+      this._terrainConfig.lacunarity,
+      this._terrainConfig.offset,
+    );
+  }
+
+  private _generateNoiseMap(
+    mapWidth: number,
+    mapHeight: number,
+    scale: number,
+    octaves: number,
+    persistance: number,
+    lacunarity: number,
+    offset: Vector2,
+  ): number[][] {
+    const noiseMap: number[][] = Array.from({ length: mapWidth }, () =>
+      Array(mapHeight).fill(0),
+    );
+
+    const octaveOffsets: Vector2[] = new Array(octaves);
+
+    for (let i = 0; i < octaves; i++) {
+      const offsetX = this._prng.next() + offset.x;
+      const offsetY = this._prng.next() + offset.y;
+      octaveOffsets[i] = vec2(offsetX, offsetY);
+    }
+
+    if (scale <= 0) {
+      scale = 0.0001;
+    }
+
+    let maxNoiseHeight = Number.MIN_VALUE;
+    let minNoiseHeight = Number.MAX_VALUE;
+
+    for (let y = 0; y < mapHeight; y++) {
+      for (let x = 0; x < mapWidth; x++) {
+        let amplitude = 1;
+        let frequency = 1;
+        let noiseHeight = 0;
+
+        for (let i = 0; i < octaves; i++) {
+          const sampleX = (x / scale) * frequency + octaveOffsets[i].x;
+          const sampleY = (y / scale) * frequency + octaveOffsets[i].y;
+
+          const simplexValue = this.sample(sampleX, sampleY) * 2 - 1;
+          noiseHeight += simplexValue * amplitude;
+
+          amplitude *= persistance;
+          frequency *= lacunarity;
+        }
+
+        if (noiseHeight > maxNoiseHeight) {
+          maxNoiseHeight = noiseHeight;
+        } else if (noiseHeight < minNoiseHeight) {
+          minNoiseHeight = noiseHeight;
+        }
+        noiseMap[x][y] = noiseHeight;
+      }
+    }
+
+    for (let y = 0; y < mapHeight; y++) {
+      for (let x = 0; x < mapWidth; x++) {
+        noiseMap[x][y] = percent(
+          noiseMap[x][y],
+          minNoiseHeight,
+          maxNoiseHeight,
+        );
+      }
+    }
+
+    return noiseMap;
   }
 }
