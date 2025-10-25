@@ -51,13 +51,13 @@ export class TerrainThing implements ITerrainThing {
     this._noise2D = createNoise2D(this._prng);
 
     this._terrainConfig = {
-      paintTerrain: false,
-      cameraZoom: this._ljs.cameraScale,
-      extent: 10,
+      paintTerrain: true,
+      cameraZoom: 5,
+      extent: 100,
       seed: 1027,
-      scale: 25,
+      scale: 100,
       octaves: 4,
-      persistance: 0.75,
+      persistance: 0.5,
       lacunarity: 2.5,
       offset: vec2(0),
     };
@@ -81,11 +81,6 @@ export class TerrainThing implements ITerrainThing {
     // result = this._reRangeSample(result);
     // result = this._quantize(result, this._terrainColors.length);
     return result;
-  }
-
-  /** Convert from range (-1 to 1) to (0 to 1) */
-  private _reRangeSample(sample: number): number {
-    return (sample + 1) / 2;
   }
 
   /** Convert continuous values (0 - 1) into discrete buckets */
@@ -112,7 +107,7 @@ export class TerrainThing implements ITerrainThing {
     rgb(0.933, 0.839, 0.686), // 1: Peach Puff (sandy beach)
     rgb(0.133, 0.545, 0.133), // 2: Forest Green (trees/forest)
     rgb(0.545, 0.537, 0.537), // 3: Gray (rocky mountains)
-    rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
+    // rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
   ];
 
   // michael: pu@, get values showing in game world
@@ -216,6 +211,9 @@ export class TerrainThing implements ITerrainThing {
     let maxNoiseHeight = Number.MIN_VALUE;
     let minNoiseHeight = Number.MAX_VALUE;
 
+    const halfWidth = mapWidth / 2;
+    const halfHeight = mapHeight / 2;
+
     for (let y = 0; y < mapHeight; y++) {
       for (let x = 0; x < mapWidth; x++) {
         let amplitude = 1;
@@ -223,8 +221,10 @@ export class TerrainThing implements ITerrainThing {
         let noiseHeight = 0;
 
         for (let i = 0; i < octaves; i++) {
-          const sampleX = (x / scale) * frequency + octaveOffsets[i].x;
-          const sampleY = (y / scale) * frequency + octaveOffsets[i].y;
+          const sampleX =
+            ((x - halfWidth) / scale) * frequency + octaveOffsets[i].x;
+          const sampleY =
+            ((y - halfHeight) / scale) * frequency + octaveOffsets[i].y;
 
           const simplexValue = this.sample(sampleX, sampleY) * 2 - 1;
           noiseHeight += simplexValue * amplitude;

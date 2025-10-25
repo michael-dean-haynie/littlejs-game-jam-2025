@@ -62,8 +62,6 @@ export class Game implements IGame {
 
     this._player.spawnUnit();
 
-    this._terrainThing.render();
-
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
     // b2Obj.setLinearDamping(0.5); // slippery

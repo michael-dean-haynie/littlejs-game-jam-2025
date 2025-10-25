@@ -21,59 +21,143 @@ export class LitOverlay extends BaseLitElement {
   }
 
   render() {
-    return html` <div class="text-white">
+    return html` <div class="text-white z-10 absolute">
       <p>Terrain Config</p>
 
-      <hr />
+      <div></div>
       <input
         type="checkbox"
-        value=${this._tc.paintTerrain}
-        @input=${this._onPaintTerrainInput}
+        data-field="paintTerrain"
+        .checked=${this._tc.paintTerrain}
+        @input=${this._onBooleanInput}
       />
       <span>Show Terrain</span>
 
-      <hr />
+      <div></div>
       <input
         type="range"
+        data-field="cameraZoom"
         min="1"
         max="100"
         value=${this._tc.cameraZoom}
-        @input=${this._onCameraZoomInput}
+        @input=${this._onNumericInput}
       />
-      <span>Camera Zoom</span>
+      <span>Camera Zoom: ${this._tc.cameraZoom}</span>
 
-      <hr />
+      <div></div>
       <input
         type="range"
+        data-field="extent"
         min="0"
         max="100"
         value=${this._tc.extent}
-        @input=${this._onExtentInput}
+        @input=${this._onNumericInput}
       />
-      <span>Grid Size</span>
+      <span>Grid Size: ${this._tc.extent}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="seed"
+        min="0"
+        max="10000"
+        value=${this._tc.seed}
+        @input=${this._onNumericInput}
+      />
+      <span>Seed: ${this._tc.seed}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="scale"
+        min="1"
+        max="200"
+        value=${this._tc.scale}
+        @input=${this._onNumericInput}
+      />
+      <span>Scale: ${this._tc.scale}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="octaves"
+        min="1"
+        max="8"
+        value=${this._tc.octaves}
+        @input=${this._onNumericInput}
+      />
+      <span>Octaves: ${this._tc.octaves}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="persistance"
+        min="0"
+        max="1"
+        step="0.01"
+        value=${this._tc.persistance}
+        @input=${this._onNumericInput}
+      />
+      <span>Persistance: ${this._tc.persistance}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="lacunarity"
+        min="1"
+        max="10"
+        step="0.1"
+        value=${this._tc.lacunarity}
+        @input=${this._onNumericInput}
+      />
+      <span>Lacunarity: ${this._tc.lacunarity}</span>
+
+      <div></div>
+      <button @click=${this._onExportConfig} class="btn btn-neutral">
+        Export Config
+      </button>
     </div>`;
   }
 
-  private _onPaintTerrainInput(ev: InputEvent): void {
+  private _onNumericInput(ev: InputEvent): void {
+    const input = ev.target as HTMLInputElement;
+    const field = input.dataset.field as keyof TerrainConfig;
+    noCap(field, "Expected data-field attribute on input element");
+
     this._terrainConfig$.next({
       ...this._tc,
-      paintTerrain: this._parseBooleanInputEventValue(ev),
+      [field]: this._parseNumericInputEventValue(ev),
     });
+    this.requestUpdate();
   }
 
-  private _onExtentInput(ev: InputEvent): void {
+  private _onBooleanInput(ev: InputEvent): void {
+    const input = ev.target as HTMLInputElement;
+    const field = input.dataset.field as keyof TerrainConfig;
+    noCap(field, "Expected data-field attribute on input element");
+
     this._terrainConfig$.next({
       ...this._tc,
-      extent: this._parseNumericInputEventValue(ev),
+      [field]: this._parseBooleanInputEventValue(ev),
     });
+    this.requestUpdate();
   }
 
-  private _onCameraZoomInput(ev: InputEvent): void {
-    this._terrainConfig$.next({
-      ...this._tc,
-      cameraZoom: this._parseNumericInputEventValue(ev),
-    });
+  private async _onExportConfig(): Promise<void> {
+    const configJson = JSON.stringify(this._tc, null, 2);
+    console.log("Terrain Config", this._tc);
+
+    try {
+      await navigator.clipboard.writeText(configJson);
+      console.log("✓ Config copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      // Fallback: show the JSON in console for manual copy
+      console.log("Copy this manually:", configJson);
+    }
   }
+
+  // michael: todo - doc daisy ui
 
   private _parseNumericInputEventValue(ev: InputEvent): number {
     noCap(
