@@ -141,8 +141,10 @@ export class TerrainThing implements ITerrainThing {
     const size = this._extToSize(this._terrainConfig.extent);
 
     const [offset] = this._sizeToBounds(size);
-    for (let x = 0; x < size; x++) {
-      for (let y = 0; y < size; y++) {
+
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
+    for (let y = size - 1; y >= 0; y--) {
+      for (let x = 0; x < size; x++) {
         const noise = this._noiseMap[x][y];
         const cliffHeight = this._quantize(noise, this.terrainTiles.length);
         // this._ljs.drawRect(
