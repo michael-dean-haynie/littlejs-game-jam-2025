@@ -158,6 +158,7 @@ export class LitOverlay extends BaseLitElement {
   }
 
   // michael: todo - doc daisy ui
+  // michael: document perspective is top-down oblique.
 
   private _parseNumericInputEventValue(ev: InputEvent): number {
     noCap(

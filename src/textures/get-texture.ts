@@ -9,6 +9,11 @@ import {
   type TileTextureId,
 } from "./textures.types";
 
+export function getTextureIdx(id: TextureId): number {
+  const [, idx] = getTexture(id);
+  return idx;
+}
+
 export function getTexture(id: TextureId): [Texture, number] {
   const idx = textures.findIndex((txt) => txt.id === id);
   noCap(idx !== -1, "Was not able to find texture.");

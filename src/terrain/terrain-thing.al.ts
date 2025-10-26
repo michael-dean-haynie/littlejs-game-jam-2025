@@ -9,10 +9,11 @@ import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import alea from "alea";
 import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
-import { percent, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { Color, Vector2 } from "../littlejsengine/littlejsengine.types";
+import { percent, vec2 } from "../littlejsengine/littlejsengine.pure";
+import type { TileInfo, Vector2 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
+import { getTextureIdx } from "../textures/get-texture";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -52,9 +53,9 @@ export class TerrainThing implements ITerrainThing {
 
     this._terrainConfig = {
       paintTerrain: true,
-      cameraZoom: 5,
-      extent: 100,
-      seed: 1027,
+      cameraZoom: 51,
+      extent: 14,
+      seed: 1678,
       scale: 100,
       octaves: 4,
       persistance: 0.5,
@@ -102,13 +103,35 @@ export class TerrainThing implements ITerrainThing {
     return [-1 * extent, extent];
   }
 
-  private readonly _terrainColors: Color[] = [
-    rgb(0.255, 0.412, 0.882), // 0: Royal Blue (water/ocean)
-    rgb(0.933, 0.839, 0.686), // 1: Peach Puff (sandy beach)
-    rgb(0.133, 0.545, 0.133), // 2: Forest Green (trees/forest)
-    rgb(0.545, 0.537, 0.537), // 3: Gray (rocky mountains)
-    // rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
-  ];
+  // private readonly _terrainColors: Color[] = [
+  //   // rgb(0.255, 0.412, 0.882), // 0: Royal Blue (water/ocean)
+  //   rgb(0.933, 0.839, 0.686), // 1: Peach Puff (sandy beach)
+  //   // rgb(0.133, 0.545, 0.133), // 2: Forest Green (trees/forest)
+  //   rgb(0.545, 0.537, 0.537), // 3: Gray (rocky mountains)
+  //   // rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
+  // ];
+
+  private readonly _terrainTiles: TileInfo[] = [];
+  get terrainTiles(): TileInfo[] {
+    if (this._terrainTiles.length === 0) {
+      this._terrainTiles.push(
+        new this._ljs.TileInfo(
+          vec2(32),
+          vec2(64),
+          // vec2(128),
+          getTextureIdx("terrain.tilemap1"),
+          0,
+        ), // low
+        new this._ljs.TileInfo(
+          vec2(32),
+          vec2(64),
+          getTextureIdx("terrain.tilemap2"),
+          0,
+        ), // high
+      );
+    }
+    return this._terrainTiles;
+  }
 
   // michael: pu@, get values showing in game world
   // get html debugging/designing interface in place with toggles for values/reseeding/zooming in or out, etc
@@ -128,16 +151,22 @@ export class TerrainThing implements ITerrainThing {
 
     const size = this._extToSize(this._terrainConfig.extent);
 
+    const scale = 2;
     const [offset] = this._sizeToBounds(size);
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const noise = this._noiseMap[x][y];
-        this._ljs.drawRect(
-          vec2(x + offset, y + offset),
-          vec2(1),
-          this._terrainColors[
-            this._quantize(noise, this._terrainColors.length)
-          ],
+        // this._ljs.drawRect(
+        //   vec2(x + offset, y + offset),
+        //   vec2(1),
+        //   this._terrainColors[
+        //     this._quantize(noise, this._terrainColors.length)
+        //   ],
+        // );
+        this._ljs.drawTile(
+          vec2((x + offset) * scale, (y + offset) * scale),
+          vec2(scale),
+          this.terrainTiles[this._quantize(noise, this.terrainTiles.length)],
         );
       }
     }
@@ -152,7 +181,7 @@ export class TerrainThing implements ITerrainThing {
         new LitOverlay(this._terrainConfig),
       ) as LitOverlay;
 
-    this._litOverlay.hidden = true; // start hidden
+    // this._litOverlay.hidden = true; // start hidden
 
     this._litOverlay.terrainConfig$
       .pipe(
