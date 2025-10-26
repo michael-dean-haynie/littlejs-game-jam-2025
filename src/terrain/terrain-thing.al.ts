@@ -9,8 +9,12 @@ import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import alea from "alea";
 import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
-import { percent, vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { TileInfo, Vector2 } from "../littlejsengine/littlejsengine.types";
+import { percent, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
+import type {
+  Color,
+  TileInfo,
+  Vector2,
+} from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
 import { getTextureIdx } from "../textures/get-texture";
@@ -53,6 +57,7 @@ export class TerrainThing implements ITerrainThing {
 
     this._terrainConfig = {
       paintTerrain: true,
+      useTiles: false,
       cameraZoom: 73,
       extent: 5,
       seed: 1678,
@@ -117,11 +122,47 @@ export class TerrainThing implements ITerrainThing {
     return this._terrainTextureIdxs;
   }
 
+  private readonly _terrainColors: Color[] = [
+    rgb(0.255, 0.412, 0.882), // 0: Royal Blue (water/ocean)
+    rgb(0.933, 0.839, 0.686), // 1: Peach Puff (sandy beach)
+    rgb(0.133, 0.545, 0.133), // 2: Forest Green (trees/forest)
+    rgb(0.545, 0.537, 0.537), // 3: Gray (rocky mountains)
+    rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
+  ];
+
   // michael: todo: organize units, relations between noise map, world space, screen space terrain grid, tile size, unit size etc.
   render(): void {
     this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
-
     if (!this._terrainConfig.paintTerrain) return;
+    if (this._terrainConfig.useTiles) {
+      this.renderTiles();
+    } else {
+      this.renderColors();
+    }
+  }
+
+  renderColors(): void {
+    const size = this._extToSize(this._terrainConfig.extent);
+    const [offset] = this._sizeToBounds(size);
+
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
+    for (let y = size - 1; y >= 0; y--) {
+      for (let x = 0; x < size; x++) {
+        const cliffHeight = this._getCliffHeightForNoiseMap(x, y);
+        // world space x/y
+        const wsx = x + offset;
+        const wsy = y + offset;
+
+        this._ljs.drawRect(
+          vec2(wsx, wsy),
+          vec2(1),
+          this._terrainColors[cliffHeight],
+        );
+      }
+    }
+  }
+
+  renderTiles(): void {
     const size = this._extToSize(this._terrainConfig.extent);
 
     const [offset] = this._sizeToBounds(size);

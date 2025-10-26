@@ -13,6 +13,7 @@ export type ITerrainThing = {
 
 export type TerrainConfig = {
   paintTerrain: boolean;
+  useTiles: boolean;
   cameraZoom: number;
   extent: number;
   seed: number;

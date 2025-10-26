@@ -36,6 +36,15 @@ export class LitOverlay extends BaseLitElement {
 
       <div></div>
       <input
+        type="checkbox"
+        data-field="useTiles"
+        .checked=${this._tc.useTiles}
+        @input=${this._onBooleanInput}
+      />
+      <span>Use Tiles</span>
+
+      <div></div>
+      <input
         type="range"
         data-field="cameraZoom"
         min="1"
