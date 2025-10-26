@@ -86,7 +86,13 @@ export class Game implements IGame {
    * Called after physics and objects are updated
    * Setup camera and prepare for render
    */
-  private _gameUpdatePost(): void {}
+  private _gameUpdatePost(): void {
+    // michael: temp - lock camera to player unit
+    const unit = this._player.unit;
+    if (unit !== null) {
+      this._ljs.setCameraPos(unit.box2dObjectAdapter.getCenterOfMass());
+    }
+  }
 
   /**
    * Called before objects are rendered

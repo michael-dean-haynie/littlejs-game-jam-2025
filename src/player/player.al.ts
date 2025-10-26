@@ -27,7 +27,7 @@ export class Player implements IPlayer {
   private readonly _inputManager: IInputManager;
   private readonly _unitFactory: IUnitFactory;
 
-  private _unit: IUnit | null = null;
+  unit: IUnit | null = null;
 
   constructor(
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
@@ -47,28 +47,28 @@ export class Player implements IPlayer {
   // michael: improve organization, consider many commands and many units possible
   private _processGameInputCommand(giCommand: IGameInputCommand): void {
     if (giCommand instanceof Move) {
-      this._unit?.enqueueMessage(createUnitMoveMessage(giCommand.direction));
+      this.unit?.enqueueMessage(createUnitMoveMessage(giCommand.direction));
     }
     if (giCommand instanceof FaceDirection) {
-      this._unit?.enqueueMessage({
+      this.unit?.enqueueMessage({
         id: "unit.faceDirection",
         direction: giCommand.direction,
       });
     }
     if (giCommand instanceof FacePosition) {
-      this._unit?.enqueueMessage({
+      this.unit?.enqueueMessage({
         id: "unit.facePosition",
         position: giCommand.position,
       });
     }
     if (giCommand instanceof GuardToggle) {
-      this._unit?.enqueueMessage({
+      this.unit?.enqueueMessage({
         id: "unit.toggleCast",
         ability: "guard",
       });
     }
     if (giCommand instanceof Attack) {
-      this._unit?.enqueueMessage({
+      this.unit?.enqueueMessage({
         id: "unit.cast",
         ability: "attack",
       });
@@ -76,10 +76,10 @@ export class Player implements IPlayer {
   }
 
   spawnUnit(): void {
-    this._unit = this._unitFactory.createUnit("warrior", vec2(0));
+    this.unit = this._unitFactory.createUnit("warrior", vec2(0));
 
     // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).unit = this._unit;
+    (window as any).unit = this.unit;
   }
 }
