@@ -113,6 +113,30 @@ export class LitOverlay extends BaseLitElement {
       <span>Lacunarity: ${this._tc.lacunarity}</span>
 
       <div></div>
+      <input
+        type="range"
+        data-field="offsetX"
+        min="-50"
+        max="50"
+        step="1"
+        value=${this._tc.offsetX}
+        @input=${this._onNumericInput}
+      />
+      <span>Offset X: ${this._tc.offsetX}</span>
+
+      <div></div>
+      <input
+        type="range"
+        data-field="offsetY"
+        min="-50"
+        max="50"
+        step="1"
+        value=${this._tc.offsetY}
+        @input=${this._onNumericInput}
+      />
+      <span>Offset Y: ${this._tc.offsetY}</span>
+
+      <div></div>
       <button @click=${this._onExportConfig} class="btn btn-neutral">
         Export Config
       </button>

@@ -20,5 +20,6 @@ export type TerrainConfig = {
   octaves: number;
   persistance: number;
   lacunarity: number;
-  offset: Vector2;
+  offsetX: number;
+  offsetY: number;
 };

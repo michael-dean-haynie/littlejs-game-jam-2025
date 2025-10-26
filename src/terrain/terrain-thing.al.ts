@@ -60,7 +60,8 @@ export class TerrainThing implements ITerrainThing {
       octaves: 4,
       persistance: 0.5,
       lacunarity: 2.5,
-      offset: vec2(0),
+      offsetX: 0,
+      offsetY: 0,
     };
 
     this._initLitOverlay();
@@ -337,7 +338,7 @@ export class TerrainThing implements ITerrainThing {
       this._terrainConfig.octaves,
       this._terrainConfig.persistance,
       this._terrainConfig.lacunarity,
-      this._terrainConfig.offset,
+      vec2(this._terrainConfig.offsetX, this._terrainConfig.offsetY),
     );
   }
 
