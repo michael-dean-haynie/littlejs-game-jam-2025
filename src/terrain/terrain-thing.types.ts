@@ -24,4 +24,5 @@ export type TerrainConfig = {
   offsetY: number;
   // interval:  [0, 1] (expected to be in ascending order)
   cliffHeightBounds: number[];
+  clamp: number;
 };

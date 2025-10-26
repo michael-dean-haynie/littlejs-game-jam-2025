@@ -63,6 +63,7 @@ export class TerrainThing implements ITerrainThing {
       offsetX: 0,
       offsetY: 0,
       cliffHeightBounds: [0.5],
+      clamp: 0.25,
     };
 
     this._initLitOverlay();
@@ -340,6 +341,7 @@ export class TerrainThing implements ITerrainThing {
       this._terrainConfig.persistance,
       this._terrainConfig.lacunarity,
       vec2(this._terrainConfig.offsetX, this._terrainConfig.offsetY),
+      this._terrainConfig.clamp,
     );
   }
 
@@ -351,6 +353,10 @@ export class TerrainThing implements ITerrainThing {
     persistance: number,
     lacunarity: number,
     offset: Vector2, // for scrolling and sector offsets
+    // this is for discarding the extremes of the theoretically possible noise values
+    // they are almost never actually reached because they would require perfect constructive/destructive interference of the octaves layering
+    // this can help keep the dynamic interesting part of the noise from being too thin
+    clamp: number, // form 0 to 1. percentage of whole theoretical amplitude space
   ): number[][] {
     const noiseMap: number[][] = Array.from({ length: mapWidth }, () =>
       Array(mapHeight).fill(0),
@@ -415,8 +421,8 @@ export class TerrainThing implements ITerrainThing {
       for (let x = 0; x < mapWidth; x++) {
         noiseMap[x][y] = percent(
           noiseMap[x][y],
-          -maxAmplitude,
-          maxAmplitude,
+          -maxAmplitude * (clamp / 2),
+          maxAmplitude * (clamp / 2),
           // minNoiseHeight,
           // maxNoiseHeight,
         );
