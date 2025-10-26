@@ -200,12 +200,29 @@ export class TerrainThing implements ITerrainThing {
           necTI,
         );
 
-        // south west corner
+        // south west corner / south west cliff face
         let swcTI: TileInfo;
-        if (sc && wc) {
-          swcTI = new this._ljs.TileInfo(vec2(320, 160), vec2(32), txtIdx, 0);
-        } else if (sc && !wc) {
-          swcTI = new this._ljs.TileInfo(vec2(352, 160), vec2(32), txtIdx, 0);
+        let swcfTI: TileInfo;
+        if (sc) {
+          if (wc) {
+            swcTI = new this._ljs.TileInfo(vec2(320, 160), vec2(32), txtIdx, 0);
+            swcfTI = new this._ljs.TileInfo(
+              vec2(320, 192),
+              vec2(32, 64),
+              txtIdx,
+              0,
+            );
+          } else {
+            // !wc
+            swcTI = new this._ljs.TileInfo(vec2(352, 160), vec2(32), txtIdx, 0);
+            swcfTI = new this._ljs.TileInfo(
+              vec2(352, 192),
+              vec2(32, 64),
+              txtIdx,
+              0,
+            );
+          }
+          this._ljs.drawTile(vec2(wsx - 0.25, wsy), vec2(0.5, 1), swcfTI);
         } else if (!sc && wc) {
           swcTI = new this._ljs.TileInfo(vec2(320, 96), vec2(32), txtIdx, 0);
         } else {
