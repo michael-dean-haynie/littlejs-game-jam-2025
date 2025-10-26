@@ -22,4 +22,6 @@ export type TerrainConfig = {
   lacunarity: number;
   offsetX: number;
   offsetY: number;
+  // interval:  [0, 1] (expected to be in ascending order)
+  cliffHeightBounds: number[];
 };

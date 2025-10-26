@@ -4,6 +4,7 @@ import { BaseLitElement } from "./base-lit-element";
 import type { TerrainConfig } from "../../terrain/terrain-thing.types";
 import { BehaviorSubject, type Observable } from "rxjs";
 import { noCap } from "../../core/util/no-cap";
+import { range } from "../../core/util/range";
 
 @customElement("lit-overlay")
 export class LitOverlay extends BaseLitElement {
@@ -21,7 +22,7 @@ export class LitOverlay extends BaseLitElement {
   }
 
   render() {
-    return html` <div class="text-white z-10 absolute">
+    return html` <div class="text-white z-10 absolute font-mono">
       <p>Terrain Config</p>
 
       <div></div>
@@ -137,14 +138,74 @@ export class LitOverlay extends BaseLitElement {
       <span>Offset Y: ${this._tc.offsetY}</span>
 
       <div></div>
+      <p>
+        Cliff Height Boundaries (${this._tc.cliffHeightBounds.length + 1} cliff
+        heights)
+      </p>
+      <ul>
+        ${this._tc.cliffHeightBounds.map(
+          (bound, index) => html`
+            <li class="flex gap-2 items-center text-center ">
+              <input
+                type="range"
+                data-field="cliffHeightBounds"
+                data-index=${index}
+                data-prev=${bound}
+                min="0"
+                max="1"
+                step="0.01"
+                .value=${bound.toString()}
+                @input=${this._onCliffHeightBoundsInput}
+              />
+              <span>${index}-${index + 1} Boundary: ${bound.toFixed(2)}</span>
+              ${this._renderRemoveCliffHeightButton(index)}
+            </li>
+          `,
+        )}
+      </ul>
+      <button @click=${this._onAddCliffHeight} class="btn btn-neutral">
+        Add Cliff Height
+      </button>
+      <button @click=${this._onSpaceEvenly} class="btn btn-neutral">
+        Space Evenly
+      </button>
+
+      <div></div>
       <button @click=${this._onExportConfig} class="btn btn-neutral">
         Export Config
       </button>
     </div>`;
   }
 
+  private _renderRemoveCliffHeightButton(index: number) {
+    return html`
+      <button
+        @click=${() => {
+          this._onRemoveCliffHeight(index);
+        }}
+        class="btn btn-circle"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          />
+        </svg>
+      </button>
+    `;
+  }
+
   private _onNumericInput(ev: InputEvent): void {
     const input = ev.target as HTMLInputElement;
+    // michael: good way to assert this so runtime and compile time safe with context inference awareness magic?
     const field = input.dataset.field as keyof TerrainConfig;
     noCap(field, "Expected data-field attribute on input element");
 
@@ -163,6 +224,105 @@ export class LitOverlay extends BaseLitElement {
     this._terrainConfig$.next({
       ...this._tc,
       [field]: this._parseBooleanInputEventValue(ev),
+    });
+    this.requestUpdate();
+  }
+
+  private _onCliffHeightBoundsInput(ev: InputEvent): void {
+    const input = ev.target as HTMLInputElement;
+
+    // index
+    const index = Number(input.dataset.index);
+    noCap(
+      index !== undefined,
+      "Expected data-index attribute on input element",
+    );
+    noCap(!Number.isNaN(index), "Expected index to be a number.");
+
+    // new value
+    const newValue = this._parseNumericInputEventValue(ev);
+
+    // previous value
+    const prev = Number(input.dataset.prev);
+    noCap(prev !== undefined, "Expected data-prev attribute on input element");
+    noCap(!Number.isNaN(prev), "Expected prev to be a number.");
+    noCap(prev !== newValue, "Expected prev value to differ from new value.");
+    const isGoingUp = prev < newValue;
+    input.dataset.prev = newValue.toString();
+
+    const cliffHeightBounds = [...this._tc.cliffHeightBounds];
+    cliffHeightBounds.splice(index, 1, newValue);
+
+    this._terrainConfig$.next({
+      ...this._tc,
+      cliffHeightBounds,
+    });
+
+    this._bullyCliffHeights(index, isGoingUp);
+    this.requestUpdate();
+  }
+
+  private _onAddCliffHeight(): void {
+    const lower = this._tc.cliffHeightBounds.at(-1) ?? 0;
+    const upper = 1;
+    const diff = upper - lower;
+    const mid = lower + diff / 2;
+
+    const cliffHeightBounds = [...this._tc.cliffHeightBounds, mid];
+    this._terrainConfig$.next({
+      ...this._tc,
+      cliffHeightBounds,
+    });
+
+    this.requestUpdate();
+  }
+
+  /** "Bully" other range values ("marks") so they don't overlap. */
+  private _bullyCliffHeights(blyIdx: number, isGoingUp: boolean): void {
+    const ary = [...this._tc.cliffHeightBounds];
+    const blyBound = ary[blyIdx];
+
+    const marks = isGoingUp ? range(blyIdx + 1, ary.length) : range(0, blyIdx);
+    for (const mark of marks) {
+      const markBound = ary[mark];
+      if (isGoingUp && blyBound > markBound) {
+        ary[mark] = blyBound;
+      }
+      if (!isGoingUp && blyBound < markBound) {
+        ary[mark] = blyBound;
+      }
+    }
+
+    this._terrainConfig$.next({
+      ...this._tc,
+      cliffHeightBounds: [...ary],
+    });
+  }
+
+  private _onSpaceEvenly(): void {
+    const cliffHeightBounds = this._tc.cliffHeightBounds.map((_, idx, arr) => {
+      const bound = (idx + 1) / (arr.length + 1);
+      return Math.round(bound * 100) / 100;
+    });
+
+    this._terrainConfig$.next({
+      ...this._tc,
+      cliffHeightBounds,
+    });
+    this.requestUpdate();
+  }
+
+  private _onRemoveCliffHeight(index: number): void {
+    noCap(
+      this._tc.cliffHeightBounds.length > index,
+      "Expected index to exist in array.",
+    );
+    const cliffHeightBounds = [...this._tc.cliffHeightBounds];
+    cliffHeightBounds.splice(index, 1);
+
+    this._terrainConfig$.next({
+      ...this._tc,
+      cliffHeightBounds,
     });
     this.requestUpdate();
   }

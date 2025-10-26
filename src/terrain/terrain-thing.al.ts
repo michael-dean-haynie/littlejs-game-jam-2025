@@ -62,6 +62,7 @@ export class TerrainThing implements ITerrainThing {
       lacunarity: 2.5,
       offsetX: 0,
       offsetY: 0,
+      cliffHeightBounds: [0.5],
     };
 
     this._initLitOverlay();
@@ -349,7 +350,7 @@ export class TerrainThing implements ITerrainThing {
     octaves: number,
     persistance: number,
     lacunarity: number,
-    offset: Vector2,
+    offset: Vector2, // for scrolling and sector offsets
   ): number[][] {
     const noiseMap: number[][] = Array.from({ length: mapWidth }, () =>
       Array(mapHeight).fill(0),
@@ -423,8 +424,8 @@ export class TerrainThing implements ITerrainThing {
     }
 
     // michael: remove
-    console.log(-maxAmplitude, maxAmplitude);
-    console.log(minNoiseHeight, maxNoiseHeight);
+    // console.log(-maxAmplitude, maxAmplitude);
+    // console.log(minNoiseHeight, maxNoiseHeight);
 
     return noiseMap;
   }
