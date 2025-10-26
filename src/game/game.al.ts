@@ -91,6 +91,12 @@ export class Game implements IGame {
     const unit = this._player.unit;
     if (unit !== null) {
       this._ljs.setCameraPos(unit.box2dObjectAdapter.getCenterOfMass());
+      // this is jumpy, at least while we can jump over cliffs, maybe enable again later
+      // this._ljs.setCameraPos(
+      //   unit.box2dObjectAdapter
+      //     .getCenterOfMass()
+      //     .add(vec2(0, unit.box2dObjectAdapter.cliffHeight)),
+      // );
     }
   }
 

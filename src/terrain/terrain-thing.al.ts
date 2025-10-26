@@ -154,11 +154,16 @@ export class TerrainThing implements ITerrainThing {
         const ec = cliffHeight > ech;
 
         // start with base?
-        // this._ljs.drawTile(
-        //   vec2(wsx, wsy + cliffHeight),
-        //   vec2(1),
-        //   this.terrainTiles[cliffHeight],
-        // );
+        this._ljs.drawTile(
+          vec2(wsx, wsy),
+          vec2(1),
+          new this._ljs.TileInfo(
+            vec2(352, 32),
+            vec2(64),
+            this.terrainTextureIdxs[0],
+            0,
+          ),
+        );
 
         // north west corner (tile info)
         let nwcTI: TileInfo;
