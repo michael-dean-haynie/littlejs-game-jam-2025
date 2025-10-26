@@ -53,8 +53,8 @@ export class TerrainThing implements ITerrainThing {
 
     this._terrainConfig = {
       paintTerrain: true,
-      cameraZoom: 51,
-      extent: 14,
+      cameraZoom: 73,
+      extent: 5,
       seed: 1678,
       scale: 100,
       octaves: 4,
