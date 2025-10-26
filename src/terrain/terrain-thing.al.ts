@@ -182,6 +182,24 @@ export class TerrainThing implements ITerrainThing {
           nwcTI,
         );
 
+        // north east corner
+        let necTI: TileInfo;
+        if (nc && ec) {
+          necTI = new this._ljs.TileInfo(vec2(480, 0), vec2(32), txtIdx, 0);
+        } else if (nc && !ec) {
+          necTI = new this._ljs.TileInfo(vec2(448, 0), vec2(32), txtIdx, 0);
+        } else if (!nc && ec) {
+          necTI = new this._ljs.TileInfo(vec2(480, 32), vec2(32), txtIdx, 0);
+        } else {
+          // (!nc && !ec)
+          necTI = new this._ljs.TileInfo(vec2(384, 32), vec2(32), txtIdx, 0);
+        }
+        this._ljs.drawTile(
+          vec2(wsx + 0.25, wsy + 0.25 + cliffHeight),
+          vec2(0.5),
+          necTI,
+        );
+
         // south west corner
         let swcTI: TileInfo;
         if (sc && wc) {
@@ -198,19 +216,6 @@ export class TerrainThing implements ITerrainThing {
           vec2(wsx - 0.25, wsy - 0.25 + cliffHeight),
           vec2(0.5),
           swcTI,
-        );
-
-        // north east corner
-        const necTI = new this._ljs.TileInfo(
-          vec2(384, 32),
-          vec2(32),
-          txtIdx,
-          0,
-        );
-        this._ljs.drawTile(
-          vec2(wsx + 0.25, wsy + 0.25 + cliffHeight),
-          vec2(0.5),
-          necTI,
         );
 
         // south east corner
