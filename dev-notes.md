@@ -80,8 +80,16 @@ Generally, factories are for instantiating types with normal parameters as well 
 
 ## todos
 
-- make guard not interrupt attack but requeue so it doesn't get stuck toggled on
-- make attack able to interrupt guard and then go right back
-- search for something better that custom events with lit (lame typesafety), maybe try signals? or rxjs?
-- re-work ioc and data flow for lit overlay
-- figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts
+- units
+  - make guard not interrupt attack but requeue so it doesn't get stuck toggled on
+  - make attack able to interrupt guard and then go right back
+- ui
+  - re-work ioc and data flow for lit overlay
+- terrain
+  - extract noise logic
+  - sectorize noise/terrain/tiling
+  - use tile layers
+  - use viewport culling
+- architecture
+  - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts
+  - come to terms with abandoning testing?

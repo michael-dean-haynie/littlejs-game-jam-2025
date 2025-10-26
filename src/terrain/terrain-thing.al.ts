@@ -165,6 +165,7 @@ export class TerrainThing implements ITerrainThing {
           ),
         );
 
+        // michael: pu@ start using tile layers and sectors44
         // north west corner (tile info)
         let nwcTI: TileInfo;
         if (nc && wc) {
