@@ -3,6 +3,7 @@ import { Guard } from "../../abilities/guard";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
+import type { ITerrainThing } from "../../terrain/terrain-thing.types";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
@@ -16,9 +17,10 @@ export class Lancer extends UnitBase {
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,
     spriteAnimationFactory: ISpriteAnimationFactory,
+    terrainThing: ITerrainThing,
     ljs: ILJS,
   ) {
-    super(box2dObjectAapter);
+    super(box2dObjectAapter, terrainThing);
 
     // register animations
     this._registerAnimation(

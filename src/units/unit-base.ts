@@ -8,6 +8,7 @@ import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.type
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
 import type { Ability, IAbility } from "../abilities/abilities.types";
+import type { ITerrainThing } from "../terrain/terrain-thing.types";
 
 export abstract class UnitBase implements IUnit {
   abstract readonly type: UnitType;
@@ -16,7 +17,14 @@ export abstract class UnitBase implements IUnit {
   private _box2dObjectAdapterUpdateSub$: Subscription;
   readonly box2dObjectAdapter: IBox2dObjectAdapter;
 
-  constructor(box2dObjectAapter: IBox2dObjectAdapter) {
+  private readonly _terrainThing: ITerrainThing;
+
+  constructor(
+    box2dObjectAapter: IBox2dObjectAdapter,
+    terrainThing: ITerrainThing,
+  ) {
+    this._terrainThing = terrainThing;
+
     // wire up to box2dObjectAdapter
     this.box2dObjectAdapter = box2dObjectAapter;
     this._box2dObjectAdapterRenderSub$ = this.box2dObjectAdapter.render$
@@ -163,6 +171,10 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
+    this.box2dObjectAdapter.cliffHeight = this._terrainThing.getCliffHeight(
+      this.box2dObjectAdapter.getCenterOfMass(),
+    );
+
     this._processMessages();
     this._getStateObj().onUpdate();
   }

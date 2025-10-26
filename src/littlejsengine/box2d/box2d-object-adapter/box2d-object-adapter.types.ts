@@ -19,4 +19,5 @@ export type IBox2dObjectAdapter = Pick<
 > & {
   update$: Observable<void>;
   render$: Observable<void>;
+  cliffHeight: number;
 };

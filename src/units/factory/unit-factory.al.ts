@@ -18,6 +18,10 @@ import { Warrior } from "../warrior/warrior";
 import { Lancer } from "../lancer/lancer";
 import { Spider } from "../spider/spider";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
+import {
+  TERRAIN_THING_TOKEN,
+  type ITerrainThing,
+} from "../../terrain/terrain-thing.types";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -25,6 +29,7 @@ import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-objec
 export class UnitFactory implements IUnitFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
+  private readonly _terrainThing: ITerrainThing;
   private readonly _ljs: ILJS;
 
   constructor(
@@ -32,11 +37,14 @@ export class UnitFactory implements IUnitFactory {
     spriteAnimationFactory: ISpriteAnimationFactory,
     @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
     box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
+    @inject(TERRAIN_THING_TOKEN)
+    terrainThing: ITerrainThing,
     @inject(LJS_TOKEN)
     ljs: ILJS,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
     this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
+    this._terrainThing = terrainThing;
     this._ljs = ljs;
   }
 
@@ -58,9 +66,15 @@ export class UnitFactory implements IUnitFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(drawSizeScale);
 
-    const args: [IBox2dObjectAdapter, ISpriteAnimationFactory, ILJS] = [
+    const args: [
+      IBox2dObjectAdapter,
+      ISpriteAnimationFactory,
+      ITerrainThing,
+      ILJS,
+    ] = [
       b2ObjAdpt,
       this._spriteAnimationFactory,
+      this._terrainThing,
       this._ljs,
     ];
 

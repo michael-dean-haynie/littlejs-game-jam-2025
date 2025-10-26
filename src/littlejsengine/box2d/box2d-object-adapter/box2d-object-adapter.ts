@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
 import type { IBox2dObjectAdapter } from "./box2d-object-adapter.types";
 import { Box2dObject } from "littlejsengine";
+import { vec2 } from "../../littlejsengine.pure";
 
 /** Default adapter used in the real app. Callbacks can be assigned for onUpdate etc. */
 export class Box2dObjectAdapter
@@ -13,6 +14,9 @@ export class Box2dObjectAdapter
   private _render$ = new Subject<void>();
   public render$ = this._render$.asObservable();
 
+  // probably in world/screen space unis?
+  public cliffHeight = 0;
+
   constructor(...args: ConstructorParameters<typeof Box2dObject>) {
     super(...args);
   }
@@ -24,6 +28,9 @@ export class Box2dObjectAdapter
 
   override render(): void {
     this._render$.next();
+    // michael: find a better solution than overwriting the position of the engine object for a hot second during rendering
+    this.setPosition(this.pos.add(vec2(0, this.cliffHeight)));
     super.render();
+    this.setPosition(this.pos.subtract(vec2(0, this.cliffHeight)));
   }
 }

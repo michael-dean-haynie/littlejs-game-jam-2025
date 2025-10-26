@@ -133,29 +133,18 @@ export class TerrainThing implements ITerrainThing {
     return this._terrainTiles;
   }
 
-  // michael: pu@, get values showing in game world
-  // get html debugging/designing interface in place with toggles for values/reseeding/zooming in or out, etc
-  // create debugging helper for assigning values to window object for live watches etc...
+  // michael: todo: organize units, relations between noise map, world space, screen space terrain grid, tile size, unit size etc.
   render(): void {
-    // michael: remove
-    // const [, textureIdx] = getTileTexture("terrain.tilemap1");
-    // this._ljs.drawTile(
-    //   vec2(5),
-    //   vec2(5),
-    //   this._ljs.tile(vec2(0), vec2(576, 384), textureIdx, 0),
-    // );
-
     this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
 
     if (!this._terrainConfig.paintTerrain) return;
-
     const size = this._extToSize(this._terrainConfig.extent);
 
-    const scale = 2;
     const [offset] = this._sizeToBounds(size);
     for (let x = 0; x < size; x++) {
       for (let y = 0; y < size; y++) {
         const noise = this._noiseMap[x][y];
+        const cliffHeight = this._quantize(noise, this.terrainTiles.length);
         // this._ljs.drawRect(
         //   vec2(x + offset, y + offset),
         //   vec2(1),
@@ -164,12 +153,33 @@ export class TerrainThing implements ITerrainThing {
         //   ],
         // );
         this._ljs.drawTile(
-          vec2((x + offset) * scale, (y + offset) * scale),
-          vec2(scale),
-          this.terrainTiles[this._quantize(noise, this.terrainTiles.length)],
+          vec2(x + offset, y + offset + cliffHeight),
+          vec2(1),
+          this.terrainTiles[cliffHeight],
         );
       }
     }
+  }
+
+  getCliffIdx(pos: Vector2): number {
+    return this._quantize(
+      this._getNoiseAtWorldPosition(pos),
+      this.terrainTiles.length,
+    );
+  }
+
+  /** This is the projection offset. In screen space units? */
+  getCliffHeight(pos: Vector2): number {
+    const cliffIdx = this.getCliffIdx(pos);
+    return cliffIdx * 1;
+  }
+
+  private _getNoiseAtWorldPosition(pos: Vector2): number {
+    const x = Math.round(pos.x);
+    const y = Math.round(pos.y);
+    const size = this._extToSize(this._terrainConfig.extent);
+    const [, offset] = this._sizeToBounds(size);
+    return this._noiseMap[x + offset][y + offset];
   }
 
   // michael: make this not so hackey

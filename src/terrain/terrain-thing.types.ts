@@ -7,6 +7,8 @@ export type ITerrainThing = {
   render(): void;
   /** Sample the noise function for a particular point in the world space. Returns value where -1 < v < 1. */
   sample(point: Vector2): number;
+  getCliffIdx(pos: Vector2): number;
+  getCliffHeight(pos: Vector2): number;
 };
 
 export type TerrainConfig = {

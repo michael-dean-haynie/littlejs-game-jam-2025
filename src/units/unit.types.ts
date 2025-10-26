@@ -52,83 +52,83 @@ export const UnitTypeInitDataMap: {
   };
 } = {
   warrior: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   lancer: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 3.5,
   },
   archer: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   monk: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   snake: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   shaman: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   paddleFish: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   spider: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   troll: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   gnoll: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   lizard: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   goblin: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   thief: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   gnome: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   minotaur: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   panda: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   bear: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   turtle: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   harpoonFish: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
   skull: {
-    size: 3,
+    size: 1.5,
     drawSizeScale: 2,
   },
 } as const;

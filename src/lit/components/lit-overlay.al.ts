@@ -38,7 +38,7 @@ export class LitOverlay extends BaseLitElement {
         type="range"
         data-field="cameraZoom"
         min="1"
-        max="100"
+        max="200"
         value=${this._tc.cameraZoom}
         @input=${this._onNumericInput}
       />
