@@ -116,6 +116,18 @@ export class LitOverlay extends BaseLitElement {
       <div></div>
       <input
         type="range"
+        data-field="clamp"
+        min="0"
+        max="1"
+        step="0.01"
+        value=${this._tc.clamp}
+        @input=${this._onNumericInput}
+      />
+      <span>Clamp: ${this._tc.clamp}</span>
+
+      <div></div>
+      <input
+        type="range"
         data-field="offsetX"
         min="-50"
         max="50"
