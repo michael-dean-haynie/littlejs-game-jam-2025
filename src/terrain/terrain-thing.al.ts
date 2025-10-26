@@ -219,12 +219,17 @@ export class TerrainThing implements ITerrainThing {
         );
 
         // south east corner
-        const secTI = new this._ljs.TileInfo(
-          vec2(384, 64),
-          vec2(32),
-          txtIdx,
-          0,
-        );
+        let secTI: TileInfo;
+        if (sc && ec) {
+          secTI = new this._ljs.TileInfo(vec2(480, 160), vec2(32), txtIdx, 0);
+        } else if (sc && !ec) {
+          secTI = new this._ljs.TileInfo(vec2(448, 160), vec2(32), txtIdx, 0);
+        } else if (!sc && ec) {
+          secTI = new this._ljs.TileInfo(vec2(480, 128), vec2(32), txtIdx, 0);
+        } else {
+          // (!sc && !ec)
+          secTI = new this._ljs.TileInfo(vec2(384, 64), vec2(32), txtIdx, 0);
+        }
         this._ljs.drawTile(
           vec2(wsx + 0.25, wsy - 0.25 + cliffHeight),
           vec2(0.5),
