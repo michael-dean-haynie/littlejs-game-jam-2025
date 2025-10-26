@@ -358,8 +358,8 @@ export class TerrainThing implements ITerrainThing {
     const octaveOffsets: Vector2[] = new Array(octaves);
 
     for (let i = 0; i < octaves; i++) {
-      const offsetX = this._prng.next() + offset.x;
-      const offsetY = this._prng.next() + offset.y;
+      const offsetX = this._prng.next();
+      const offsetY = this._prng.next();
       octaveOffsets[i] = vec2(offsetX, offsetY);
     }
 
@@ -369,6 +369,13 @@ export class TerrainThing implements ITerrainThing {
 
     let maxNoiseHeight = Number.MIN_VALUE;
     let minNoiseHeight = Number.MAX_VALUE;
+
+    let maxAmplitude;
+    if (persistance === 1) {
+      maxAmplitude = octaves;
+    } else {
+      maxAmplitude = (1 - Math.pow(persistance, octaves)) / (1 - persistance);
+    }
 
     const halfWidth = mapWidth / 2;
     const halfHeight = mapHeight / 2;
@@ -381,11 +388,13 @@ export class TerrainThing implements ITerrainThing {
 
         for (let i = 0; i < octaves; i++) {
           const sampleX =
-            ((x - halfWidth) / scale) * frequency + octaveOffsets[i].x;
+            ((x - halfWidth) / scale + offset.x / scale) * frequency +
+            octaveOffsets[i].x;
           const sampleY =
-            ((y - halfHeight) / scale) * frequency + octaveOffsets[i].y;
+            ((y - halfHeight) / scale + offset.y / scale) * frequency +
+            octaveOffsets[i].y;
 
-          const simplexValue = this.sample(sampleX, sampleY) * 2 - 1;
+          const simplexValue = this.sample(sampleX, sampleY);
           noiseHeight += simplexValue * amplitude;
 
           amplitude *= persistance;
@@ -405,11 +414,17 @@ export class TerrainThing implements ITerrainThing {
       for (let x = 0; x < mapWidth; x++) {
         noiseMap[x][y] = percent(
           noiseMap[x][y],
-          minNoiseHeight,
-          maxNoiseHeight,
+          -maxAmplitude,
+          maxAmplitude,
+          // minNoiseHeight,
+          // maxNoiseHeight,
         );
       }
     }
+
+    // michael: remove
+    console.log(-maxAmplitude, maxAmplitude);
+    console.log(minNoiseHeight, maxNoiseHeight);
 
     return noiseMap;
   }

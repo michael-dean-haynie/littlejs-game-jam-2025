@@ -88,6 +88,8 @@ Generally, factories are for instantiating types with normal parameters as well 
 - terrain
   - extract noise logic
   - sectorize noise/terrain/tiling
+  - make the cliff height quantization so that cliff heights can be different % of whole
+  - clamp noise values by configurable % of theoretical limits
   - use tile layers
   - use viewport culling
 - architecture
