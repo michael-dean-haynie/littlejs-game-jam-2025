@@ -10,11 +10,7 @@ import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import alea from "alea";
 import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
 import { percent, vec2 } from "../littlejsengine/littlejsengine.pure";
-import type {
-  TileInfo as number,
-  TileInfo,
-  Vector2,
-} from "../littlejsengine/littlejsengine.types";
+import type { TileInfo, Vector2 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
 import { getTextureIdx } from "../textures/get-texture";
@@ -237,10 +233,27 @@ export class TerrainThing implements ITerrainThing {
 
         // south east corner
         let secTI: TileInfo;
-        if (sc && ec) {
-          secTI = new this._ljs.TileInfo(vec2(480, 160), vec2(32), txtIdx, 0);
-        } else if (sc && !ec) {
-          secTI = new this._ljs.TileInfo(vec2(448, 160), vec2(32), txtIdx, 0);
+        let secfTI: TileInfo;
+        if (sc) {
+          if (ec) {
+            secTI = new this._ljs.TileInfo(vec2(480, 160), vec2(32), txtIdx, 0);
+            secfTI = new this._ljs.TileInfo(
+              vec2(480, 192),
+              vec2(32, 64),
+              txtIdx,
+              0,
+            );
+          } else {
+            // !ec
+            secTI = new this._ljs.TileInfo(vec2(448, 160), vec2(32), txtIdx, 0);
+            secfTI = new this._ljs.TileInfo(
+              vec2(448, 192),
+              vec2(32, 64),
+              txtIdx,
+              0,
+            );
+          }
+          this._ljs.drawTile(vec2(wsx + 0.25, wsy), vec2(0.5, 1), secfTI);
         } else if (!sc && ec) {
           secTI = new this._ljs.TileInfo(vec2(480, 128), vec2(32), txtIdx, 0);
         } else {
