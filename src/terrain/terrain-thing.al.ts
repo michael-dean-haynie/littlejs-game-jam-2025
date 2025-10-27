@@ -122,8 +122,11 @@ export class TerrainThing implements ITerrainThing {
   get terrainTextureIdxs(): number[] {
     if (this._terrainTextureIdxs.length === 0) {
       this._terrainTextureIdxs.push(
-        getTextureIdx("terrain.tilemap1"), // low
-        getTextureIdx("terrain.tilemap3"), // high
+        getTextureIdx("terrain.tilemap1"),
+        getTextureIdx("terrain.tilemap2"),
+        getTextureIdx("terrain.tilemap3"),
+        getTextureIdx("terrain.tilemap4"),
+        getTextureIdx("terrain.tilemap5"),
       );
     }
     return this._terrainTextureIdxs;
