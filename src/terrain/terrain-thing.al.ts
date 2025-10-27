@@ -9,7 +9,12 @@ import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import alea from "alea";
 import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
-import { percent, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
+import {
+  clamp,
+  percent,
+  rgb,
+  vec2,
+} from "../littlejsengine/littlejsengine.pure";
 import type {
   Color,
   TileInfo,
@@ -93,8 +98,10 @@ export class TerrainThing implements ITerrainThing {
   }
 
   /** Convert continuous values (0 - 1) into discrete buckets */
-  private _quantize(value: number, buckets: number): number {
-    return Math.min(Math.floor(value * buckets), buckets - 1);
+  private _quantize(value: number): number {
+    const bounds = this._terrainConfig.cliffHeightBounds;
+    const upperBoundIdx = bounds.findIndex((bound) => value <= bound);
+    return upperBoundIdx === -1 ? bounds.length : upperBoundIdx;
   }
 
   /**
@@ -154,7 +161,7 @@ export class TerrainThing implements ITerrainThing {
         const wsy = y + offset;
 
         this._ljs.drawRect(
-          vec2(wsx, wsy),
+          vec2(wsx, wsy + cliffHeight),
           vec2(1),
           this._terrainColors[cliffHeight],
         );
@@ -321,14 +328,11 @@ export class TerrainThing implements ITerrainThing {
 
   private _getCliffHeightForNoiseMap(x: number, y: number): number {
     const noise = this._noiseMap[x][y];
-    return this._quantize(noise, this.terrainTextureIdxs.length);
+    return this._quantize(noise);
   }
 
   getCliffIdx(pos: Vector2): number {
-    return this._quantize(
-      this._getNoiseAtWorldPosition(pos),
-      this.terrainTextureIdxs.length,
-    );
+    return this._quantize(this._getNoiseAtWorldPosition(pos));
   }
 
   /** This is the projection offset. In screen space units? */
@@ -397,7 +401,7 @@ export class TerrainThing implements ITerrainThing {
     // this is for discarding the extremes of the theoretically possible noise values
     // they are almost never actually reached because they would require perfect constructive/destructive interference of the octaves layering
     // this can help keep the dynamic interesting part of the noise from being too thin
-    clamp: number, // form 0 to 1. percentage of whole theoretical amplitude space
+    clampPct: number, // form 0 to 1. percentage of whole theoretical amplitude space
   ): number[][] {
     const noiseMap: number[][] = Array.from({ length: mapWidth }, () =>
       Array(mapHeight).fill(0),
@@ -415,15 +419,14 @@ export class TerrainThing implements ITerrainThing {
       scale = 0.0001;
     }
 
-    let maxNoiseHeight = Number.MIN_VALUE;
-    let minNoiseHeight = Number.MAX_VALUE;
-
     let maxAmplitude;
     if (persistance === 1) {
       maxAmplitude = octaves;
     } else {
       maxAmplitude = (1 - Math.pow(persistance, octaves)) / (1 - persistance);
     }
+    const clampMin = -maxAmplitude + maxAmplitude * clampPct;
+    const clampMax = maxAmplitude - maxAmplitude * clampPct;
 
     const halfWidth = mapWidth / 2;
     const halfHeight = mapHeight / 2;
@@ -449,31 +452,31 @@ export class TerrainThing implements ITerrainThing {
           frequency *= lacunarity;
         }
 
-        if (noiseHeight > maxNoiseHeight) {
-          maxNoiseHeight = noiseHeight;
-        } else if (noiseHeight < minNoiseHeight) {
-          minNoiseHeight = noiseHeight;
-        }
-        noiseMap[x][y] = noiseHeight;
+        noiseMap[x][y] = clamp(noiseHeight, clampMin, clampMax);
       }
     }
 
     for (let y = 0; y < mapHeight; y++) {
       for (let x = 0; x < mapWidth; x++) {
-        noiseMap[x][y] = percent(
-          noiseMap[x][y],
-          -maxAmplitude * (clamp / 2),
-          maxAmplitude * (clamp / 2),
-          // minNoiseHeight,
-          // maxNoiseHeight,
-        );
+        noiseMap[x][y] = percent(noiseMap[x][y], clampMin, clampMax);
       }
     }
 
-    // michael: remove
-    // console.log(-maxAmplitude, maxAmplitude);
-    // console.log(minNoiseHeight, maxNoiseHeight);
+    // michael: for optimizing the clamp
+    // dotPlot(noiseMap.flat());
 
     return noiseMap;
   }
 }
+
+// function dotPlot(values: number[], width: number = 50): void {
+//   const line = new Array(width + 1).fill("·");
+
+//   values.forEach((v) => {
+//     const pos = Math.round(v * width);
+//     line[pos] = "●";
+//   });
+
+//   console.log("0" + line.join("") + "1");
+//   console.log("|" + " ".repeat(width) + "|");
+// }
