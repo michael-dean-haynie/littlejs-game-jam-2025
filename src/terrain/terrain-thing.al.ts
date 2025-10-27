@@ -7,14 +7,7 @@ import {
 } from "./terrain-thing.types";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import alea from "alea";
-import { createNoise2D, type NoiseFunction2D } from "simplex-noise";
-import {
-  clamp,
-  percent,
-  rgb,
-  vec2,
-} from "../littlejsengine/littlejsengine.pure";
+import { rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
 import type {
   Color,
   TileInfo,
@@ -23,6 +16,7 @@ import type {
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
 import { getTextureIdx } from "../textures/get-texture";
+import { generateNoiseMap } from "../noise/generate-noise-map";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -30,23 +24,6 @@ import { getTextureIdx } from "../textures/get-texture";
 })
 export class TerrainThing implements ITerrainThing {
   private readonly _ljs: ILJS;
-
-  /** Pseudo-random number generator */
-  private _prng: ReturnType<typeof alea>;
-
-  /** Gives values between -1 and 1 */
-  private _noise2D: NoiseFunction2D;
-
-  /** A seed for reproducable prodecurally generated output */
-  private _seed: unknown = "seed";
-  public get seed(): unknown {
-    return this._seed;
-  }
-  public set seed(value: unknown) {
-    this._seed = value;
-    this._prng = alea(this.seed);
-    this._noise2D = createNoise2D(this._prng);
-  }
 
   private _litOverlay!: LitOverlay;
 
@@ -56,9 +33,6 @@ export class TerrainThing implements ITerrainThing {
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
     this._ljs = ljs;
-
-    this._prng = alea(this.seed);
-    this._noise2D = createNoise2D(this._prng);
 
     this._terrainConfig = {
       paintTerrain: true,
@@ -77,24 +51,6 @@ export class TerrainThing implements ITerrainThing {
     };
 
     this._initLitOverlay();
-  }
-
-  sample(value1: Vector2): number;
-  sample(value1: number, value2: number): number;
-  sample(value1: Vector2 | number, value2?: number): number {
-    let x, y: number;
-    if (typeof value1 === "object") {
-      x = value1.x;
-      y = value1.y;
-    } else {
-      x = value1;
-      y = value2!;
-    }
-
-    const result = this._noise2D(x, y);
-    // result = this._reRangeSample(result);
-    // result = this._quantize(result, this._terrainColors.length);
-    return result;
   }
 
   /** Convert continuous values (0 - 1) into discrete buckets */
@@ -379,9 +335,9 @@ export class TerrainThing implements ITerrainThing {
   }
 
   private _generateNoiseMapFromConfig(): number[][] {
-    this.seed = this._terrainConfig.seed;
     const size = this._extToSize(this._terrainConfig.extent);
-    return this._generateNoiseMap(
+    return generateNoiseMap(
+      this._terrainConfig.seed,
       size,
       size,
       this._terrainConfig.scale,
@@ -392,94 +348,4 @@ export class TerrainThing implements ITerrainThing {
       this._terrainConfig.clamp,
     );
   }
-
-  private _generateNoiseMap(
-    mapWidth: number,
-    mapHeight: number,
-    scale: number,
-    octaves: number,
-    persistance: number,
-    lacunarity: number,
-    offset: Vector2, // for scrolling and sector offsets
-    // this is for discarding the extremes of the theoretically possible noise values
-    // they are almost never actually reached because they would require perfect constructive/destructive interference of the octaves layering
-    // this can help keep the dynamic interesting part of the noise from being too thin
-    clampPct: number, // form 0 to 1. percentage of whole theoretical amplitude space
-  ): number[][] {
-    const noiseMap: number[][] = Array.from({ length: mapWidth }, () =>
-      Array(mapHeight).fill(0),
-    );
-
-    const octaveOffsets: Vector2[] = new Array(octaves);
-
-    for (let i = 0; i < octaves; i++) {
-      const offsetX = this._prng.next();
-      const offsetY = this._prng.next();
-      octaveOffsets[i] = vec2(offsetX, offsetY);
-    }
-
-    if (scale <= 0) {
-      scale = 0.0001;
-    }
-
-    let maxAmplitude;
-    if (persistance === 1) {
-      maxAmplitude = octaves;
-    } else {
-      maxAmplitude = (1 - Math.pow(persistance, octaves)) / (1 - persistance);
-    }
-    const clampMin = -maxAmplitude + maxAmplitude * clampPct;
-    const clampMax = maxAmplitude - maxAmplitude * clampPct;
-
-    const halfWidth = mapWidth / 2;
-    const halfHeight = mapHeight / 2;
-
-    for (let y = 0; y < mapHeight; y++) {
-      for (let x = 0; x < mapWidth; x++) {
-        let amplitude = 1;
-        let frequency = 1;
-        let noiseHeight = 0;
-
-        for (let i = 0; i < octaves; i++) {
-          const sampleX =
-            ((x - halfWidth) / scale + offset.x / scale) * frequency +
-            octaveOffsets[i].x;
-          const sampleY =
-            ((y - halfHeight) / scale + offset.y / scale) * frequency +
-            octaveOffsets[i].y;
-
-          const simplexValue = this.sample(sampleX, sampleY);
-          noiseHeight += simplexValue * amplitude;
-
-          amplitude *= persistance;
-          frequency *= lacunarity;
-        }
-
-        noiseMap[x][y] = clamp(noiseHeight, clampMin, clampMax);
-      }
-    }
-
-    for (let y = 0; y < mapHeight; y++) {
-      for (let x = 0; x < mapWidth; x++) {
-        noiseMap[x][y] = percent(noiseMap[x][y], clampMin, clampMax);
-      }
-    }
-
-    // michael: for optimizing the clamp
-    // dotPlot(noiseMap.flat());
-
-    return noiseMap;
-  }
 }
-
-// function dotPlot(values: number[], width: number = 50): void {
-//   const line = new Array(width + 1).fill("·");
-
-//   values.forEach((v) => {
-//     const pos = Math.round(v * width);
-//     line[pos] = "●";
-//   });
-
-//   console.log("0" + line.join("") + "1");
-//   console.log("|" + " ".repeat(width) + "|");
-// }

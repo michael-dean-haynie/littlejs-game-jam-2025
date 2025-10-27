@@ -85,14 +85,13 @@ Generally, factories are for instantiating types with normal parameters as well 
   - make attack able to interrupt guard and then go right back
   - formalize the world space to screen space conversion so mouse interactions facing unit work
     - maybe just account for unit's cliff height in relation to mouse
+    - maybe when I lock camera to player with adjusted cliff height, this will go away?
 - ui
   - re-work ioc and data flow for lit overlay
   - emit event to lit overlay with latest noiseMap data to visualize dot plot and clamping and such
 - terrain
   - extract noise logic
   - sectorize noise/terrain/tiling
-  - make the cliff height quantization so that cliff heights can be different % of whole
-  - clamp noise values by configurable % of theoretical limits
   - use tile layers
   - use viewport culling
 - architecture
