@@ -12,14 +12,14 @@ export type TerrainConfig = {
   paintTerrain: boolean;
   useTiles: boolean;
   cameraZoom: number;
-  extent: number;
+  extent: number; // in sectors, to render
   seed: number;
   scale: number;
   octaves: number;
   persistance: number;
   lacunarity: number;
-  offsetX: number;
-  offsetY: number;
+  offsetX: number; // in sectors
+  offsetY: number; // in sectors
   // interval:  [0, 1] (expected to be in ascending order)
   cliffHeightBounds: number[];
   clamp: number;

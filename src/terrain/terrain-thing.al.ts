@@ -17,6 +17,14 @@ import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
 import { getTextureIdx } from "../textures/get-texture";
 import { generateNoiseMap } from "../noise/generate-noise-map";
+import {
+  sectorExtent,
+  sectorSize,
+  sectorToKey,
+  sectorToWorld,
+  worldToSector,
+} from "../world/sector.types";
+import { noCap } from "../core/util/no-cap";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -29,25 +37,25 @@ export class TerrainThing implements ITerrainThing {
 
   private _terrainConfig!: TerrainConfig;
 
-  private _noiseMap!: number[][];
+  private readonly _sectorNoiseMaps = new Map<string, number[][]>();
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
     this._ljs = ljs;
 
     this._terrainConfig = {
       paintTerrain: true,
-      useTiles: false,
-      cameraZoom: 73,
-      extent: 5,
+      useTiles: true,
+      cameraZoom: 45,
+      extent: 2,
       seed: 1678,
-      scale: 100,
+      scale: 181,
       octaves: 4,
       persistance: 0.5,
       lacunarity: 2.5,
       offsetX: 0,
-      offsetY: 0,
-      cliffHeightBounds: [0.5],
-      clamp: 0.25,
+      offsetY: -1,
+      cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
+      clamp: 0.64,
     };
 
     this._initLitOverlay();
@@ -58,20 +66,6 @@ export class TerrainThing implements ITerrainThing {
     const bounds = this._terrainConfig.cliffHeightBounds;
     const upperBoundIdx = bounds.findIndex((bound) => value <= bound);
     return upperBoundIdx === -1 ? bounds.length : upperBoundIdx;
-  }
-
-  /**
-   * Converts grid extent (half-width) to odd size (full-width).
-   * This is mainly for creating a grid with a discrete center (e.g. 1x1, 3x3, 5x5, ...etc)
-   */
-  private _extToSize(extent: number) {
-    return Math.abs(extent) * 2 + 1;
-  }
-
-  /** Centers a grid size on zero (so 11 would be from -5 to 5) */
-  private _sizeToBounds(size: number): [number, number] {
-    const extent = (size - 1) / 2;
-    return [-1 * extent, extent];
   }
 
   private readonly _terrainTextureIdxs: number[] = [];
@@ -100,27 +94,35 @@ export class TerrainThing implements ITerrainThing {
   render(): void {
     this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
     if (!this._terrainConfig.paintTerrain) return;
-    if (this._terrainConfig.useTiles) {
-      this.renderTiles();
-    } else {
-      this.renderColors();
+
+    const upper = this._terrainConfig.extent;
+    const lower = -upper;
+
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const sector = vec2(x, y);
+        if (this._terrainConfig.useTiles) {
+          this.renderSectorTiles(sector);
+        } else {
+          this.renderSectorColors(sector);
+        }
+      }
     }
   }
 
-  renderColors(): void {
-    const size = this._extToSize(this._terrainConfig.extent);
-    const [offset] = this._sizeToBounds(size);
+  renderSectorColors(sector: Vector2): void {
+    const upper = sectorExtent;
+    const lower = -upper;
 
     // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
-    for (let y = size - 1; y >= 0; y--) {
-      for (let x = 0; x < size; x++) {
-        const cliffHeight = this._getCliffHeightForNoiseMap(x, y);
-        // world space x/y
-        const wsx = x + offset;
-        const wsy = y + offset;
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorToWorld(sector).add(vec2(x, y));
+        const cliffHeight = this.getCliffIdx(worldPos);
 
         this._ljs.drawRect(
-          vec2(wsx, wsy + cliffHeight),
+          vec2(worldPos.x, worldPos.y + cliffHeight),
           vec2(1),
           this._terrainColors[cliffHeight],
         );
@@ -128,34 +130,25 @@ export class TerrainThing implements ITerrainThing {
     }
   }
 
-  renderTiles(): void {
-    const size = this._extToSize(this._terrainConfig.extent);
-
-    const [offset] = this._sizeToBounds(size);
+  renderSectorTiles(sector: Vector2): void {
+    const upper = sectorExtent;
+    const lower = -upper;
 
     // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
-    for (let y = size - 1; y >= 0; y--) {
-      for (let x = 0; x < size; x++) {
-        const cliffHeight = this._getCliffHeightForNoiseMap(x, y);
-        // const txtIdx = getTextureIdx("terrain.tilemap2");
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorToWorld(sector).add(vec2(x, y));
+        const cliffHeight = this.getCliffIdx(worldPos);
         const txtIdx = this.terrainTextureIdxs[cliffHeight];
-        // world space x/y
-        const wsx = x + offset;
-        const wsy = y + offset;
+
+        const wsx = worldPos.x;
+        const wsy = worldPos.y;
 
         // north cliff height ... etc
-        const nch =
-          y === size - 1
-            ? cliffHeight
-            : this._getCliffHeightForNoiseMap(x, y + 1);
-        const sch =
-          y === 0 ? cliffHeight : this._getCliffHeightForNoiseMap(x, y - 1);
-        const wch =
-          x === 0 ? cliffHeight : this._getCliffHeightForNoiseMap(x - 1, y);
-        const ech =
-          x === size - 1
-            ? cliffHeight
-            : this._getCliffHeightForNoiseMap(x + 1, y);
+        const nch = this.getCliffIdx(vec2(wsx, wsy + 1));
+        const sch = this.getCliffIdx(vec2(wsx, wsy - 1));
+        const wch = this.getCliffIdx(vec2(wsx - 1, wsy));
+        const ech = this.getCliffIdx(vec2(wsx + 1, wsy));
 
         // north edge is cliff ... etc
         const nc = cliffHeight > nch;
@@ -163,19 +156,20 @@ export class TerrainThing implements ITerrainThing {
         const wc = cliffHeight > wch;
         const ec = cliffHeight > ech;
 
-        // start with base?
-        this._ljs.drawTile(
-          vec2(wsx, wsy),
-          vec2(1),
-          new this._ljs.TileInfo(
-            vec2(352, 32),
-            vec2(64),
-            this.terrainTextureIdxs[0],
-            0,
-          ),
-        );
+        if (sc) {
+          // start with tile of height below to show around cliff face
+          this._ljs.drawTile(
+            vec2(wsx, wsy + cliffHeight - 1),
+            vec2(1),
+            new this._ljs.TileInfo(
+              vec2(352, 32),
+              vec2(64),
+              this.terrainTextureIdxs[cliffHeight - 1],
+              0,
+            ),
+          );
+        }
 
-        // michael: pu@ start using tile layers and sectors44
         // north west corner (tile info)
         let nwcTI: TileInfo;
         if (nc && wc) {
@@ -234,7 +228,11 @@ export class TerrainThing implements ITerrainThing {
               0,
             );
           }
-          this._ljs.drawTile(vec2(wsx - 0.25, wsy), vec2(0.5, 1), swcfTI);
+          this._ljs.drawTile(
+            vec2(wsx - 0.25, wsy + cliffHeight - 1),
+            vec2(0.5, 1),
+            swcfTI,
+          );
         } else if (!sc && wc) {
           swcTI = new this._ljs.TileInfo(vec2(320, 96), vec2(32), txtIdx, 0);
         } else {
@@ -269,7 +267,11 @@ export class TerrainThing implements ITerrainThing {
               0,
             );
           }
-          this._ljs.drawTile(vec2(wsx + 0.25, wsy), vec2(0.5, 1), secfTI);
+          this._ljs.drawTile(
+            vec2(wsx + 0.25, wsy + cliffHeight - 1),
+            vec2(0.5, 1),
+            secfTI,
+          );
         } else if (!sc && ec) {
           secTI = new this._ljs.TileInfo(vec2(480, 128), vec2(32), txtIdx, 0);
         } else {
@@ -285,11 +287,6 @@ export class TerrainThing implements ITerrainThing {
     }
   }
 
-  private _getCliffHeightForNoiseMap(x: number, y: number): number {
-    const noise = this._noiseMap[x][y];
-    return this._quantize(noise);
-  }
-
   getCliffIdx(pos: Vector2): number {
     return this._quantize(this._getNoiseAtWorldPosition(pos));
   }
@@ -297,15 +294,25 @@ export class TerrainThing implements ITerrainThing {
   /** This is the projection offset. In screen space units? */
   getCliffHeight(pos: Vector2): number {
     const cliffIdx = this.getCliffIdx(pos);
-    return cliffIdx * 1;
+    return cliffIdx * 1; // cliff height scale would go here
   }
 
   private _getNoiseAtWorldPosition(pos: Vector2): number {
-    const x = Math.round(pos.x);
-    const y = Math.round(pos.y);
-    const size = this._extToSize(this._terrainConfig.extent);
-    const [, offset] = this._sizeToBounds(size);
-    return this._noiseMap[x + offset][y + offset];
+    // round world position to center of tile
+    const worldPos = vec2(Math.round(pos.x), Math.round(pos.y));
+
+    const sector = worldToSector(worldPos);
+    const sectorCenter = sectorToWorld(sector);
+
+    const offsetFromSectorCenter = worldPos.subtract(sectorCenter);
+    const offsetFromNoiseMapOrigin = offsetFromSectorCenter.add(
+      vec2(sectorExtent),
+    );
+    const { x, y } = offsetFromNoiseMapOrigin;
+
+    const noiseMap = this._sectorNoiseMaps.get(sectorToKey(sector));
+    noCap.notUndefined(noiseMap);
+    return noiseMap[x][y];
   }
 
   // michael: make this not so hackey
@@ -323,7 +330,7 @@ export class TerrainThing implements ITerrainThing {
       .pipe(
         tap((tc) => {
           this._terrainConfig = tc;
-          this._noiseMap = this._generateNoiseMapFromConfig();
+          this._generateNoiseMaps();
         }),
       )
       .subscribe();
@@ -334,17 +341,36 @@ export class TerrainThing implements ITerrainThing {
     });
   }
 
-  private _generateNoiseMapFromConfig(): number[][] {
-    const size = this._extToSize(this._terrainConfig.extent);
+  private _generateNoiseMaps(): void {
+    this._sectorNoiseMaps.clear();
+    // + 1 for outer edge. won't be rendered but needed for edges of rendered sectors
+    const upper = this._terrainConfig.extent + 1;
+    const lower = -upper;
+
+    // note: going top to bottom, left to right in case render order matters or something
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const sector = vec2(x, y);
+        const noiseMap = this._generateNoiseMapForSector(sector);
+        this._sectorNoiseMaps.set(sectorToKey(sector), noiseMap);
+      }
+    }
+  }
+
+  private _generateNoiseMapForSector(sector: Vector2): number[][] {
     return generateNoiseMap(
       this._terrainConfig.seed,
-      size,
-      size,
+      sectorSize,
+      sectorSize,
       this._terrainConfig.scale,
       this._terrainConfig.octaves,
       this._terrainConfig.persistance,
       this._terrainConfig.lacunarity,
-      vec2(this._terrainConfig.offsetX, this._terrainConfig.offsetY),
+      sectorToWorld(
+        sector.add(
+          vec2(this._terrainConfig.offsetX, this._terrainConfig.offsetY),
+        ),
+      ),
       this._terrainConfig.clamp,
     );
   }

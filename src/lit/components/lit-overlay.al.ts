@@ -59,7 +59,7 @@ export class LitOverlay extends BaseLitElement {
         type="range"
         data-field="extent"
         min="0"
-        max="100"
+        max="10"
         value=${this._tc.extent}
         @input=${this._onNumericInput}
       />
