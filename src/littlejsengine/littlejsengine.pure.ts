@@ -7,5 +7,6 @@ export {
   rgb,
   hsl,
   WHITE,
+  RED,
   rand,
 } from "littlejsengine";

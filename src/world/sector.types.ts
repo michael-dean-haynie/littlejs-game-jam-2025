@@ -3,7 +3,7 @@ import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 
 /** The distance from the center of a sector to the edge (flat side) in world units */
-export const sectorExtent = 2;
+export const sectorExtent = 5;
 
 export const sectorSize = extToGridSize(sectorExtent);
 

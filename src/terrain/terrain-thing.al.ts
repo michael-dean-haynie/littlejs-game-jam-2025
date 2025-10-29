@@ -8,10 +8,11 @@ import {
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
-import type {
-  Color,
-  TileInfo,
-  Vector2,
+import {
+  type CanvasLayer,
+  type Color,
+  type TileInfo,
+  type Vector2,
 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
@@ -38,6 +39,7 @@ export class TerrainThing implements ITerrainThing {
   private _terrainConfig!: TerrainConfig;
 
   private readonly _sectorNoiseMaps = new Map<string, number[][]>();
+  private readonly _sectorCanvasLayers = new Map<string, CanvasLayer>();
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
     this._ljs = ljs;
@@ -45,19 +47,21 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 45,
-      extent: 2,
-      seed: 1678,
-      scale: 181,
+      cameraZoom: 42,
+      extent: 1,
+      seed: 2334,
+      scale: 174,
       octaves: 4,
       persistance: 0.5,
       lacunarity: 2.5,
-      offsetX: 0,
+      offsetX: -3,
       offsetY: -1,
       cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
       clamp: 0.64,
     };
+  }
 
+  init(): void {
     this._initLitOverlay();
   }
 
@@ -95,6 +99,14 @@ export class TerrainThing implements ITerrainThing {
     this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
     if (!this._terrainConfig.paintTerrain) return;
 
+    // canvas layers render on their own
+  }
+
+  private _rebuildCanvasLayers(): void {
+    for (const layer of this._sectorCanvasLayers.values()) {
+      layer.destroy();
+    }
+
     const upper = this._terrainConfig.extent;
     const lower = -upper;
 
@@ -102,47 +114,59 @@ export class TerrainThing implements ITerrainThing {
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const sector = vec2(x, y);
-        if (this._terrainConfig.useTiles) {
-          this.renderSectorTiles(sector);
-        } else {
-          this.renderSectorColors(sector);
+        this._buildSectorCanvasLayer(sector);
+      }
+    }
+  }
+
+  private _buildSectorCanvasLayer(sector: Vector2): void {
+    const sectorCenter = sectorToWorld(sector);
+    const canvasLayer = new this._ljs.CanvasLayer(
+      sectorCenter,
+      vec2(sectorSize),
+      0,
+      0,
+      vec2(sectorSize).scale(64),
+    );
+    canvasLayer.tileInfo = new this._ljs.TileInfo(
+      vec2(0),
+      vec2(64),
+      getTextureIdx("units.empty"),
+      0,
+    );
+
+    // note: extending lower range for y to render tiles from lower sector that have cliff height into this sector
+    const upper = sectorExtent;
+    const lower = -upper;
+    const bounds = this._terrainConfig.cliffHeightBounds.length;
+
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
+    for (let y = upper; y >= lower - bounds; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorToWorld(sector).add(vec2(x, y));
+        const canvasPos = worldPos.add(vec2(sectorSize / 2));
+        const cliffHeight = this.getCliffIdx(worldPos);
+
+        // get the simple color rect mode out of the way
+        if (!this._terrainConfig.useTiles) {
+          canvasLayer.drawRect(
+            vec2(canvasPos.x, canvasPos.y + cliffHeight),
+            vec2(1),
+            this._terrainColors[cliffHeight],
+          );
+          continue;
         }
-      }
-    }
-  }
 
-  renderSectorColors(sector: Vector2): void {
-    const upper = sectorExtent;
-    const lower = -upper;
-
-    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
-    for (let y = upper; y >= lower; y--) {
-      for (let x = lower; x <= upper; x++) {
-        const worldPos = sectorToWorld(sector).add(vec2(x, y));
-        const cliffHeight = this.getCliffIdx(worldPos);
-
-        this._ljs.drawRect(
-          vec2(worldPos.x, worldPos.y + cliffHeight),
-          vec2(1),
-          this._terrainColors[cliffHeight],
-        );
-      }
-    }
-  }
-
-  renderSectorTiles(sector: Vector2): void {
-    const upper = sectorExtent;
-    const lower = -upper;
-
-    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
-    for (let y = upper; y >= lower; y--) {
-      for (let x = lower; x <= upper; x++) {
-        const worldPos = sectorToWorld(sector).add(vec2(x, y));
-        const cliffHeight = this.getCliffIdx(worldPos);
+        // render with tiles
+        const { x: wsx, y: wsy } = worldPos;
+        const { x: csx, y: csy } = canvasPos;
         const txtIdx = this.terrainTextureIdxs[cliffHeight];
 
-        const wsx = worldPos.x;
-        const wsy = worldPos.y;
+        canvasLayer.drawTile(
+          vec2(csx, csy + cliffHeight),
+          vec2(1),
+          new this._ljs.TileInfo(vec2(352, 32), vec2(64), txtIdx, 0),
+        );
 
         // north cliff height ... etc
         const nch = this.getCliffIdx(vec2(wsx, wsy + 1));
@@ -158,8 +182,8 @@ export class TerrainThing implements ITerrainThing {
 
         if (sc) {
           // start with tile of height below to show around cliff face
-          this._ljs.drawTile(
-            vec2(wsx, wsy + cliffHeight - 1),
+          canvasLayer.drawTile(
+            vec2(csx, csy + cliffHeight - 1),
             vec2(1),
             new this._ljs.TileInfo(
               vec2(352, 32),
@@ -182,8 +206,8 @@ export class TerrainThing implements ITerrainThing {
           // (!nc && !wc) {
           nwcTI = new this._ljs.TileInfo(vec2(352, 32), vec2(32), txtIdx, 0);
         }
-        this._ljs.drawTile(
-          vec2(wsx - 0.25, wsy + 0.25 + cliffHeight),
+        canvasLayer.drawTile(
+          vec2(csx - 0.25, csy + 0.25 + cliffHeight),
           vec2(0.5),
           nwcTI,
         );
@@ -200,8 +224,8 @@ export class TerrainThing implements ITerrainThing {
           // (!nc && !ec)
           necTI = new this._ljs.TileInfo(vec2(384, 32), vec2(32), txtIdx, 0);
         }
-        this._ljs.drawTile(
-          vec2(wsx + 0.25, wsy + 0.25 + cliffHeight),
+        canvasLayer.drawTile(
+          vec2(csx + 0.25, csy + 0.25 + cliffHeight),
           vec2(0.5),
           necTI,
         );
@@ -228,8 +252,8 @@ export class TerrainThing implements ITerrainThing {
               0,
             );
           }
-          this._ljs.drawTile(
-            vec2(wsx - 0.25, wsy + cliffHeight - 1),
+          canvasLayer.drawTile(
+            vec2(csx - 0.25, csy + cliffHeight - 1),
             vec2(0.5, 1),
             swcfTI,
           );
@@ -239,8 +263,8 @@ export class TerrainThing implements ITerrainThing {
           // (!sc && !wc)
           swcTI = new this._ljs.TileInfo(vec2(352, 64), vec2(32), txtIdx, 0);
         }
-        this._ljs.drawTile(
-          vec2(wsx - 0.25, wsy - 0.25 + cliffHeight),
+        canvasLayer.drawTile(
+          vec2(csx - 0.25, csy - 0.25 + cliffHeight),
           vec2(0.5),
           swcTI,
         );
@@ -267,8 +291,8 @@ export class TerrainThing implements ITerrainThing {
               0,
             );
           }
-          this._ljs.drawTile(
-            vec2(wsx + 0.25, wsy + cliffHeight - 1),
+          canvasLayer.drawTile(
+            vec2(csx + 0.25, csy + cliffHeight - 1),
             vec2(0.5, 1),
             secfTI,
           );
@@ -278,13 +302,15 @@ export class TerrainThing implements ITerrainThing {
           // (!sc && !ec)
           secTI = new this._ljs.TileInfo(vec2(384, 64), vec2(32), txtIdx, 0);
         }
-        this._ljs.drawTile(
-          vec2(wsx + 0.25, wsy - 0.25 + cliffHeight),
+        canvasLayer.drawTile(
+          vec2(csx + 0.25, csy - 0.25 + cliffHeight),
           vec2(0.5),
           secTI,
         );
       }
     }
+
+    this._sectorCanvasLayers.set(sectorToKey(sector), canvasLayer);
   }
 
   getCliffIdx(pos: Vector2): number {
@@ -331,6 +357,7 @@ export class TerrainThing implements ITerrainThing {
         tap((tc) => {
           this._terrainConfig = tc;
           this._generateNoiseMaps();
+          this._rebuildCanvasLayers();
         }),
       )
       .subscribe();

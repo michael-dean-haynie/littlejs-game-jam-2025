@@ -58,6 +58,7 @@ export class Game implements IGame {
     await this._ljs.box2dInit();
 
     // michael: organize
+    this._terrainThing.init();
     this._ljs.setCameraPos(vec2(0, 0));
 
     this._player.spawnUnit();
