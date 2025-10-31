@@ -38,14 +38,15 @@ export function gridSizeToExtent(size: number): number {
   return (size - 1) / 2;
 }
 
-/** Get's the key for a sector for use in a map. X and Y are expected to be whole numbers. */
-export function sectorToKey({ x, y }: Vector2): string {
+/** Get's the key for a coordinate for use in a map. X and Y are expected to be whole numbers. */
+export function coordToKey({ x, y }: Vector2): string {
   noCap(x % 1 === 0, "Expected x to be a whole number.");
   noCap(y % 1 === 0, "Expected y to be a whole number.");
-  return `${x}.${y}`;
+  // add zero to avoie -0 situations
+  return `${x + 0},${y + 0}`;
 }
 
-export function keyToSector(key: string): Vector2 {
+export function keyToCoord(key: string): Vector2 {
   const [x, y] = key.split(",").map(Number);
   noCap(!isNaN(x), "Expected x to be a number.");
   noCap(!isNaN(y), "Expected y to be a number.");

@@ -21,11 +21,12 @@ import { generateNoiseMap } from "../noise/generate-noise-map";
 import {
   sectorExtent,
   sectorSize,
-  sectorToKey,
+  coordToKey,
   sectorToWorld,
   worldToSector,
 } from "../world/sector.types";
 import { noCap } from "../core/util/no-cap";
+import type { OrdinalDirection } from "../core/types/directions.types";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -39,6 +40,8 @@ export class TerrainThing implements ITerrainThing {
   private _terrainConfig!: TerrainConfig;
 
   private readonly _sectorNoiseMaps = new Map<string, number[][]>();
+  private readonly _cliffsMap = new Map<string, OrdinalDirection[]>();
+  // private readonly _sectorCollision = new Map<string, TileCollisionLayer>();
   private readonly _sectorCanvasLayers = new Map<string, CanvasLayer>();
 
   constructor(@inject(LJS_TOKEN) ljs: ILJS) {
@@ -47,16 +50,16 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 42,
-      extent: 1,
-      seed: 2334,
+      cameraZoom: 40,
+      extent: 0,
+      seed: 1206,
       scale: 174,
       octaves: 4,
       persistance: 0.5,
       lacunarity: 2.5,
       offsetX: -3,
-      offsetY: -1,
-      cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
+      offsetY: 0,
+      cliffHeightBounds: [0.2],
       clamp: 0.64,
     };
   }
@@ -143,7 +146,7 @@ export class TerrainThing implements ITerrainThing {
     // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
     for (let y = upper; y >= lower - bounds; y--) {
       for (let x = lower; x <= upper; x++) {
-        const worldPos = sectorToWorld(sector).add(vec2(x, y));
+        const worldPos = sectorCenter.add(vec2(x, y));
         const canvasPos = worldPos.add(vec2(sectorSize / 2));
         const cliffHeight = this.getCliffIdx(worldPos);
 
@@ -158,7 +161,7 @@ export class TerrainThing implements ITerrainThing {
         }
 
         // render with tiles
-        const { x: wsx, y: wsy } = worldPos;
+        // const { x: wsx, y: wsy } = worldPos;
         const { x: csx, y: csy } = canvasPos;
         const txtIdx = this.terrainTextureIdxs[cliffHeight];
 
@@ -168,17 +171,13 @@ export class TerrainThing implements ITerrainThing {
           new this._ljs.TileInfo(vec2(352, 32), vec2(64), txtIdx, 0),
         );
 
-        // north cliff height ... etc
-        const nch = this.getCliffIdx(vec2(wsx, wsy + 1));
-        const sch = this.getCliffIdx(vec2(wsx, wsy - 1));
-        const wch = this.getCliffIdx(vec2(wsx - 1, wsy));
-        const ech = this.getCliffIdx(vec2(wsx + 1, wsy));
+        const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
 
         // north edge is cliff ... etc
-        const nc = cliffHeight > nch;
-        const sc = cliffHeight > sch;
-        const wc = cliffHeight > wch;
-        const ec = cliffHeight > ech;
+        const nc = cliffs.includes("n");
+        const sc = cliffs.includes("s");
+        const wc = cliffs.includes("w");
+        const ec = cliffs.includes("e");
 
         if (sc) {
           // start with tile of height below to show around cliff face
@@ -310,7 +309,7 @@ export class TerrainThing implements ITerrainThing {
       }
     }
 
-    this._sectorCanvasLayers.set(sectorToKey(sector), canvasLayer);
+    this._sectorCanvasLayers.set(coordToKey(sector), canvasLayer);
   }
 
   getCliffIdx(pos: Vector2): number {
@@ -336,7 +335,7 @@ export class TerrainThing implements ITerrainThing {
     );
     const { x, y } = offsetFromNoiseMapOrigin;
 
-    const noiseMap = this._sectorNoiseMaps.get(sectorToKey(sector));
+    const noiseMap = this._sectorNoiseMaps.get(coordToKey(sector));
     noCap.notUndefined(noiseMap);
     return noiseMap[x][y];
   }
@@ -357,6 +356,8 @@ export class TerrainThing implements ITerrainThing {
         tap((tc) => {
           this._terrainConfig = tc;
           this._generateNoiseMaps();
+          this._generateAllCliffs();
+          this._rebuildCollisionLayers();
           this._rebuildCanvasLayers();
         }),
       )
@@ -370,8 +371,9 @@ export class TerrainThing implements ITerrainThing {
 
   private _generateNoiseMaps(): void {
     this._sectorNoiseMaps.clear();
-    // + 1 for outer edge. won't be rendered but needed for edges of rendered sectors
-    const upper = this._terrainConfig.extent + 1;
+    // + 2 for outer edge. won't be rendered but needed for edges of rendered sectors
+    // rendering needs cliffs with +1 extent, cliffs need their own +1 extent of noise
+    const upper = this._terrainConfig.extent + 2;
     const lower = -upper;
 
     // note: going top to bottom, left to right in case render order matters or something
@@ -379,7 +381,7 @@ export class TerrainThing implements ITerrainThing {
       for (let x = lower; x <= upper; x++) {
         const sector = vec2(x, y);
         const noiseMap = this._generateNoiseMapForSector(sector);
-        this._sectorNoiseMaps.set(sectorToKey(sector), noiseMap);
+        this._sectorNoiseMaps.set(coordToKey(sector), noiseMap);
       }
     }
   }
@@ -401,4 +403,71 @@ export class TerrainThing implements ITerrainThing {
       this._terrainConfig.clamp,
     );
   }
+
+  private _generateAllCliffs() {
+    this._cliffsMap.clear();
+
+    // + 1 for outer edge. won't be rendered but needed for edges of rendered sectors
+    const upper = this._terrainConfig.extent + 1;
+    const lower = -upper;
+
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const sector = vec2(x, y);
+        this._generateSectorCliffs(sector);
+      }
+    }
+  }
+
+  private _generateSectorCliffs(sector: Vector2) {
+    const sectorCenter = sectorToWorld(sector);
+
+    const upper = sectorExtent;
+    const lower = -upper;
+
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorCenter.add(vec2(x, y));
+        // const canvasPos = worldPos.add(vec2(sectorSize / 2));
+        const { x: wsx, y: wsy } = worldPos;
+        // const { x: csx, y: csy } = canvasPos;
+        const cliffHeight = this.getCliffIdx(worldPos);
+
+        // north cliff height ... etc
+        const nch = this.getCliffIdx(vec2(wsx, wsy + 1));
+        const sch = this.getCliffIdx(vec2(wsx, wsy - 1));
+        const wch = this.getCliffIdx(vec2(wsx - 1, wsy));
+        const ech = this.getCliffIdx(vec2(wsx + 1, wsy));
+
+        // north edge is cliff ... etc
+        const dirs: OrdinalDirection[] = [];
+        if (cliffHeight > nch) dirs.push("n");
+        if (cliffHeight > sch) dirs.push("s");
+        if (cliffHeight > wch) dirs.push("w");
+        if (cliffHeight > ech) dirs.push("e");
+
+        if (dirs.length > 0) {
+          this._cliffsMap.set(coordToKey(worldPos), dirs);
+        }
+      }
+    }
+  }
+
+  private _rebuildCollisionLayers(): void {
+    for (const layer of this._sectorCanvasLayers.values()) {
+      layer.destroy();
+    }
+
+    const upper = this._terrainConfig.extent;
+    const lower = -upper;
+
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        // const sector = vec2(x, y);
+        // this._buildSectorCollisionLayer(sector);
+      }
+    }
+  }
+
+  // private _buildSectorCollisionLayer(sector: Vector2): void {}
 }

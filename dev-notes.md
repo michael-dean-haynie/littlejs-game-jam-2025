@@ -90,10 +90,17 @@ Generally, factories are for instantiating types with normal parameters as well 
   - re-work ioc and data flow for lit overlay
   - emit event to lit overlay with latest noiseMap data to visualize dot plot and clamping and such
 - terrain
-  - extract noise logic
-  - sectorize noise/terrain/tiling
-  - use tile layers
+  - improve top cliff corners, maybe it's the base I set, limit it to the bottom corners so top ones stay transparent
+  - improve canvas layer building by only creating the different tileInfos once, not every loop
+  - render as units walk, etc
   - use viewport culling
+  - ramps
+    - generate somehow
+    - maybe create ones facing forward/backward
+  - water/waves
+  - collision
+- pathing
+- doodads, trees, rocks, bushes
 - architecture
   - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts
   - come to terms with abandoning testing?
