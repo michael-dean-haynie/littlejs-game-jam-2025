@@ -67,6 +67,8 @@ export class UnitFactory implements IUnitFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(drawSizeScale);
 
+    b2ObjAdpt.setFixedRotation(true);
+
     const args: [
       IBox2dObjectAdapter,
       ISpriteAnimationFactory,

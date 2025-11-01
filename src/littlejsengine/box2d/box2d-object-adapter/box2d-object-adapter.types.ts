@@ -15,6 +15,7 @@ export type IBox2dObjectAdapter = Pick<
   | "getCenterOfMass"
   | "setLinearDamping"
   | "setLinearVelocity"
+  | "setFixedRotation"
   | "destroy"
 > & {
   update$: Observable<void>;

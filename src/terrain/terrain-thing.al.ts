@@ -7,7 +7,7 @@ import {
 } from "./terrain-thing.types";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import { rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
+import { RED, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
 import {
   type CanvasLayer,
   type Color,
@@ -28,6 +28,12 @@ import type { OrdinalDirection } from "../core/types/directions.types";
 import { mkTerrainTile } from "../textures/tile-sheets/terrain/mk-terrain-tile";
 import { textureIndexMap } from "../textures/texture-index-map";
 import { cliffIdxHeightMap } from "./cliff-idx-height-map";
+import {
+  BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN,
+  type IBox2dObjectAdapterFactory,
+} from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter-factory.types";
+import { mkTile } from "../textures/tile-sheets/mk-tile";
+import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -35,6 +41,7 @@ import { cliffIdxHeightMap } from "./cliff-idx-height-map";
 })
 export class TerrainThing implements ITerrainThing {
   private readonly _ljs: ILJS;
+  private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
 
   private _litOverlay!: LitOverlay;
 
@@ -42,11 +49,19 @@ export class TerrainThing implements ITerrainThing {
 
   private readonly _sectorNoiseMaps = new Map<string, number[][]>();
   private readonly _cliffsMap = new Map<string, OrdinalDirection[]>();
-  // private readonly _sectorCollision = new Map<string, TileCollisionLayer>();
+  private readonly _sectorCollisionsMap = new Map<
+    string,
+    IBox2dObjectAdapter[]
+  >();
   private readonly _sectorCanvasLayers = new Map<string, CanvasLayer>();
 
-  constructor(@inject(LJS_TOKEN) ljs: ILJS) {
+  constructor(
+    @inject(LJS_TOKEN) ljs: ILJS,
+    @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
+    box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
+  ) {
     this._ljs = ljs;
+    this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
 
     this._terrainConfig = {
       paintTerrain: true,
@@ -60,7 +75,7 @@ export class TerrainThing implements ITerrainThing {
       lacunarity: 2.5,
       offsetX: -3,
       offsetY: 0,
-      cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
+      cliffHeightBounds: [0.5],
       clamp: 0.64,
     };
   }
@@ -272,7 +287,7 @@ export class TerrainThing implements ITerrainThing {
           if (!this._terrainConfig.paintTerrain) return;
 
           this._generateAllCliffs();
-          this._rebuildCollisionLayers();
+          this._rebuildCollisionsMap();
           this._rebuildCanvasLayers();
         }),
       )
@@ -343,9 +358,7 @@ export class TerrainThing implements ITerrainThing {
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const worldPos = sectorCenter.add(vec2(x, y));
-        // const canvasPos = worldPos.add(vec2(sectorSize / 2));
         const { x: wsx, y: wsy } = worldPos;
-        // const { x: csx, y: csy } = canvasPos;
         const cliffIdx = this.getCliffIdx(worldPos);
 
         // north cliff height ... etc
@@ -368,21 +381,84 @@ export class TerrainThing implements ITerrainThing {
     }
   }
 
-  private _rebuildCollisionLayers(): void {
-    for (const layer of this._sectorCanvasLayers.values()) {
-      layer.destroy();
+  private _rebuildCollisionsMap(): void {
+    for (const b2ObjAdpt of [...this._sectorCollisionsMap.values()].flat()) {
+      b2ObjAdpt.destroy();
     }
 
     const upper = this._terrainConfig.extent;
     const lower = -upper;
 
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
-        // const sector = vec2(x, y);
-        // this._buildSectorCollisionLayer(sector);
+        const sector = vec2(x, y);
+        this._buildSectorCollisions(sector);
       }
     }
   }
 
-  // private _buildSectorCollisionLayer(sector: Vector2): void {}
+  private _buildSectorCollisions(sector: Vector2): void {
+    const sectorCenter = sectorToWorld(sector);
+    const collisions: IBox2dObjectAdapter[] = [];
+    this._sectorCollisionsMap.set(coordToKey(sector), collisions);
+
+    const upper = sectorExtent;
+    const lower = -upper;
+
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorCenter.add(vec2(x, y));
+
+        const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
+        if (cliffs.length === 0) continue;
+
+        const offsetScalar: number = 0.4;
+        const thickScalar: number = 0.2;
+
+        for (const cliff of cliffs) {
+          let pos = worldPos;
+          switch (cliff) {
+            case "n":
+              pos = pos.add(vec2(0, offsetScalar));
+              break;
+            case "s":
+              pos = pos.add(vec2(0, -offsetScalar));
+              break;
+            case "w":
+              pos = pos.add(vec2(-offsetScalar, 0));
+              break;
+            case "e":
+              pos = pos.add(vec2(offsetScalar, 0));
+              break;
+          }
+
+          let size: Vector2;
+          switch (cliff) {
+            case "n":
+            case "s":
+              size = vec2(1, thickScalar);
+              break;
+            case "e":
+            case "w":
+              size = vec2(thickScalar, 1);
+              break;
+          }
+
+          const b2ObjAdpt =
+            this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
+              pos,
+              size,
+              mkTile("terrain.water", this._ljs),
+              0,
+              RED,
+              this._ljs.box2d.bodyTypeStatic,
+            );
+          b2ObjAdpt.addBox(size);
+          b2ObjAdpt.drawSize = size;
+          collisions.push(b2ObjAdpt);
+        }
+      }
+    }
+  }
 }

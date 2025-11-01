@@ -10,4 +10,5 @@ export {
   RED,
   rand,
   debugRect,
+  TileLayerData,
 } from "littlejsengine";
