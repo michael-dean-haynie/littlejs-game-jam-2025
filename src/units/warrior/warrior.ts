@@ -14,7 +14,7 @@ import type { UnitType } from "../unit.types";
 export class Warrior extends UnitBase {
   readonly type: UnitType = "warrior";
 
-  protected _moveSpeed: number = 5;
+  protected _moveSpeed: number = 3;
 
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,

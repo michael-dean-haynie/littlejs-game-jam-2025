@@ -171,9 +171,10 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
-    this.box2dObjectAdapter.cliffIdx = this._terrainThing.getCliffIdx(
-      this.box2dObjectAdapter.getCenterOfMass(),
-    );
+    this.box2dObjectAdapter.travelingHeight =
+      this._terrainThing.getTravelingHeight(
+        this.box2dObjectAdapter.getCenterOfMass(),
+      );
 
     this._processMessages();
     this._getStateObj().onUpdate();

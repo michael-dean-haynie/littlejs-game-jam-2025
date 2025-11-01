@@ -20,5 +20,5 @@ export type IBox2dObjectAdapter = Pick<
 > & {
   update$: Observable<void>;
   render$: Observable<void>;
-  cliffIdx: number;
+  travelingHeight: number; // includes cliff height and ramp height
 };

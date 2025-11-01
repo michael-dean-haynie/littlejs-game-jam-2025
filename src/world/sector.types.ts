@@ -40,8 +40,10 @@ export function gridSizeToExtent(size: number): number {
 
 /** Get's the key for a coordinate for use in a map. X and Y are expected to be whole numbers. */
 export function coordToKey({ x, y }: Vector2): string {
-  noCap(x % 1 === 0, "Expected x to be a whole number.");
-  noCap(y % 1 === 0, "Expected y to be a whole number.");
+  // noCap(x % 1 === 0, "Expected x to be a whole number.");
+  // noCap(y % 1 === 0, "Expected y to be a whole number.");
+  x = Math.round(x);
+  y = Math.round(y);
   // add zero to avoie -0 situations
   return `${x + 0},${y + 0}`;
 }

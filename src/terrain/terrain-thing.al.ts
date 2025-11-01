@@ -1,8 +1,10 @@
 import { inject } from "inversify";
 import { Autoloadable } from "../core/autoload/autoloadable";
 import {
+  rampDirections,
   TERRAIN_THING_TOKEN,
   type ITerrainThing,
+  type RampDirection,
   type TerrainConfig,
 } from "./terrain-thing.types";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
@@ -25,7 +27,10 @@ import {
 } from "../world/sector.types";
 import { noCap } from "../core/util/no-cap";
 import type { OrdinalDirection } from "../core/types/directions.types";
-import { mkTerrainTile } from "../textures/tile-sheets/terrain/mk-terrain-tile";
+import {
+  mkRampTile,
+  mkTerrainTile,
+} from "../textures/tile-sheets/terrain/mk-terrain-tile";
 import { textureIndexMap } from "../textures/texture-index-map";
 import { cliffIdxHeightMap } from "./cliff-idx-height-map";
 import {
@@ -49,6 +54,7 @@ export class TerrainThing implements ITerrainThing {
 
   private readonly _sectorNoiseMaps = new Map<string, number[][]>();
   private readonly _cliffsMap = new Map<string, OrdinalDirection[]>();
+  private readonly _rampsMap = new Map<string, RampDirection>();
   private readonly _sectorCollisionsMap = new Map<
     string,
     IBox2dObjectAdapter[]
@@ -66,17 +72,17 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 89,
-      extent: 1,
-      seed: 1156,
-      scale: 174,
+      cameraZoom: 147,
+      extent: 3,
+      seed: 3851,
+      scale: 184,
       octaves: 4,
-      persistance: 0.5,
-      lacunarity: 2.5,
-      offsetX: -3,
-      offsetY: 0,
-      cliffHeightBounds: [0.5],
-      clamp: 0.64,
+      persistance: 0.56,
+      lacunarity: 3.2,
+      offsetX: -2,
+      offsetY: 1,
+      cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
+      clamp: 0.37,
     };
   }
 
@@ -177,15 +183,53 @@ export class TerrainThing implements ITerrainThing {
         }
 
         // render with tiles
-        const { x: csx, y: csy } = canvasPos;
-        const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
 
-        // north edge is cliff ... etc
+        // render ramps
+        const { x: csx, y: csy } = canvasPos;
+        const rampDir: RampDirection | undefined = this._rampsMap.get(
+          coordToKey(worldPos),
+        );
+
+        if (rampDir !== undefined) {
+          // bottom half
+          canvasLayer.drawTile(
+            vec2(csx, csy + cliffHeight),
+            vec2(1),
+            mkTerrainTile([], cliffIdx, false, false, this._ljs),
+          );
+          canvasLayer.drawTile(
+            vec2(csx, csy + cliffHeight),
+            vec2(1),
+            mkRampTile(rampDir, cliffIdx, this._ljs),
+          );
+
+          // top half
+          canvasLayer.drawTile(
+            vec2(csx, csy + 1 + cliffHeight),
+            vec2(1),
+            mkRampTile(rampDir, cliffIdx, this._ljs, true),
+          );
+          continue; // no need to check for cliff stuff (hopefully?)
+        }
+
+        // render cliffs
+        const rampToWest =
+          this._rampsMap.get(coordToKey(worldPos.add(vec2(-1, 0)))) === "e";
+        const rampToEast =
+          this._rampsMap.get(coordToKey(worldPos.add(vec2(1, 0)))) === "w";
+
+        const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
         const nc = cliffs.includes("n");
         const sc = cliffs.includes("s");
 
         if (cliffs.length) {
-          const lowerLevelTile = mkTerrainTile([], cliffIdx - 1, this._ljs);
+          const lowerLevelTile = mkTerrainTile(
+            [],
+            cliffIdx - 1,
+            false,
+            false,
+            this._ljs,
+          );
 
           // start with tile of height below to show around cliff face
           canvasLayer.drawTile(
@@ -215,6 +259,8 @@ export class TerrainThing implements ITerrainThing {
             const cliffFaceTile = mkTerrainTile(
               cliffs,
               cliffIdx,
+              rampToWest,
+              rampToEast,
               this._ljs,
               true,
             );
@@ -229,7 +275,7 @@ export class TerrainThing implements ITerrainThing {
         canvasLayer.drawTile(
           vec2(csx, csy + cliffHeight),
           vec2(1),
-          mkTerrainTile(cliffs, cliffIdx, this._ljs),
+          mkTerrainTile(cliffs, cliffIdx, rampToWest, rampToEast, this._ljs),
         );
       }
     }
@@ -245,6 +291,18 @@ export class TerrainThing implements ITerrainThing {
   getCliffHeight(pos: Vector2): number {
     const cliffIdx = this.getCliffIdx(pos);
     return cliffIdxHeightMap[cliffIdx]; // cliff height scale would go here
+  }
+
+  getTravelingHeight(pos: Vector2): number {
+    const rampDir: RampDirection | undefined = this._rampsMap.get(
+      coordToKey(pos),
+    );
+    if (rampDir === undefined) return this.getCliffHeight(pos);
+
+    let xProg = pos.x - 0.5;
+    xProg = xProg - Math.floor(xProg);
+    xProg = rampDir === "e" ? xProg : 1 - xProg;
+    return this.getCliffHeight(pos) + xProg;
   }
 
   private _getNoiseAtWorldPosition(pos: Vector2): number {
@@ -279,14 +337,21 @@ export class TerrainThing implements ITerrainThing {
     this._litOverlay.terrainConfig$
       .pipe(
         tap((tc) => {
-          this._terrainConfig = tc;
-          this._generateNoiseMaps();
           for (const layer of this._sectorCanvasLayers.values()) {
             layer.destroy();
           }
+          for (const collision of [
+            ...this._sectorCollisionsMap.values(),
+          ].flat()) {
+            collision.destroy();
+          }
+
+          this._terrainConfig = tc;
+          this._generateNoiseMaps();
           if (!this._terrainConfig.paintTerrain) return;
 
           this._generateAllCliffs();
+          this._remarkRamps();
           this._rebuildCollisionsMap();
           this._rebuildCanvasLayers();
         }),
@@ -381,6 +446,62 @@ export class TerrainThing implements ITerrainThing {
     }
   }
 
+  private _remarkRamps(): void {
+    this._rampsMap.clear();
+
+    const upper = this._terrainConfig.extent;
+    const lower = -upper;
+
+    // note: need to draw from top to bottom (back to front) so projection offsets don't get jacked
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const sector = vec2(x, y);
+        this._remarkSectorRamps(sector);
+      }
+    }
+  }
+
+  private _remarkSectorRamps(sector: Vector2): void {
+    const sectorCenter = sectorToWorld(sector);
+
+    const upper = sectorExtent;
+    const lower = -upper;
+
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const worldPos = sectorCenter.add(vec2(x, y));
+        const cliffIdx = this.getCliffIdx(worldPos);
+
+        if (cliffIdx < 2) continue; // water and ground grass cannot ramp down
+
+        const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
+        const rampDirCliffs = cliffs.filter((cliff) =>
+          (rampDirections as OrdinalDirection[]).includes(cliff),
+        ) as RampDirection[];
+
+        for (const rampDirCliff of rampDirCliffs) {
+          if (Math.random() < 0.66) continue;
+
+          let rampPos: Vector2;
+          let rampDir: RampDirection;
+          switch (rampDirCliff) {
+            case "w":
+              rampDir = "e";
+              rampPos = worldPos.add(vec2(-1, 0));
+              break;
+            case "e":
+              rampDir = "w";
+              rampPos = worldPos.add(vec2(1, 0));
+              break;
+          }
+
+          if (this._rampsMap.get(coordToKey(rampPos)) !== undefined) continue;
+          this._rampsMap.set(coordToKey(rampPos), rampDir);
+        }
+      }
+    }
+  }
+
   private _rebuildCollisionsMap(): void {
     for (const b2ObjAdpt of [...this._sectorCollisionsMap.values()].flat()) {
       b2ObjAdpt.destroy();
@@ -412,11 +533,18 @@ export class TerrainThing implements ITerrainThing {
 
         const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
         if (cliffs.length === 0) continue;
+        const rampToWest =
+          this._rampsMap.get(coordToKey(worldPos.add(vec2(-1, 0)))) === "e";
+        const rampToEast =
+          this._rampsMap.get(coordToKey(worldPos.add(vec2(1, 0)))) === "w";
 
         const offsetScalar: number = 0.4;
         const thickScalar: number = 0.2;
 
         for (const cliff of cliffs) {
+          if (rampToWest && cliff === "w") continue;
+          if (rampToEast && cliff === "e") continue;
+
           let pos = worldPos;
           switch (cliff) {
             case "n":
@@ -449,7 +577,8 @@ export class TerrainThing implements ITerrainThing {
             this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
               pos,
               size,
-              mkTile("terrain.water", this._ljs),
+              // mkTile("terrain.water", this._ljs),
+              mkTile("empty", this._ljs),
               0,
               RED,
               this._ljs.box2d.bodyTypeStatic,

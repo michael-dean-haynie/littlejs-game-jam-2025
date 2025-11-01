@@ -1,3 +1,4 @@
+import type { OrdinalDirection } from "../core/types/directions.types";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 
 export const TERRAIN_THING_TOKEN = "TERRAIN_THING_TOKEN" as const;
@@ -7,7 +8,12 @@ export type ITerrainThing = {
   render(): void;
   getCliffIdx(pos: Vector2): number;
   getCliffHeight(pos: Vector2): number;
+  /** includes cliff height and ramp height, meant for moving units */
+  getTravelingHeight(pos: Vector2): number;
 };
+
+export const rampDirections = ["w", "e"] as const satisfies OrdinalDirection[];
+export type RampDirection = (typeof rampDirections)[number];
 
 export type TerrainConfig = {
   paintTerrain: boolean;

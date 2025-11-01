@@ -5,6 +5,7 @@ import type {
   TileInfo,
   Vector2,
 } from "../../../littlejsengine/littlejsengine.types";
+import type { RampDirection } from "../../../terrain/terrain-thing.types";
 import { textureIndexMap } from "../../texture-index-map";
 import type { TerrainTexture } from "../../textures.types";
 import { mkTile } from "../mk-tile";
@@ -39,6 +40,8 @@ export type CliffType = "water" | "grass";
 export function mkTerrainTile(
   cliffs: OrdinalDirection[],
   cliffIdx: number,
+  rampToWest: boolean,
+  rampToEast: boolean,
   ljs: ILJS,
   cliffFace = false,
 ): TileInfo {
@@ -49,8 +52,8 @@ export function mkTerrainTile(
   // north edge is cliff ... etc
   const northCliff = cliffs.includes("n");
   const southCliff = cliffs.includes("s");
-  const westCliff = cliffs.includes("w");
-  const eastCliff = cliffs.includes("e");
+  const westCliff = cliffs.includes("w") && !rampToWest;
+  const eastCliff = cliffs.includes("e") && !rampToEast;
 
   const cliffType: CliffType = cliffIdx > 1 ? "grass" : "water";
 
@@ -80,5 +83,27 @@ export function mkTerrainTile(
     pos.y * 9 + pos.x,
     vec2(tileScale),
     textureIndexMap[cliffIdxTextureMap[cliffIdx]],
+  );
+}
+
+const rampDirOriginMap: { [key in RampDirection]: Vector2 } = {
+  e: vec2(0, 5),
+  w: vec2(3, 5),
+};
+
+export function mkRampTile(
+  rampDir: RampDirection,
+  cliffIdx: number,
+  ljs: ILJS,
+  topHalf = false,
+) {
+  let pos = rampDirOriginMap[rampDir];
+  if (topHalf) {
+    pos = pos.add(vec2(0, -1));
+  }
+  return ljs.tile(
+    pos.y * 9 + pos.x,
+    vec2(tileScale),
+    textureIndexMap[cliffIdxTextureMap[cliffIdx + 1]],
   );
 }

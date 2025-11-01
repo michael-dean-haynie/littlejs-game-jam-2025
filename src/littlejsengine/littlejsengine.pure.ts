@@ -3,6 +3,7 @@ export {
   clamp,
   vec2,
   min,
+  abs,
   percent,
   rgb,
   hsl,

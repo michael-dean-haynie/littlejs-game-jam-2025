@@ -52,7 +52,7 @@ export const UnitTypeInitDataMap: {
   };
 } = {
   warrior: {
-    size: 1.5,
+    size: 0.5,
     drawSizeScale: 2,
   },
   lancer: {
