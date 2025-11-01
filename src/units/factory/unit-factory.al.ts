@@ -22,6 +22,7 @@ import {
   TERRAIN_THING_TOKEN,
   type ITerrainThing,
 } from "../../terrain/terrain-thing.types";
+import { mkTile } from "../../textures/tile-sheets/mk-tile";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -55,7 +56,7 @@ export class UnitFactory implements IUnitFactory {
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
       size,
-      this._spriteAnimationFactory.createTileInfo("units.empty"),
+      mkTile("empty", this._ljs),
       0,
       WHITE,
       this._ljs.box2d.bodyTypeDynamic,

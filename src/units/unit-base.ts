@@ -80,7 +80,7 @@ export abstract class UnitBase implements IUnit {
       .pipe(
         takeUntil(this._destroyRef$),
         tap((frameChangedData) => {
-          this.box2dObjectAdapter.tileInfo = frameChangedData.frame.tileInfo;
+          this.box2dObjectAdapter.tileInfo = frameChangedData.tileInfo;
         }),
       )
       .subscribe();
@@ -171,7 +171,7 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
-    this.box2dObjectAdapter.cliffHeight = this._terrainThing.getCliffHeight(
+    this.box2dObjectAdapter.cliffIdx = this._terrainThing.getCliffIdx(
       this.box2dObjectAdapter.getCenterOfMass(),
     );
 

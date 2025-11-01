@@ -1,7 +1,6 @@
-import type { TileInfo } from "../littlejsengine/littlejsengine.types";
-import type { TextureId } from "../textures/textures.types";
+import type { SpriteSheetId } from "../textures/sprite-sheets/sprite-sheet.types";
 import type {
-  DirToTextureMap,
+  DirSpriteSheetMap,
   ISpriteAnimation,
 } from "./sprite-animation.types";
 
@@ -10,7 +9,6 @@ export const SPRITE_ANIMATION_FACTORY_TOKEN =
 
 export interface ISpriteAnimationFactory {
   createSpriteAnimation(
-    textureData: TextureId | DirToTextureMap,
+    spriteSheetData: SpriteSheetId | DirSpriteSheetMap,
   ): ISpriteAnimation;
-  createTileInfo(textureId: TextureId): TileInfo;
 }

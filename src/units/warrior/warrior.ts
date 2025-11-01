@@ -4,6 +4,7 @@ import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-objec
 import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
 import type { ITerrainThing } from "../../terrain/terrain-thing.types";
+import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
@@ -39,11 +40,11 @@ export class Warrior extends UnitBase {
     this._registerAnimation(
       "attack",
       spriteAnimationFactory.createSpriteAnimation({
-        n: "units.warrior.attack2",
-        ne: "units.warrior.attack2",
-        e: "units.warrior.attack1",
-        se: "units.warrior.attack1",
-        s: "units.warrior.attack1",
+        n: spriteSheetMap["units.warrior.attack2"],
+        ne: spriteSheetMap["units.warrior.attack2"],
+        e: spriteSheetMap["units.warrior.attack1"],
+        se: spriteSheetMap["units.warrior.attack1"],
+        s: spriteSheetMap["units.warrior.attack1"],
       }),
     );
 

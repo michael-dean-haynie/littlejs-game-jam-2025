@@ -76,7 +76,9 @@ export class Player implements IPlayer {
   }
 
   spawnUnit(): void {
-    this.unit = this._unitFactory.createUnit("lancer", vec2(0));
+    // for (let i = 0; i < 100; i++) {
+    this.unit = this._unitFactory.createUnit("warrior", vec2(0));
+    // }
 
     // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

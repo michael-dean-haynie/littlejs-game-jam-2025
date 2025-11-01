@@ -1,21 +1,27 @@
 import { Subject } from "rxjs";
 import { noCap } from "../core/util/no-cap";
-import type { SpriteAnimationFrame } from "./sprite-animation-frame";
-import type {
-  AnimationDirection,
-  DirToFramesMap,
-  FrameChangedData,
-  ISpriteAnimation,
+import {
+  AnimationDirections,
+  type AnimationDirection,
+  type DirSpriteSheetMap,
+  type FrameChangedData,
+  type ISpriteAnimation,
 } from "./sprite-animation.types";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
+import type { SpriteSheet } from "../textures/sprite-sheets/sprite-sheet.types";
+import { textureIndexMap } from "../textures/texture-index-map";
+import { range } from "lit/directives/range.js";
 
 /** A sprite animation that progresses and tracks its own state */
 export class SpriteAnimation implements ISpriteAnimation {
-  private _frames: ReadonlyArray<SpriteAnimationFrame>;
+  private _spriteSheet: SpriteSheet;
   private _direction: AnimationDirection;
-  private readonly _dirToFramesMap: DirToFramesMap;
+  private readonly _dirSpriteSheetMap: DirSpriteSheetMap;
   private readonly _ljs: ILJS;
+
+  /** The animation frame duration in seconds */
+  private readonly _frameDuration: number = 0.1;
 
   /** The index of the current animation frame */
   private _currentFrameIndex: number | null = null;
@@ -26,8 +32,10 @@ export class SpriteAnimation implements ISpriteAnimation {
   /** The duration of every frame summed together in seconds */
   private readonly _fullDuration: number;
 
-  /** The offest start of each animation frame */
-  private readonly _offsets: number[];
+  /** Number of unique animations directions  in full circle */
+  private readonly _dirCount = 8;
+
+  private readonly _frames: number[] = [];
 
   private _frameChanged$ = new Subject<FrameChangedData>();
   public frameChanged$ = this._frameChanged$.asObservable();
@@ -35,19 +43,20 @@ export class SpriteAnimation implements ISpriteAnimation {
   private _stopped$ = new Subject<void>();
   public stopped$ = this._stopped$.asObservable();
 
-  constructor(dirToFramesMap: DirToFramesMap, ljs: ILJS) {
-    this._dirToFramesMap = dirToFramesMap;
+  constructor(dirSpriteSheetMap: DirSpriteSheetMap, ljs: ILJS) {
+    this._dirSpriteSheetMap = dirSpriteSheetMap;
     this._ljs = ljs;
 
     // assumption: each texture has the same duration and number of frames
     this._direction = "e";
-    this._frames = this._dirToFramesMap.e;
-    this._fullDuration = 0;
-    this._offsets = [];
-    for (const frame of this._frames) {
-      this._offsets.push(this._fullDuration);
-      this._fullDuration += frame.duration;
+    this._spriteSheet = this._dirSpriteSheetMap.e;
+    if (this._spriteSheet.frameDuration) {
+      this._frameDuration = this._spriteSheet.frameDuration;
     }
+    this._frames = [...range(this._spriteSheet.frames)].filter(
+      (frIdx) => !(this._spriteSheet.omitFrames ?? []).includes(frIdx),
+    );
+    this._fullDuration = this._frameDuration * this._frames.length;
   }
 
   /** Starts or restarts the animation from the begining */
@@ -75,18 +84,8 @@ export class SpriteAnimation implements ISpriteAnimation {
 
     const engineTimeNow = this._ljs.time;
     const delta = (engineTimeNow - this._startTime) % this._fullDuration;
-
     const startingFrameIndex = this._currentFrameIndex;
-    for (let idx = 0; idx < this._frames.length; idx++) {
-      const frame = this._frames[idx];
-      const offset = this._offsets[idx];
-      const lower = offset;
-      const upper = offset + frame.duration;
-      if (lower <= delta && delta < upper) {
-        this._currentFrameIndex = idx;
-        break;
-      }
-    }
+    this._currentFrameIndex = Math.floor(delta / this._frameDuration);
 
     if (
       startingFrameIndex !== this._currentFrameIndex ||
@@ -98,26 +97,28 @@ export class SpriteAnimation implements ISpriteAnimation {
 
   private _updateActiveFramesForDirection(faceDirection?: Vector2): void {
     if (faceDirection === undefined) {
-      this._frames = this._dirToFramesMap.e;
+      this._spriteSheet = this._dirSpriteSheetMap.e;
       return;
     }
 
-    const directions: AnimationDirection[] = ["n", "ne", "e", "se", "s"];
     /** Percentage of 180 degrees (or PI radians) */
     const semiPct = Math.abs(faceDirection.angle()) / Math.PI;
-    /** Number directions unique animations in full circle */
-    const dirCount = 8;
-    // map angles for (top, topRight, right, bottomRight, bottom) to (0, 1, 2, 3, 4)
-    const idx = Math.round((semiPct * dirCount) / 2);
 
-    this._direction = directions[idx];
-    this._frames = this._dirToFramesMap[this._direction];
+    // map angles for (top, topRight, right, bottomRight, bottom) to (0, 1, 2, 3, 4)
+    const idx = Math.round((semiPct * this._dirCount) / 2);
+
+    this._direction = AnimationDirections.values()[idx];
+    this._spriteSheet = this._dirSpriteSheetMap[this._direction];
   }
 
   private _emitFrameChanged(): void {
     noCap.notNull(this._currentFrameIndex);
     this._frameChanged$.next({
-      frame: this._frames[this._currentFrameIndex],
+      tileInfo: this._ljs.tile(
+        this._frames[this._currentFrameIndex],
+        this._spriteSheet.frameSize,
+        textureIndexMap[this._spriteSheet.texture],
+      ),
       frameIndex: this._currentFrameIndex,
     });
   }

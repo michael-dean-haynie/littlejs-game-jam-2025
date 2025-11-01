@@ -11,12 +11,10 @@ import { rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
 import {
   type CanvasLayer,
   type Color,
-  type TileInfo,
   type Vector2,
 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
 import { tap } from "rxjs";
-import { getTextureIdx } from "../textures/get-texture";
 import { generateNoiseMap } from "../noise/generate-noise-map";
 import {
   sectorExtent,
@@ -27,6 +25,9 @@ import {
 } from "../world/sector.types";
 import { noCap } from "../core/util/no-cap";
 import type { OrdinalDirection } from "../core/types/directions.types";
+import { mkTerrainTile } from "../textures/tile-sheets/terrain/mk-terrain-tile";
+import { textureIndexMap } from "../textures/texture-index-map";
+import { cliffIdxHeightMap } from "./cliff-idx-height-map";
 
 // michael: doc: alea and simplex noise packages
 @Autoloadable({
@@ -50,16 +51,16 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 40,
-      extent: 0,
-      seed: 1206,
+      cameraZoom: 89,
+      extent: 1,
+      seed: 1156,
       scale: 174,
       octaves: 4,
       persistance: 0.5,
       lacunarity: 2.5,
       offsetX: -3,
       offsetY: 0,
-      cliffHeightBounds: [0.2],
+      cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
       clamp: 0.64,
     };
   }
@@ -79,11 +80,11 @@ export class TerrainThing implements ITerrainThing {
   get terrainTextureIdxs(): number[] {
     if (this._terrainTextureIdxs.length === 0) {
       this._terrainTextureIdxs.push(
-        getTextureIdx("terrain.tilemap1"),
-        getTextureIdx("terrain.tilemap2"),
-        getTextureIdx("terrain.tilemap3"),
-        getTextureIdx("terrain.tilemap4"),
-        getTextureIdx("terrain.tilemap5"),
+        textureIndexMap["terrain/Tilemap_color1.png"],
+        textureIndexMap["terrain/Tilemap_color2.png"],
+        textureIndexMap["terrain/Tilemap_color3.png"],
+        textureIndexMap["terrain/Tilemap_color4.png"],
+        textureIndexMap["terrain/Tilemap_color5.png"],
       );
     }
     return this._terrainTextureIdxs;
@@ -100,7 +101,6 @@ export class TerrainThing implements ITerrainThing {
   // michael: todo: organize units, relations between noise map, world space, screen space terrain grid, tile size, unit size etc.
   render(): void {
     this._ljs.setCameraScale(this._terrainConfig.cameraZoom);
-    if (!this._terrainConfig.paintTerrain) return;
 
     // canvas layers render on their own
   }
@@ -134,7 +134,7 @@ export class TerrainThing implements ITerrainThing {
     canvasLayer.tileInfo = new this._ljs.TileInfo(
       vec2(0),
       vec2(64),
-      getTextureIdx("units.empty"),
+      textureIndexMap["empty.png"],
       0,
     );
 
@@ -148,163 +148,73 @@ export class TerrainThing implements ITerrainThing {
       for (let x = lower; x <= upper; x++) {
         const worldPos = sectorCenter.add(vec2(x, y));
         const canvasPos = worldPos.add(vec2(sectorSize / 2));
-        const cliffHeight = this.getCliffIdx(worldPos);
+        const cliffIdx = this.getCliffIdx(worldPos);
+        const cliffHeight = cliffIdxHeightMap[cliffIdx];
 
         // get the simple color rect mode out of the way
         if (!this._terrainConfig.useTiles) {
           canvasLayer.drawRect(
             vec2(canvasPos.x, canvasPos.y + cliffHeight),
             vec2(1),
-            this._terrainColors[cliffHeight],
+            this._terrainColors[cliffIdx],
           );
           continue;
         }
 
         // render with tiles
-        // const { x: wsx, y: wsy } = worldPos;
         const { x: csx, y: csy } = canvasPos;
-        const txtIdx = this.terrainTextureIdxs[cliffHeight];
-
-        canvasLayer.drawTile(
-          vec2(csx, csy + cliffHeight),
-          vec2(1),
-          new this._ljs.TileInfo(vec2(352, 32), vec2(64), txtIdx, 0),
-        );
-
         const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
 
         // north edge is cliff ... etc
         const nc = cliffs.includes("n");
         const sc = cliffs.includes("s");
-        const wc = cliffs.includes("w");
-        const ec = cliffs.includes("e");
 
-        if (sc) {
+        if (cliffs.length) {
+          const lowerLevelTile = mkTerrainTile([], cliffIdx - 1, this._ljs);
+
           // start with tile of height below to show around cliff face
           canvasLayer.drawTile(
-            vec2(csx, csy + cliffHeight - 1),
+            vec2(csx, csy + cliffHeight),
             vec2(1),
-            new this._ljs.TileInfo(
-              vec2(352, 32),
-              vec2(64),
-              this.terrainTextureIdxs[cliffHeight - 1],
-              0,
-            ),
+            lowerLevelTile,
           );
-        }
 
-        // north west corner (tile info)
-        let nwcTI: TileInfo;
-        if (nc && wc) {
-          nwcTI = new this._ljs.TileInfo(vec2(320, 256), vec2(32), txtIdx, 0);
-        } else if (nc && !wc) {
-          nwcTI = new this._ljs.TileInfo(vec2(384, 256), vec2(32), txtIdx, 0);
-        } else if (!nc && wc) {
-          nwcTI = new this._ljs.TileInfo(vec2(320, 128), vec2(32), txtIdx, 0);
-        } else {
-          // (!nc && !wc) {
-          nwcTI = new this._ljs.TileInfo(vec2(352, 32), vec2(32), txtIdx, 0);
-        }
-        canvasLayer.drawTile(
-          vec2(csx - 0.25, csy + 0.25 + cliffHeight),
-          vec2(0.5),
-          nwcTI,
-        );
-
-        // north east corner
-        let necTI: TileInfo;
-        if (nc && ec) {
-          necTI = new this._ljs.TileInfo(vec2(480, 0), vec2(32), txtIdx, 0);
-        } else if (nc && !ec) {
-          necTI = new this._ljs.TileInfo(vec2(448, 0), vec2(32), txtIdx, 0);
-        } else if (!nc && ec) {
-          necTI = new this._ljs.TileInfo(vec2(480, 32), vec2(32), txtIdx, 0);
-        } else {
-          // (!nc && !ec)
-          necTI = new this._ljs.TileInfo(vec2(384, 32), vec2(32), txtIdx, 0);
-        }
-        canvasLayer.drawTile(
-          vec2(csx + 0.25, csy + 0.25 + cliffHeight),
-          vec2(0.5),
-          necTI,
-        );
-
-        // south west corner / south west cliff face
-        let swcTI: TileInfo;
-        let swcfTI: TileInfo;
-        if (sc) {
-          if (wc) {
-            swcTI = new this._ljs.TileInfo(vec2(320, 160), vec2(32), txtIdx, 0);
-            swcfTI = new this._ljs.TileInfo(
-              vec2(320, 192),
-              vec2(32, 64),
-              txtIdx,
-              0,
-            );
-          } else {
-            // !wc
-            swcTI = new this._ljs.TileInfo(vec2(352, 160), vec2(32), txtIdx, 0);
-            swcfTI = new this._ljs.TileInfo(
-              vec2(352, 192),
-              vec2(32, 64),
-              txtIdx,
-              0,
+          // lower cliff level to north
+          if (nc) {
+            canvasLayer.drawTile(
+              vec2(csx, csy + cliffHeight),
+              vec2(1),
+              lowerLevelTile,
             );
           }
-          canvasLayer.drawTile(
-            vec2(csx - 0.25, csy + cliffHeight - 1),
-            vec2(0.5, 1),
-            swcfTI,
-          );
-        } else if (!sc && wc) {
-          swcTI = new this._ljs.TileInfo(vec2(320, 96), vec2(32), txtIdx, 0);
-        } else {
-          // (!sc && !wc)
-          swcTI = new this._ljs.TileInfo(vec2(352, 64), vec2(32), txtIdx, 0);
-        }
-        canvasLayer.drawTile(
-          vec2(csx - 0.25, csy - 0.25 + cliffHeight),
-          vec2(0.5),
-          swcTI,
-        );
 
-        // south east corner
-        let secTI: TileInfo;
-        let secfTI: TileInfo;
-        if (sc) {
-          if (ec) {
-            secTI = new this._ljs.TileInfo(vec2(480, 160), vec2(32), txtIdx, 0);
-            secfTI = new this._ljs.TileInfo(
-              vec2(480, 192),
-              vec2(32, 64),
-              txtIdx,
-              0,
+          if (sc) {
+            // lower cliff level around clif face
+            canvasLayer.drawTile(
+              vec2(csx, csy + cliffHeight - 1),
+              vec2(1),
+              lowerLevelTile,
             );
-          } else {
-            // !ec
-            secTI = new this._ljs.TileInfo(vec2(448, 160), vec2(32), txtIdx, 0);
-            secfTI = new this._ljs.TileInfo(
-              vec2(448, 192),
-              vec2(32, 64),
-              txtIdx,
-              0,
+
+            // cliff face
+            const cliffFaceTile = mkTerrainTile(
+              cliffs,
+              cliffIdx,
+              this._ljs,
+              true,
+            );
+            canvasLayer.drawTile(
+              vec2(csx, csy + cliffHeight - 1),
+              vec2(1),
+              cliffFaceTile,
             );
           }
-          canvasLayer.drawTile(
-            vec2(csx + 0.25, csy + cliffHeight - 1),
-            vec2(0.5, 1),
-            secfTI,
-          );
-        } else if (!sc && ec) {
-          secTI = new this._ljs.TileInfo(vec2(480, 128), vec2(32), txtIdx, 0);
-        } else {
-          // (!sc && !ec)
-          secTI = new this._ljs.TileInfo(vec2(384, 64), vec2(32), txtIdx, 0);
         }
+
         canvasLayer.drawTile(
-          vec2(csx + 0.25, csy - 0.25 + cliffHeight),
-          vec2(0.5),
-          secTI,
+          vec2(csx, csy + cliffHeight),
+          vec2(1),
+          mkTerrainTile(cliffs, cliffIdx, this._ljs),
         );
       }
     }
@@ -319,7 +229,7 @@ export class TerrainThing implements ITerrainThing {
   /** This is the projection offset. In screen space units? */
   getCliffHeight(pos: Vector2): number {
     const cliffIdx = this.getCliffIdx(pos);
-    return cliffIdx * 1; // cliff height scale would go here
+    return cliffIdxHeightMap[cliffIdx]; // cliff height scale would go here
   }
 
   private _getNoiseAtWorldPosition(pos: Vector2): number {
@@ -356,6 +266,11 @@ export class TerrainThing implements ITerrainThing {
         tap((tc) => {
           this._terrainConfig = tc;
           this._generateNoiseMaps();
+          for (const layer of this._sectorCanvasLayers.values()) {
+            layer.destroy();
+          }
+          if (!this._terrainConfig.paintTerrain) return;
+
           this._generateAllCliffs();
           this._rebuildCollisionLayers();
           this._rebuildCanvasLayers();
@@ -431,7 +346,7 @@ export class TerrainThing implements ITerrainThing {
         // const canvasPos = worldPos.add(vec2(sectorSize / 2));
         const { x: wsx, y: wsy } = worldPos;
         // const { x: csx, y: csy } = canvasPos;
-        const cliffHeight = this.getCliffIdx(worldPos);
+        const cliffIdx = this.getCliffIdx(worldPos);
 
         // north cliff height ... etc
         const nch = this.getCliffIdx(vec2(wsx, wsy + 1));
@@ -441,10 +356,10 @@ export class TerrainThing implements ITerrainThing {
 
         // north edge is cliff ... etc
         const dirs: OrdinalDirection[] = [];
-        if (cliffHeight > nch) dirs.push("n");
-        if (cliffHeight > sch) dirs.push("s");
-        if (cliffHeight > wch) dirs.push("w");
-        if (cliffHeight > ech) dirs.push("e");
+        if (cliffIdx > nch) dirs.push("n");
+        if (cliffIdx > sch) dirs.push("s");
+        if (cliffIdx > wch) dirs.push("w");
+        if (cliffIdx > ech) dirs.push("e");
 
         if (dirs.length > 0) {
           this._cliffsMap.set(coordToKey(worldPos), dirs);

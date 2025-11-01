@@ -9,4 +9,5 @@ export {
   WHITE,
   RED,
   rand,
+  debugRect,
 } from "littlejsengine";

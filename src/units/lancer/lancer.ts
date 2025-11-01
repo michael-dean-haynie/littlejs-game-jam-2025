@@ -4,6 +4,7 @@ import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-objec
 import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
 import type { ITerrainThing } from "../../terrain/terrain-thing.types";
+import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
@@ -34,21 +35,21 @@ export class Lancer extends UnitBase {
     this._registerAnimation(
       "guard",
       spriteAnimationFactory.createSpriteAnimation({
-        n: "units.lancer.guardUp",
-        ne: "units.lancer.guardUpRight",
-        e: "units.lancer.guardRight",
-        se: "units.lancer.guardDownRight",
-        s: "units.lancer.guardDown",
+        n: spriteSheetMap["units.lancer.guardUp"],
+        ne: spriteSheetMap["units.lancer.guardUpRight"],
+        e: spriteSheetMap["units.lancer.guardRight"],
+        se: spriteSheetMap["units.lancer.guardDownRight"],
+        s: spriteSheetMap["units.lancer.guardDown"],
       }),
     );
     this._registerAnimation(
       "attack",
       spriteAnimationFactory.createSpriteAnimation({
-        n: "units.lancer.attackUp",
-        ne: "units.lancer.attackUpRight",
-        e: "units.lancer.attackRight",
-        se: "units.lancer.attackDownRight",
-        s: "units.lancer.attackDown",
+        n: spriteSheetMap["units.lancer.attackUp"],
+        ne: spriteSheetMap["units.lancer.attackUpRight"],
+        e: spriteSheetMap["units.lancer.attackRight"],
+        se: spriteSheetMap["units.lancer.attackDownRight"],
+        s: spriteSheetMap["units.lancer.attackDown"],
       }),
     );
 

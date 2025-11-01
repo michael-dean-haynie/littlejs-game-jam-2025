@@ -89,6 +89,8 @@ Generally, factories are for instantiating types with normal parameters as well 
 - ui
   - re-work ioc and data flow for lit overlay
   - emit event to lit overlay with latest noiseMap data to visualize dot plot and clamping and such
+- sprite animation optimization
+  - maybe sprite animation frame is not needed (will animations ever NOT be at same duration? (100ms or whatever tinyswords does))
 - terrain
   - improve top cliff corners, maybe it's the base I set, limit it to the bottom corners so top ones stay transparent
   - improve canvas layer building by only creating the different tileInfos once, not every loop
@@ -104,3 +106,4 @@ Generally, factories are for instantiating types with normal parameters as well 
 - architecture
   - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts
   - come to terms with abandoning testing?
+  - get rid of the enumeration factory nonsense

@@ -46,7 +46,7 @@ export class Game implements IGame {
       this._gameUpdatePost.bind(this),
       this._gameRender.bind(this),
       this._gameRenderPost.bind(this),
-      textures.map((txt) => txt.src),
+      textures,
     );
   }
 
@@ -96,7 +96,7 @@ export class Game implements IGame {
       // this._ljs.setCameraPos(
       //   unit.box2dObjectAdapter
       //     .getCenterOfMass()
-      //     .add(vec2(0, unit.box2dObjectAdapter.cliffHeight)),
+      //     .add(vec2(0, cliffIdxHeightMap[unit.box2dObjectAdapter.cliffIdx])),
       // );
     }
   }
