@@ -71,7 +71,7 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 60,
+      cameraZoom: 127,
       extent: 0,
       seed: 3851,
       scale: 184,
@@ -236,6 +236,7 @@ export class TerrainThing implements ITerrainThing {
 
           // michael: improve: rendering strategy which knows if the tiles were already painted, so not replaceing cliff face in background, for example
           // maybe also split terrain into layers by cliffIdx so that units can semi-disappear behind cliffs and such.
+          // also be able to place shadows/ripples inbetween flat and cliff faces and such
 
           // start with tile of height below to show behind
           if (!rampToNorth) {

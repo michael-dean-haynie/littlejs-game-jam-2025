@@ -4,6 +4,7 @@ export const textures = [
   "terrain/Tilemap_color3.png",
   "terrain/Tilemap_color4.png",
   "terrain/Tilemap_color5.png",
+  "terrain/Shadow.png",
   "terrain/Water_Background_color.png",
   "units/warrior/Warrior_Idle.png",
   "units/warrior/Warrior_Run.png",
