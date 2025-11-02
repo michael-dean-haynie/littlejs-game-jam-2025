@@ -59,12 +59,20 @@ export function mkTerrainTile(
 
   let pos = cliffTypeOriginMap[cliffType];
 
-  if (cliffFace && cliffIdx > 1) {
+  // prevent cliff face for water, base grass
+  if (cliffFace && cliffIdx < 2) {
+    cliffFace = false;
+  }
+  if (cliffFace) {
     pos = pos.add(vec2(0, 1));
   }
 
   if (northCliff && southCliff) {
     pos = pos.add(bothOffset(cliffType, "y"));
+    if (cliffFace) {
+      // prevent cliff base being water (edge case)
+      pos = pos.add(vec2(0, -2));
+    }
   } else if (northCliff) {
     pos = pos.add(vec2(0, -1));
   } else if (southCliff) {

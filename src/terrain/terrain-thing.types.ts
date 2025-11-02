@@ -8,6 +8,8 @@ export type ITerrainThing = {
   render(): void;
   getCliffIdx(pos: Vector2): number;
   getCliffHeight(pos: Vector2): number;
+  /** Checks if a world position is obscured by a cliff or ramp in the cell below */
+  isObscured(pos: Vector2): boolean;
   /** includes cliff height and ramp height, meant for moving units */
   getTerrainDrawHeight(pos: Vector2): number;
 };

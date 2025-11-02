@@ -3,7 +3,7 @@ import { noCap } from "../core/util/no-cap";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { IUnit, UnitType } from "./unit.types";
 import { type Vector2 } from "../littlejsengine/littlejsengine.types";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
+import { Color, vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
@@ -171,10 +171,16 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
+    const pos = this.box2dObjectAdapter.getCenterOfMass();
+
+    // michael: performance: maybe not for now, might be expensive
+    // make semi-transparent with terrain
+    const alpha = this._terrainThing.isObscured(pos) ? 0.5 : 1;
+    this.box2dObjectAdapter.color = new Color(1, 1, 1, alpha);
+
+    // manage draw height
     this.box2dObjectAdapter.terrainDrawHeight =
-      this._terrainThing.getTerrainDrawHeight(
-        this.box2dObjectAdapter.getCenterOfMass(),
-      );
+      this._terrainThing.getTerrainDrawHeight(pos);
 
     this._processMessages();
     this._getStateObj().onUpdate();

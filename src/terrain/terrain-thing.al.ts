@@ -9,10 +9,9 @@ import {
 } from "./terrain-thing.types";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import { RED, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
+import { Color, RED, rgb, vec2 } from "../littlejsengine/littlejsengine.pure";
 import {
   type CanvasLayer,
-  type Color,
   type Vector2,
 } from "../littlejsengine/littlejsengine.types";
 import { LitOverlay } from "../lit/components/lit-overlay.al";
@@ -73,7 +72,7 @@ export class TerrainThing implements ITerrainThing {
       paintTerrain: true,
       useTiles: true,
       cameraZoom: 60,
-      extent: 3,
+      extent: 0,
       seed: 3851,
       scale: 184,
       octaves: 4,
@@ -214,6 +213,9 @@ export class TerrainThing implements ITerrainThing {
         }
 
         // render cliffs
+        const rampToNorth =
+          this._rampsMap.get(coordToKey(worldPos.add(vec2(0, 1)))) !==
+          undefined;
         const rampToWest =
           this._rampsMap.get(coordToKey(worldPos.add(vec2(-1, 0)))) === "e";
         const rampToEast =
@@ -233,15 +235,19 @@ export class TerrainThing implements ITerrainThing {
           );
 
           // michael: improve: rendering strategy which knows if the tiles were already painted, so not replaceing cliff face in background, for example
-          // start with tile of height below to show around cliff face
-          canvasLayer.drawTile(
-            vec2(csx, csy + cliffHeight),
-            vec2(1),
-            lowerLevelTile,
-          );
+          // maybe also split terrain into layers by cliffIdx so that units can semi-disappear behind cliffs and such.
+
+          // start with tile of height below to show behind
+          if (!rampToNorth) {
+            canvasLayer.drawTile(
+              vec2(csx, csy + cliffHeight),
+              vec2(1),
+              lowerLevelTile,
+            );
+          }
 
           // lower cliff level to north
-          if (nc) {
+          if (nc && !rampToNorth) {
             canvasLayer.drawTile(
               vec2(csx, csy + cliffHeight),
               vec2(1),
@@ -305,6 +311,22 @@ export class TerrainThing implements ITerrainThing {
     xProg = xProg - Math.floor(xProg);
     xProg = rampDir === "e" ? xProg : 1 - xProg;
     return this.getCliffHeight(pos) + xProg;
+  }
+
+  isObscured(pos: Vector2): boolean {
+    const posKey = coordToKey(pos);
+    const belKey = coordToKey(pos.add(vec2(0, -1)));
+
+    const inLowerHalfOfCell = pos.y - 0.5 - Math.floor(pos.y - 0.5) < 0.5;
+    const onRamp = this._rampsMap.get(posKey) !== undefined;
+    const onCliff = this._cliffsMap.get(posKey)?.includes("s") ?? false;
+    const belIsRamp = this._rampsMap.get(belKey) !== undefined;
+    const belIsCliff = this._cliffsMap.get(belKey)?.includes("n") ?? false;
+
+    return (
+      (belIsCliff && (!onRamp || inLowerHalfOfCell)) ||
+      (belIsRamp && !onRamp && !onCliff && inLowerHalfOfCell)
+    );
   }
 
   private _getNoiseAtWorldPosition(pos: Vector2): number {
