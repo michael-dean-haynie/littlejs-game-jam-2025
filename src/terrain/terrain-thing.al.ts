@@ -72,7 +72,7 @@ export class TerrainThing implements ITerrainThing {
     this._terrainConfig = {
       paintTerrain: true,
       useTiles: true,
-      cameraZoom: 147,
+      cameraZoom: 60,
       extent: 3,
       seed: 3851,
       scale: 184,
@@ -481,22 +481,36 @@ export class TerrainThing implements ITerrainThing {
         ) as RampDirection[];
 
         for (const rampDirCliff of rampDirCliffs) {
-          if (Math.random() < 0.66) continue;
-
           let rampPos: Vector2;
+          let landingPos: Vector2;
           let rampDir: RampDirection;
           switch (rampDirCliff) {
             case "w":
               rampDir = "e";
               rampPos = worldPos.add(vec2(-1, 0));
+              landingPos = worldPos.add(vec2(-2, 0));
               break;
             case "e":
               rampDir = "w";
               rampPos = worldPos.add(vec2(1, 0));
+              landingPos = worldPos.add(vec2(2, 0));
               break;
           }
-
+          // must not already be a ramp
           if (this._rampsMap.get(coordToKey(rampPos)) !== undefined) continue;
+          // must lead to somewhere (have a landing space same height as lower cell)
+          if (this.getCliffIdx(landingPos) !== cliffIdx - 1) continue;
+
+          const highNoise = this._getNoiseAtWorldPosition(worldPos);
+          const lowNoise = this._getNoiseAtWorldPosition(rampPos);
+          const noiseDiff = highNoise - lowNoise;
+          const noiseRange =
+            this._terrainConfig.cliffHeightBounds[cliffIdx] -
+            this._terrainConfig.cliffHeightBounds[cliffIdx - 2];
+          const slope = noiseDiff / noiseRange;
+          console.log(slope);
+          if (slope > 0.09) continue;
+
           this._rampsMap.set(coordToKey(rampPos), rampDir);
         }
       }
@@ -531,16 +545,40 @@ export class TerrainThing implements ITerrainThing {
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const worldPos = sectorCenter.add(vec2(x, y));
+        const offsetScalar: number = 0.5;
+        const thickScalar: number = 0.1;
 
+        // ramp collisions
+        const rampDir = this._rampsMap.get(coordToKey(worldPos));
+        if (rampDir !== undefined) {
+          const rampToNorth =
+            this._rampsMap.get(coordToKey(worldPos.add(vec2(0, 1)))) !==
+            undefined;
+          const rampToSouth =
+            this._rampsMap.get(coordToKey(worldPos.add(vec2(0, -1)))) !==
+            undefined;
+
+          const size = vec2(1, thickScalar);
+          let pos = worldPos.add(vec2(0, offsetScalar));
+          // top ramp edge
+          if (!rampToNorth) {
+            collisions.push(this._createCollision(pos, size));
+          }
+          // bottom ramp edge
+          pos = worldPos.add(vec2(0, -offsetScalar));
+          if (!rampToSouth) {
+            collisions.push(this._createCollision(pos, size));
+          }
+          continue;
+        }
+
+        // cliff collisions
         const cliffs = this._cliffsMap.get(coordToKey(worldPos)) ?? [];
         if (cliffs.length === 0) continue;
         const rampToWest =
           this._rampsMap.get(coordToKey(worldPos.add(vec2(-1, 0)))) === "e";
         const rampToEast =
           this._rampsMap.get(coordToKey(worldPos.add(vec2(1, 0)))) === "w";
-
-        const offsetScalar: number = 0.4;
-        const thickScalar: number = 0.2;
 
         for (const cliff of cliffs) {
           if (rampToWest && cliff === "w") continue;
@@ -574,21 +612,24 @@ export class TerrainThing implements ITerrainThing {
               break;
           }
 
-          const b2ObjAdpt =
-            this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
-              pos,
-              size,
-              // mkTile("terrain.water", this._ljs),
-              mkTile("empty", this._ljs),
-              0,
-              RED,
-              this._ljs.box2d.bodyTypeStatic,
-            );
-          b2ObjAdpt.addBox(size, undefined, undefined, undefined, 0);
-          b2ObjAdpt.drawSize = size;
-          collisions.push(b2ObjAdpt);
+          collisions.push(this._createCollision(pos, size));
         }
       }
     }
+  }
+
+  private _createCollision(pos: Vector2, size: Vector2): IBox2dObjectAdapter {
+    const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
+      pos,
+      size,
+      // mkTile("terrain.water", this._ljs),
+      mkTile("empty", this._ljs),
+      0,
+      RED,
+      this._ljs.box2d.bodyTypeStatic,
+    );
+    b2ObjAdpt.addBox(size, undefined, undefined, undefined, 0);
+    b2ObjAdpt.drawSize = size;
+    return b2ObjAdpt;
   }
 }
