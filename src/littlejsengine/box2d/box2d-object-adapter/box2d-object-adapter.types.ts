@@ -20,5 +20,8 @@ export type IBox2dObjectAdapter = Pick<
 > & {
   update$: Observable<void>;
   render$: Observable<void>;
-  travelingHeight: number; // includes cliff height and ramp height
+  /** Offset for cliff height and ramp height */
+  terrainDrawHeight: number;
+  /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
+  drawHeight3d: number;
 };

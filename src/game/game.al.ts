@@ -96,7 +96,7 @@ export class Game implements IGame {
       this._ljs.setCameraPos(
         unit.box2dObjectAdapter
           .getCenterOfMass()
-          .add(vec2(0, unit.box2dObjectAdapter.travelingHeight)),
+          .add(vec2(0, unit.box2dObjectAdapter.terrainDrawHeight)),
       );
     }
   }

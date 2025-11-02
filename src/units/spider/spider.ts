@@ -7,12 +7,18 @@ import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitBase } from "../unit-base";
+import { unitTypeStatsMap } from "../unit-type-stats-map";
 import type { UnitType } from "../unit.types";
+
+unitTypeStatsMap.spider = {
+  ...unitTypeStatsMap.spider,
+  size: 0.25,
+  drawSizeScale: 4,
+  moveSpeed: 2,
+};
 
 export class Spider extends UnitBase {
   readonly type: UnitType = "spider";
-
-  protected _moveSpeed: number = 5;
 
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,

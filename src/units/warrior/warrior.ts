@@ -9,12 +9,18 @@ import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitBase } from "../unit-base";
+import { unitTypeStatsMap } from "../unit-type-stats-map";
 import type { UnitType } from "../unit.types";
+
+unitTypeStatsMap.warrior = {
+  ...unitTypeStatsMap.warrior,
+  size: 0.5,
+  drawSizeScale: 4,
+  moveSpeed: 3,
+};
 
 export class Warrior extends UnitBase {
   readonly type: UnitType = "warrior";
-
-  protected _moveSpeed: number = 3;
 
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,

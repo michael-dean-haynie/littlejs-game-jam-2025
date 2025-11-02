@@ -17,7 +17,7 @@ export class UnitStateMoving extends UnitStateBase {
       }
       this._unit.moveDirection = msg.direction;
       this._unit.box2dObjectAdapter.setLinearVelocity(
-        this._unit.moveDirection.scale(this._unit.moveSpeed),
+        this._unit.moveDirection.scale(this._unit.stats.moveSpeed),
       );
       return "none";
     };
@@ -41,7 +41,7 @@ export class UnitStateMoving extends UnitStateBase {
 
   override onUpdate(): void {
     this._unit.box2dObjectAdapter.setLinearVelocity(
-      this._unit.moveDirection.scale(this._unit.moveSpeed),
+      this._unit.moveDirection.scale(this._unit.stats.moveSpeed),
     );
   }
 }

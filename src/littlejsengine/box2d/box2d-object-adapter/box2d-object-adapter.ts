@@ -17,8 +17,11 @@ export class Box2dObjectAdapter
   private _render$ = new Subject<void>();
   public render$ = this._render$.asObservable();
 
-  // probably in world/screen space unis?
-  public travelingHeight = 0;
+  /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
+  public drawHeight3d = 0;
+
+  /** The vertical offset from cliff height */
+  public terrainDrawHeight = 0;
 
   constructor(ljs: ILJS, ...args: ConstructorParameters<typeof Box2dObject>) {
     super(...args);
@@ -34,7 +37,7 @@ export class Box2dObjectAdapter
     this._render$.next();
     // note: coppied from default impl - just updated the pos argument
     this._ljs.drawTile(
-      this.pos.add(vec2(0, this.travelingHeight)),
+      this.pos.add(vec2(0, this.terrainDrawHeight + this.drawHeight3d)),
       this.drawSize || this.size,
       this.tileInfo,
       this.color,

@@ -86,6 +86,7 @@ Generally, factories are for instantiating types with normal parameters as well 
   - formalize the world space to screen space conversion so mouse interactions facing unit work
     - maybe just account for unit's cliff height in relation to mouse
     - maybe when I lock camera to player with adjusted cliff height, this will go away?
+  - make it so once you attack, the direction doesn't change mid-attack when mouse moves
 - ui
   - re-work ioc and data flow for lit overlay
   - emit event to lit overlay with latest noiseMap data to visualize dot plot and clamping and such
@@ -102,6 +103,8 @@ Generally, factories are for instantiating types with normal parameters as well 
   - water/waves
   - collision
 - pathing
+- controls
+  - make it so left/right clicks don't get stuck up/down by other click sequences
 - doodads, trees, rocks, bushes
 - architecture
   - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts

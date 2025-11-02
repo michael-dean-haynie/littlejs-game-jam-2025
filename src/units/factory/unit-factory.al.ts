@@ -11,7 +11,7 @@ import {
 } from "../../sprite-animation/sprite-animation-factory.types";
 import { UNIT_FACTORY_TOKEN, type IUnitFactory } from "./unit-factory.types";
 import { LJS_TOKEN } from "../../littlejsengine/littlejsengine.token";
-import { UnitTypeInitDataMap, type IUnit, type UnitType } from "../unit.types";
+import { type IUnit, type UnitType } from "../unit.types";
 import { vec2, WHITE } from "../../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
 import { Warrior } from "../warrior/warrior";
@@ -23,6 +23,7 @@ import {
   type ITerrainThing,
 } from "../../terrain/terrain-thing.types";
 import { mkTile } from "../../textures/tile-sheets/mk-tile";
+import { unitTypeStatsMap } from "../unit-type-stats-map";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -50,7 +51,11 @@ export class UnitFactory implements IUnitFactory {
   }
 
   createUnit(unitType: UnitType, position: Vector2): IUnit {
-    const { size: sz, drawSizeScale } = UnitTypeInitDataMap[unitType];
+    const {
+      size: sz,
+      drawSizeScale,
+      drawHeight3d,
+    } = unitTypeStatsMap[unitType];
     const size = vec2(sz);
 
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
@@ -66,6 +71,8 @@ export class UnitFactory implements IUnitFactory {
     b2ObjAdpt.addCircle(size.scale(0.75).length());
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(drawSizeScale);
+    // make the sprite stand in its physical bd2 circle
+    b2ObjAdpt.drawHeight3d = size.y / 2 + drawHeight3d * size.y;
 
     b2ObjAdpt.setFixedRotation(true);
 

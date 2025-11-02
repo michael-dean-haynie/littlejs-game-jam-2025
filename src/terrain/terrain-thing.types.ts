@@ -9,7 +9,7 @@ export type ITerrainThing = {
   getCliffIdx(pos: Vector2): number;
   getCliffHeight(pos: Vector2): number;
   /** includes cliff height and ramp height, meant for moving units */
-  getTravelingHeight(pos: Vector2): number;
+  getTerrainDrawHeight(pos: Vector2): number;
 };
 
 export const rampDirections = ["w", "e"] as const satisfies OrdinalDirection[];

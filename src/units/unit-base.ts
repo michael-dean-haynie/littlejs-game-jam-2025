@@ -9,6 +9,7 @@ import type { IUnitState, UnitState } from "./states/states.types";
 import type { Message } from "../messages/messages.types";
 import type { Ability, IAbility } from "../abilities/abilities.types";
 import type { ITerrainThing } from "../terrain/terrain-thing.types";
+import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
 
 export abstract class UnitBase implements IUnit {
   abstract readonly type: UnitType;
@@ -138,9 +139,8 @@ export abstract class UnitBase implements IUnit {
     if (direction.x === 0) return;
     this.box2dObjectAdapter.mirror = direction.x < 0;
   }
-  protected _moveSpeed: number = 0;
-  public get moveSpeed(): number {
-    return this._moveSpeed;
+  get stats(): UnitStats {
+    return unitTypeStatsMap[this.type];
   }
 
   // messages
@@ -171,8 +171,8 @@ export abstract class UnitBase implements IUnit {
   }
 
   private _update(): void {
-    this.box2dObjectAdapter.travelingHeight =
-      this._terrainThing.getTravelingHeight(
+    this.box2dObjectAdapter.terrainDrawHeight =
+      this._terrainThing.getTerrainDrawHeight(
         this.box2dObjectAdapter.getCenterOfMass(),
       );
 

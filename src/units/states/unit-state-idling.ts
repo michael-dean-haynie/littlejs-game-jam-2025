@@ -29,7 +29,7 @@ export class UnitStateIdling extends UnitStateBase {
 
     this._unit.moveDirection = vec2(0, 0);
     this._unit.box2dObjectAdapter.setLinearVelocity(
-      this._unit.moveDirection.scale(this._unit.moveSpeed),
+      this._unit.moveDirection.scale(this._unit.stats.moveSpeed),
     );
   }
 }

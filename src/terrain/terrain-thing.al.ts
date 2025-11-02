@@ -231,6 +231,7 @@ export class TerrainThing implements ITerrainThing {
             this._ljs,
           );
 
+          // michael: improve: rendering strategy which knows if the tiles were already painted, so not replaceing cliff face in background, for example
           // start with tile of height below to show around cliff face
           canvasLayer.drawTile(
             vec2(csx, csy + cliffHeight),
@@ -293,7 +294,7 @@ export class TerrainThing implements ITerrainThing {
     return cliffIdxHeightMap[cliffIdx]; // cliff height scale would go here
   }
 
-  getTravelingHeight(pos: Vector2): number {
+  getTerrainDrawHeight(pos: Vector2): number {
     const rampDir: RampDirection | undefined = this._rampsMap.get(
       coordToKey(pos),
     );
@@ -583,7 +584,7 @@ export class TerrainThing implements ITerrainThing {
               RED,
               this._ljs.box2d.bodyTypeStatic,
             );
-          b2ObjAdpt.addBox(size);
+          b2ObjAdpt.addBox(size, undefined, undefined, undefined, 0);
           b2ObjAdpt.drawSize = size;
           collisions.push(b2ObjAdpt);
         }
