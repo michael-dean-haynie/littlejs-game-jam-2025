@@ -30,4 +30,5 @@ export type TerrainConfig = {
   // interval:  [0, 1] (expected to be in ascending order)
   cliffHeightBounds: number[];
   clamp: number;
+  rampSlopeThreshold: number;
 };

@@ -137,6 +137,18 @@ export class LitOverlay extends BaseLitElement {
       <div></div>
       <input
         type="range"
+        data-field="rampSlopeThreshold"
+        min="0"
+        max="0.3"
+        step="0.01"
+        value=${this._tc.rampSlopeThreshold}
+        @input=${this._onNumericInput}
+      />
+      <span>Ramp Slope Threshold: ${this._tc.rampSlopeThreshold}</span>
+
+      <div></div>
+      <input
+        type="range"
         data-field="offsetX"
         min="-50"
         max="50"

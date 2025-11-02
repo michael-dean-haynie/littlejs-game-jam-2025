@@ -83,6 +83,7 @@ export class TerrainThing implements ITerrainThing {
       offsetY: 1,
       cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
       clamp: 0.37,
+      rampSlopeThreshold: 0.11,
     };
   }
 
@@ -508,8 +509,7 @@ export class TerrainThing implements ITerrainThing {
             this._terrainConfig.cliffHeightBounds[cliffIdx] -
             this._terrainConfig.cliffHeightBounds[cliffIdx - 2];
           const slope = noiseDiff / noiseRange;
-          console.log(slope);
-          if (slope > 0.09) continue;
+          if (slope > this._terrainConfig.rampSlopeThreshold) continue;
 
           this._rampsMap.set(coordToKey(rampPos), rampDir);
         }
