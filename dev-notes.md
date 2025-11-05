@@ -110,3 +110,20 @@ Generally, factories are for instantiating types with normal parameters as well 
   - figure out how to get vitest to notice compilation issues without running `tsc` before it in the npm scripts
   - come to terms with abandoning testing?
   - get rid of the enumeration factory nonsense
+
+- combat
+- enemy player?
+- enemy units
+- enemy unit ai
+- path finding
+- path finding debugging
+- top down rendering toggle
+
+## memory usage
+
+- dev mode
+  - no game engine start: 14 MB
+  - 1 layer 1225 cells, 49 sectors: 40 MB
+  - no world init, update, or unit spawning: 39 MB
+    - no textures either: 38 MB
+      - no box2d init either: 17 MB

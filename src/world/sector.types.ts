@@ -1,6 +1,9 @@
 import { noCap } from "../core/util/no-cap";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
+import type {
+  CanvasLayer,
+  Vector2,
+} from "../littlejsengine/littlejsengine.types";
 
 /** The distance from the center of a sector to the edge (flat side) in world units */
 export const sectorExtent = 5;
@@ -8,26 +11,16 @@ export const sectorExtent = 5;
 export const sectorSize = extToGridSize(sectorExtent);
 
 /** Converts a sector coordinate to a world coordinate. */
-export function sectorToWorld(sector: Vector2): Vector2 {
+export function sctr2Wrld(sector: Vector2): Vector2 {
   return sector.scale(sectorSize);
 }
 
 /** Converts a world coordinate to a sector coordinate. */
-export function worldToSector(world: Vector2): Vector2 {
+export function wrld2Sctr(world: Vector2): Vector2 {
   return world
     .add(vec2(sectorSize / 2))
     .scale(1 / sectorSize)
     .floor();
-}
-
-/**
- * Converts a scalar "extent" into a scalar "size".
- * The "extent" is a whole number which works kind of like a radius.
- * A "size" is the length/width of a square grid.
- * This is mainly for creating a grid with a discrete center (e.g. 1x1, 3x3, 5x5, ...etc).
- */
-export function extToGridSize(extent: number) {
-  return Math.floor(Math.abs(extent)) * 2 + 1;
 }
 
 /**
@@ -55,4 +48,59 @@ export function keyToCoord(key: string): Vector2 {
   noCap(x % 1 === 0, "Expected x to be a whole number.");
   noCap(y % 1 === 0, "Expected y to be a whole number.");
   return vec2(x, y);
+}
+
+/**
+ * ===========================================================
+ * NEW STUFF WITH REWORK
+ * ===========================================================
+ */
+
+export const phases = ["none", "noise", "layers"] as const;
+export type Phase = (typeof phases)[number];
+export const phaseIdxMap = Object.fromEntries(
+  phases.map((phase, index) => [phase, index]),
+) as { [K in Phase]: number };
+
+export function advancePhase(sector: Sector, newPhase: Phase): void {
+  const { neededFor } = sector;
+  if (phaseIdxMap[neededFor] > phaseIdxMap[newPhase]) return;
+  sector.neededFor = newPhase;
+}
+
+export type Sector = {
+  // Position in sector-space
+  pos: Vector2;
+  // Position in world-space
+  worldPos: Vector2;
+  // Phase of rendering that this sector is needed for
+  neededFor: Phase;
+  // Canvas layer caches for fast rendering
+  layers?: CanvasLayer[];
+};
+
+/**
+ * Converts a scalar "extent" into a scalar "size".
+ * The "extent" is a whole number which works kind of like a radius.
+ * A "size" is the length/width of a square grid.
+ * This is mainly for creating a grid with a discrete center (e.g. 1x1, 3x3, 5x5, ...etc).
+ */
+export function extToGridSize(extent: number) {
+  noCap(extent > 0, "Extent should be greater than 0");
+  return Math.floor(Math.abs(extent)) * 2 + 1;
+}
+
+/** Converts a sector coordinate to a world coordinate. */
+export function sectorToWorld(sector: Vector2, sectorExtent: number): Vector2 {
+  const sectorSize = extToGridSize(sectorExtent);
+  return sector.scale(sectorSize);
+}
+
+/** Converts a world coordinate to a sector coordinate. */
+export function worldToSector(world: Vector2, sectorExtent: number): Vector2 {
+  const sectorSize = extToGridSize(sectorExtent);
+  return world
+    .add(vec2(sectorSize / 2))
+    .scale(1 / sectorSize)
+    .floor();
 }

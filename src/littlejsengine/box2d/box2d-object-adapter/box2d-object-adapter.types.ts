@@ -1,5 +1,5 @@
 import type { Observable } from "rxjs";
-import type { Box2dObject } from "../../littlejsengine.types";
+import type { Box2dObject, Vector2 } from "../../littlejsengine.types";
 
 /** A minimal interface for the box2d engine object that can be mocked out for tests */
 export type IBox2dObjectAdapter = Pick<
@@ -7,6 +7,7 @@ export type IBox2dObjectAdapter = Pick<
   | "tileInfo"
   | "color"
   | "drawSize"
+  | "renderOrder"
   | "mirror"
   | "addBox"
   | "addCircle"
@@ -22,7 +23,9 @@ export type IBox2dObjectAdapter = Pick<
   update$: Observable<void>;
   render$: Observable<void>;
   /** Offset for cliff height and ramp height */
-  terrainDrawHeight: number;
+  terrainHeight: number;
   /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
-  drawHeight3d: number;
+  spriteOffset: number;
+  /** Returns the position in world space after perspective has been applied */
+  getPerspectivePos(): Vector2;
 };

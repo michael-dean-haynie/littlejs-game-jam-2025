@@ -1,8 +1,9 @@
 import { Subject } from "rxjs";
 import type { IBox2dObjectAdapter } from "./box2d-object-adapter.types";
-import { Box2dObject } from "littlejsengine";
+import { Box2dObject, Vector2 } from "littlejsengine";
 import { vec2 } from "../../littlejsengine.pure";
 import type { ILJS } from "../../littlejsengine.impure";
+import type { IWorld } from "../../../world/world.types";
 
 /** Default adapter used in the real app. Callbacks can be assigned for onUpdate etc. */
 export class Box2dObjectAdapter
@@ -10,6 +11,7 @@ export class Box2dObjectAdapter
   implements IBox2dObjectAdapter
 {
   private readonly _ljs: ILJS;
+  private readonly _world: IWorld;
 
   private _update$ = new Subject<void>();
   public update$ = this._update$.asObservable();
@@ -18,18 +20,33 @@ export class Box2dObjectAdapter
   public render$ = this._render$.asObservable();
 
   /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
-  public drawHeight3d = 0;
+  public spriteOffset = 0;
 
   /** The vertical offset from cliff height */
-  public terrainDrawHeight = 0;
+  public terrainHeight = 0;
 
-  constructor(ljs: ILJS, ...args: ConstructorParameters<typeof Box2dObject>) {
+  constructor(
+    ljs: ILJS,
+    world: IWorld,
+    ...args: ConstructorParameters<typeof Box2dObject>
+  ) {
     super(...args);
     this._ljs = ljs;
+    this._world = world;
   }
 
   override update(): void {
     this._update$.next();
+    const pos = this.getCenterOfMass();
+
+    // michael: performance: maybe not for now, might be expensive
+    // make semi-transparent with terrain
+    // const alpha = this._terrainThing.isObscured(pos) ? 0.5 : 1;
+    // this.box2dObjectAdapter.color = new Color(1, 1, 1, alpha);
+
+    // manage height
+    this.terrainHeight = this._world.getTerrainHeight(pos);
+    this.renderOrder = this.terrainHeight;
     super.update();
   }
 
@@ -37,7 +54,7 @@ export class Box2dObjectAdapter
     this._render$.next();
     // note: coppied from default impl - just updated the pos argument
     this._ljs.drawTile(
-      this.pos.add(vec2(0, this.terrainDrawHeight + this.drawHeight3d)),
+      this.getPerspectivePos(),
       this.drawSize || this.size,
       this.tileInfo,
       this.color,
@@ -50,5 +67,13 @@ export class Box2dObjectAdapter
     // this.setPosition(this.pos.add(vec2(0, this.travelingHeight)));
     // super.render();
     // this.setPosition(this.pos.subtract(vec2(0, this.travelingHeight)));
+  }
+
+  getPerspectivePos(): Vector2 {
+    const perspectiveY =
+      this._world.perspective === "topdown"
+        ? 0
+        : this.terrainHeight + this.spriteOffset;
+    return this.pos.add(vec2(0, perspectiveY));
   }
 }

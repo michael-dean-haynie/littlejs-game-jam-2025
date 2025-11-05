@@ -14,6 +14,9 @@ export default defineConfig({
     tailwindcss(),
     checker({
       typescript: true, // Enable TypeScript checking
+      overlay: {
+        initialIsOpen: false,
+      },
     }),
     // include boxd2 assets from node_modules
     viteStaticCopy({

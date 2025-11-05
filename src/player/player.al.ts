@@ -19,6 +19,7 @@ import {
 } from "../units/factory/unit-factory.types";
 import { GuardToggle } from "../input/game-inputs/guard-toggle";
 import { Attack } from "../input/game-inputs/attack";
+import { WORLD_TOKEN, type IWorld } from "../world/world.types";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
@@ -26,15 +27,18 @@ import { Attack } from "../input/game-inputs/attack";
 export class Player implements IPlayer {
   private readonly _inputManager: IInputManager;
   private readonly _unitFactory: IUnitFactory;
+  private readonly _world: IWorld;
 
   unit: IUnit | null = null;
 
   constructor(
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(UNIT_FACTORY_TOKEN) unitFactory: IUnitFactory,
+    @inject(WORLD_TOKEN) world: IWorld,
   ) {
     this._inputManager = inputManager;
     this._unitFactory = unitFactory;
+    this._world = world;
 
     this._inputManager.commands$
       .pipe(
@@ -80,6 +84,7 @@ export class Player implements IPlayer {
     this.unit = this._unitFactory.createUnit("warrior", vec2(0));
     // }
 
+    this._world.unit = this.unit;
     // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).unit = this.unit;

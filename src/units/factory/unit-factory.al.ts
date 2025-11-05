@@ -18,12 +18,9 @@ import { Warrior } from "../warrior/warrior";
 import { Lancer } from "../lancer/lancer";
 import { Spider } from "../spider/spider";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
-import {
-  TERRAIN_THING_TOKEN,
-  type ITerrainThing,
-} from "../../terrain/terrain-thing.types";
 import { mkTile } from "../../textures/tile-sheets/mk-tile";
 import { unitTypeStatsMap } from "../unit-type-stats-map";
+import { WORLD_TOKEN, type IWorld } from "../../world/world.types";
 
 @Autoloadable({
   serviceIdentifier: UNIT_FACTORY_TOKEN,
@@ -31,7 +28,7 @@ import { unitTypeStatsMap } from "../unit-type-stats-map";
 export class UnitFactory implements IUnitFactory {
   private readonly _spriteAnimationFactory: ISpriteAnimationFactory;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
-  private readonly _terrainThing: ITerrainThing;
+  private readonly _world: IWorld;
   private readonly _ljs: ILJS;
 
   constructor(
@@ -39,14 +36,14 @@ export class UnitFactory implements IUnitFactory {
     spriteAnimationFactory: ISpriteAnimationFactory,
     @inject(BOX2D_OBJECT_ADAPTER_FACTORY_TOKEN)
     box2dObjectAdapterFactory: IBox2dObjectAdapterFactory,
-    @inject(TERRAIN_THING_TOKEN)
-    terrainThing: ITerrainThing,
+    @inject(WORLD_TOKEN)
+    world: IWorld,
     @inject(LJS_TOKEN)
     ljs: ILJS,
   ) {
     this._spriteAnimationFactory = spriteAnimationFactory;
     this._box2dObjectAdapterFactory = box2dObjectAdapterFactory;
-    this._terrainThing = terrainThing;
+    this._world = world;
     this._ljs = ljs;
   }
 
@@ -54,7 +51,7 @@ export class UnitFactory implements IUnitFactory {
     const {
       size: sz,
       drawSizeScale,
-      drawHeight3d,
+      spriteOffset: drawHeight3d,
     } = unitTypeStatsMap[unitType];
     const size = vec2(sz);
 
@@ -72,19 +69,14 @@ export class UnitFactory implements IUnitFactory {
     // make the sprite tile fit to the physics body shape
     b2ObjAdpt.drawSize = size.scale(drawSizeScale);
     // make the sprite stand in its physical bd2 circle
-    b2ObjAdpt.drawHeight3d = size.y / 2 + drawHeight3d * size.y;
+    b2ObjAdpt.spriteOffset = size.y / 2 + drawHeight3d * size.y;
 
     b2ObjAdpt.setFixedRotation(true);
 
-    const args: [
-      IBox2dObjectAdapter,
-      ISpriteAnimationFactory,
-      ITerrainThing,
-      ILJS,
-    ] = [
+    const args: [IBox2dObjectAdapter, ISpriteAnimationFactory, IWorld, ILJS] = [
       b2ObjAdpt,
       this._spriteAnimationFactory,
-      this._terrainThing,
+      this._world,
       this._ljs,
     ];
 

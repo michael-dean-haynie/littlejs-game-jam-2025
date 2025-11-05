@@ -10,10 +10,7 @@ import {
   type IInputManager,
 } from "../input/input-manager/input-manager.types";
 import { textures } from "../textures/textures.types";
-import {
-  TERRAIN_THING_TOKEN,
-  type ITerrainThing,
-} from "../terrain/terrain-thing.types";
+import { WORLD_TOKEN, type IWorld } from "../world/world.types";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -22,18 +19,18 @@ export class Game implements IGame {
   private readonly _ljs: ILJS;
   private readonly _inputManager: IInputManager;
   private readonly _player: IPlayer;
-  private readonly _terrainThing: ITerrainThing;
+  private readonly _world: IWorld;
 
   constructor(
     @inject(LJS_TOKEN) ljs: ILJS,
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(PLAYER_TOKEN) player: IPlayer,
-    @inject(TERRAIN_THING_TOKEN) terrainThing: ITerrainThing,
+    @inject(WORLD_TOKEN) world: IWorld,
   ) {
     this._ljs = ljs;
     this._inputManager = inputManager;
     this._player = player;
-    this._terrainThing = terrainThing;
+    this._world = world;
   }
 
   start(): void {
@@ -58,7 +55,8 @@ export class Game implements IGame {
     await this._ljs.box2dInit();
 
     // michael: organize
-    this._terrainThing.init();
+    this._world.init();
+
     this._ljs.setCameraPos(vec2(0, 0));
 
     this._player.spawnUnit();
@@ -81,6 +79,7 @@ export class Game implements IGame {
    */
   private _gameUpdate(): void {
     this._inputManager.triggerFrameDrivenInputs();
+    this._world.update();
   }
 
   /**
@@ -91,13 +90,7 @@ export class Game implements IGame {
     // michael: temp - lock camera to player unit
     const unit = this._player.unit;
     if (unit !== null) {
-      // this._ljs.setCameraPos(unit.box2dObjectAdapter.getCenterOfMass());
-      // this is jumpy, at least while we can jump over cliffs, maybe enable again later
-      this._ljs.setCameraPos(
-        unit.box2dObjectAdapter
-          .getCenterOfMass()
-          .add(vec2(0, unit.box2dObjectAdapter.terrainDrawHeight)),
-      );
+      this._ljs.setCameraPos(unit.box2dObjectAdapter.getPerspectivePos());
     }
   }
 
@@ -105,10 +98,7 @@ export class Game implements IGame {
    * Called before objects are rendered
    * Draw any background effects that appear behind objects
    */
-  private _gameRender(): void {
-    // michael: remove
-    this._terrainThing.render();
-  }
+  private _gameRender(): void {}
 
   /**
    * Called after objects are rendered

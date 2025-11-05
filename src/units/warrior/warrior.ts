@@ -3,8 +3,8 @@ import { Guard } from "../../abilities/guard";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 import type { ILJS } from "../../littlejsengine/littlejsengine.impure";
 import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
-import type { ITerrainThing } from "../../terrain/terrain-thing.types";
 import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
+import type { IWorld } from "../../world/world.types";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
@@ -25,10 +25,10 @@ export class Warrior extends UnitBase {
   constructor(
     box2dObjectAapter: IBox2dObjectAdapter,
     spriteAnimationFactory: ISpriteAnimationFactory,
-    terrainThing: ITerrainThing,
+    world: IWorld,
     ljs: ILJS,
   ) {
-    super(box2dObjectAapter, terrainThing);
+    super(box2dObjectAapter, world);
 
     // register animations
     this._registerAnimation(

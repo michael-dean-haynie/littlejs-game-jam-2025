@@ -1,8 +1,6 @@
 import { inject } from "inversify";
-import { Autoloadable } from "../core/autoload/autoloadable";
 import {
   rampDirections,
-  TERRAIN_THING_TOKEN,
   type ITerrainThing,
   type RampDirection,
   type TerrainConfig,
@@ -21,8 +19,8 @@ import {
   sectorExtent,
   sectorSize,
   coordToKey,
-  sectorToWorld,
-  worldToSector,
+  sctr2Wrld,
+  wrld2Sctr,
 } from "../world/sector.types";
 import { noCap } from "../core/util/no-cap";
 import type { OrdinalDirection } from "../core/types/directions.types";
@@ -39,10 +37,10 @@ import {
 import { mkTile } from "../textures/tile-sheets/mk-tile";
 import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
 
-// michael: doc: alea and simplex noise packages
-@Autoloadable({
-  serviceIdentifier: TERRAIN_THING_TOKEN,
-})
+// // michael: doc: alea and simplex noise packages
+// @Autoloadable({
+//   serviceIdentifier: TERRAIN_THING_TOKEN,
+// })
 export class TerrainThing implements ITerrainThing {
   private readonly _ljs: ILJS;
   private readonly _box2dObjectAdapterFactory: IBox2dObjectAdapterFactory;
@@ -144,7 +142,7 @@ export class TerrainThing implements ITerrainThing {
   }
 
   private _buildSectorCanvasLayer(sector: Vector2): void {
-    const sectorCenter = sectorToWorld(sector);
+    const sectorCenter = sctr2Wrld(sector);
     const canvasLayer = new this._ljs.CanvasLayer(
       sectorCenter,
       vec2(sectorSize),
@@ -334,8 +332,8 @@ export class TerrainThing implements ITerrainThing {
     // round world position to center of tile
     const worldPos = vec2(Math.round(pos.x), Math.round(pos.y));
 
-    const sector = worldToSector(worldPos);
-    const sectorCenter = sectorToWorld(sector);
+    const sector = wrld2Sctr(worldPos);
+    const sectorCenter = sctr2Wrld(sector);
 
     const offsetFromSectorCenter = worldPos.subtract(sectorCenter);
     const offsetFromNoiseMapOrigin = offsetFromSectorCenter.add(
@@ -415,7 +413,7 @@ export class TerrainThing implements ITerrainThing {
       this._terrainConfig.octaves,
       this._terrainConfig.persistance,
       this._terrainConfig.lacunarity,
-      sectorToWorld(
+      sctr2Wrld(
         sector.add(
           vec2(this._terrainConfig.offsetX, this._terrainConfig.offsetY),
         ),
@@ -440,7 +438,7 @@ export class TerrainThing implements ITerrainThing {
   }
 
   private _generateSectorCliffs(sector: Vector2) {
-    const sectorCenter = sectorToWorld(sector);
+    const sectorCenter = sctr2Wrld(sector);
 
     const upper = sectorExtent;
     const lower = -upper;
@@ -487,7 +485,7 @@ export class TerrainThing implements ITerrainThing {
   }
 
   private _remarkSectorRamps(sector: Vector2): void {
-    const sectorCenter = sectorToWorld(sector);
+    const sectorCenter = sctr2Wrld(sector);
 
     const upper = sectorExtent;
     const lower = -upper;
@@ -558,7 +556,7 @@ export class TerrainThing implements ITerrainThing {
   }
 
   private _buildSectorCollisions(sector: Vector2): void {
-    const sectorCenter = sectorToWorld(sector);
+    const sectorCenter = sctr2Wrld(sector);
     const collisions: IBox2dObjectAdapter[] = [];
     this._sectorCollisionsMap.set(coordToKey(sector), collisions);
 
