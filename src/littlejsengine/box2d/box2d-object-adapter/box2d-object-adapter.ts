@@ -46,7 +46,8 @@ export class Box2dObjectAdapter
 
     // manage height
     this.terrainHeight = this._world.getTerrainHeight(pos);
-    this.renderOrder = this.terrainHeight;
+    // michael: formalize this. Cliffs take the integer heights, within those, units are .1, maybe other things will be .2, etc
+    this.renderOrder = this.terrainHeight + 0.1;
     super.update();
   }
 

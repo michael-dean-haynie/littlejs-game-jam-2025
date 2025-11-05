@@ -1,7 +1,7 @@
 import { noCap } from "../core/util/no-cap";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type {
-  CanvasLayer,
+  TileLayer,
   Vector2,
 } from "../littlejsengine/littlejsengine.types";
 
@@ -75,8 +75,8 @@ export type Sector = {
   worldPos: Vector2;
   // Phase of rendering that this sector is needed for
   neededFor: Phase;
-  // Canvas layer caches for fast rendering
-  layers?: CanvasLayer[];
+  // Layer caches for fast rendering
+  layers?: TileLayer[];
 };
 
 /**

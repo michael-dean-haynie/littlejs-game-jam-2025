@@ -9,8 +9,8 @@ export type Cell = {
   pos: Vector2;
   /** Position relative to center of sector */
   sectorPos: Vector2;
-  /** Position relative to origin of canvas (bottom left) */
-  canvasPos: Vector2;
+  /** Position relative to origin of the tile layer (bottom left) */
+  tileLayerPos: Vector2;
   /** Raw noise value for generating terrain */
   noise: number;
   /** Cliff height - result of quantized noise value */

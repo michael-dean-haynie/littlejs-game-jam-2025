@@ -26,6 +26,7 @@ export const textures = [
   "units/spider/Spider_Idle.png",
   "units/spider/Spider_Run.png",
   "units/spider/Spider_Attack.png",
+  "white.png",
   "empty.png",
 ] as const satisfies string[];
 export type Texture = (typeof textures)[number];

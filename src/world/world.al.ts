@@ -188,6 +188,9 @@ export class World implements IWorld {
         this._drawCell(cell, sector);
       }
     }
+    for (const layer of sector.layers!) {
+      layer.redraw();
+    }
   }
 
   /** Advance a single sector (noise phase does not need any neighbors to advance) */
@@ -235,7 +238,7 @@ export class World implements IWorld {
         const cell: Cell = {
           pos,
           sectorPos: vec2(x, y),
-          canvasPos: this._worldToCanvasPos(pos),
+          tileLayerPos: vec2(x, y).add(vec2(this._wc.sectorExtent)),
           noise,
           cliffHeight: quantize(noise, this._wc.cliffHeightBounds),
         };
@@ -252,11 +255,6 @@ export class World implements IWorld {
   /** tile scale */
   private _tileScale = 64;
 
-  /** convert an offset relative to the world-space origin into an offset relative to the origin of a sector canvas (bottom left) */
-  private _worldToCanvasPos(pos: Vector2) {
-    return pos.add(vec2(this._sectorSize / 2));
-  }
-
   private readonly _terrainColors: Color[] = [
     rgb(0.255, 0.412, 0.882), // 0: Royal Blue (water/ocean)
     rgb(0.933, 0.839, 0.686), // 1: Peach Puff (sandy beach)
@@ -270,32 +268,34 @@ export class World implements IWorld {
     sector.layers = [];
 
     for (let cliff = 0; cliff <= this._wc.cliffHeightBounds.length; cliff++) {
-      // init the layer
-      const layer = new this._ljs.CanvasLayer(
-        sector.worldPos,
+      const layer = new this._ljs.TileLayer(
+        sector.worldPos.subtract(vec2(this._sectorSize / 2)),
         vec2(this._sectorSize),
-        0,
+        new this._ljs.TileInfo(
+          vec2(0),
+          vec2(this._tileScale),
+          textureIndexMap["white.png"],
+          0,
+        ),
+        vec2(1),
         cliff,
-        vec2(this._sectorSize).scale(this._tileScale),
-      );
-      layer.tileInfo = new this._ljs.TileInfo(
-        vec2(0),
-        vec2(this._tileScale),
-        textureIndexMap["terrain/Water_Background_color.png"],
-        0,
+        true,
       );
       sector.layers[cliff] = layer;
-      // michael: remove
       debugRect(sector.worldPos, vec2(this._sectorSize), WHITE.toString(), 1);
     }
   }
 
   private _drawCell(cell: Cell, sector: Sector): void {
     noCap.notUndefined(sector.layers);
-    sector.layers[cell.cliffHeight].drawRect(
-      cell.canvasPos,
-      vec2(1),
-      this._terrainColors[cell.cliffHeight],
+    sector.layers[cell.cliffHeight].setData(
+      cell.tileLayerPos,
+      new this._ljs.TileLayerData(
+        0,
+        0,
+        false,
+        this._terrainColors[cell.cliffHeight],
+      ),
     );
   }
 
