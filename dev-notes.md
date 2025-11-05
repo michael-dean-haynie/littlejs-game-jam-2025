@@ -127,3 +127,8 @@ Generally, factories are for instantiating types with normal parameters as well 
   - no world init, update, or unit spawning: 39 MB
     - no textures either: 38 MB
       - no box2d init either: 17 MB
+
+## cpu usage / performance
+
+- switching to tile layers (with webgl enabled) helped a log
+- droping a fram whenever we cross sector boundaries though, seems because of "set width"

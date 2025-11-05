@@ -177,7 +177,7 @@ export class World implements IWorld {
     if (sector.layers !== undefined) {
       return;
     }
-    this._initSectorCanvasLayers(sectorVector);
+    this._initSectorLayers(sectorVector);
 
     upper = this._wc.sectorExtent;
     lower = -upper;
@@ -263,7 +263,7 @@ export class World implements IWorld {
     rgb(1.0, 0.98, 0.98), // 4: Snow White (snow caps)
   ];
 
-  private _initSectorCanvasLayers(sectorVector: Vector2): void {
+  private _initSectorLayers(sectorVector: Vector2): void {
     const sector = this._sectors.get(f2dmk(sectorVector))!;
     sector.layers = [];
 
