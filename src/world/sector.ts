@@ -11,6 +11,8 @@ import { Cell, rampDirections } from "./cell";
 import { CliffRenderer } from "./renderers/cliff-renderer";
 import { TdDrawRectCliffRenderer } from "./renderers/td-draw-rect-cliff-renderer";
 import { TdDrawTileCliffRenderer } from "./renderers/td-draw-tile-cliff-renderer";
+import { TdoDrawRectCliffRenderer } from "./renderers/tdo-draw-rect-cliff-renderer";
+import { TdoDrawTileCliffRenderer } from "./renderers/tdo-draw-tile-cliff-renderer";
 import { f2dmk, type IWorld } from "./world.types";
 
 /** The distance from the center of a sector to the edge (flat side) in world units */
@@ -368,14 +370,14 @@ export class Sector {
             );
             break;
           case !tpdn && tiles:
-            renderer = new TdDrawTileCliffRenderer(
+            renderer = new TdoDrawTileCliffRenderer(
               this,
               this._world,
               cliffHeight,
             );
             break;
           case !tpdn && !tiles:
-            renderer = new TdDrawRectCliffRenderer(
+            renderer = new TdoDrawRectCliffRenderer(
               this,
               this._world,
               cliffHeight,

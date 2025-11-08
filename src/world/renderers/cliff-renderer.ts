@@ -1,6 +1,9 @@
+import { drawRect, Vector2 } from "littlejsengine";
 import { EngineObject, vec2 } from "../../littlejsengine/littlejsengine.pure";
 import type { Sector } from "../sector";
 import type { IWorld } from "../world.types";
+import { cellWorldSize } from "../cell";
+import { cliffHeightColors } from "./cliff-height-colors";
 
 export abstract class CliffRenderer extends EngineObject {
   protected readonly _sector: Sector;
@@ -19,5 +22,9 @@ export abstract class CliffRenderer extends EngineObject {
     this._sector = sector;
     this._world = world;
     this._cliffHeight = cliffHeight;
+  }
+
+  protected _drawWater(pos: Vector2): void {
+    drawRect(pos, cellWorldSize, cliffHeightColors[0]);
   }
 }

@@ -30,6 +30,11 @@ export const cellTextureSize = vec2(64);
 export const rampDirections = ["w", "e"] as const satisfies OrdinalDirection[];
 export type RampDirection = (typeof rampDirections)[number];
 
+const rampDirOriginMap: { [key in RampDirection]: Vector2 } = {
+  e: vec2(0, 5),
+  w: vec2(3, 5),
+};
+
 export class Cell {
   /** Position in world-space */
   pos: Vector2;
@@ -50,13 +55,17 @@ export class Cell {
   mainTi?: TileInfo;
   /** The tile for background art "behind" the main tile (based on perspective) */
   backgroundTi?: TileInfo;
-  /** The tile with the cliff face for this tile if it is elevated cliff */
+  /** The tile with the cliff face for this cell if it is elevated cliff */
   cliffFaceTi?: TileInfo;
+  /** The tile with the upper ramp for this cell if it is a ramp */
+  upperRampTi?: TileInfo;
 
   /** Position in world space to draw the background and main tiles */
   mainPos: Vector2;
   /** Position in world space to draw the cliff face tile */
   cliffFacePos?: Vector2;
+  /** Position in world space to draw the top upperRamp tile */
+  upperRampPos?: Vector2;
 
   private readonly _world: IWorld;
 
@@ -85,6 +94,7 @@ export class Cell {
           vec2(0, cliffHeightObliqueOffsets[this.cliffHeight]),
         );
         this.cliffFacePos = this.mainPos.add(vec2(0, -1));
+        this.upperRampPos = this.mainPos.add(vec2(0, 1));
         break;
     }
   }
@@ -117,19 +127,32 @@ export class Cell {
   }
 
   setTileInfo(): void {
-    this._setMainTileInfo();
-    this._setBackgroundTileInfo();
-    this._setCliffFaceTileInfo();
-  }
-
-  private _setMainTileInfo(): void {
-    const cliffType = this._getCliffType();
-    let tilePos = this._getTilePosOrigin();
+    const adjCells = this.getAdjacentCells();
+    const r2w = adjCells.get("w")?.rampDir === "e";
+    const r2e = adjCells.get("e")?.rampDir === "w";
 
     const c2n = this.cliffs?.includes("n");
     const c2s = this.cliffs?.includes("s");
-    const c2w = this.cliffs?.includes("w");
-    const c2e = this.cliffs?.includes("e");
+    const c2w = this.cliffs?.includes("w") && !r2w;
+    const c2e = this.cliffs?.includes("e") && !r2e;
+
+    const cliffType = this._getCliffType();
+    let tilePos = this._getTilePosOrigin();
+
+    // ========================
+    // Background Tile
+    // ========================
+    if (this.cliffHeight !== 0) {
+      this.backgroundTi = tile(
+        tilePos,
+        cellTextureSize,
+        cliffHieghtTextureIndexMap[this.cliffHeight - 1],
+      );
+    }
+
+    // ========================
+    // Main Tile
+    // ========================
 
     // y offset
     if (c2n && c2s) {
@@ -154,29 +177,36 @@ export class Cell {
       cellTextureSize,
       cliffHieghtTextureIndexMap[this.cliffHeight],
     );
-  }
 
-  private _setBackgroundTileInfo(): void {
-    const tilePos = this._getTilePosOrigin();
-    if (this.cliffHeight === 0) return;
+    // ========================
+    // Cliff Face Tile
+    // ========================
+    if (this.cliffHeight > 1 && c2s) {
+      tilePos = tilePos.add(this._getCliffFaceOffset(c2n, c2s));
+      this.cliffFaceTi = tile(
+        tilePos,
+        cellTextureSize,
+        cliffHieghtTextureIndexMap[this.cliffHeight],
+      );
+    }
 
-    const subCliffHeight = this.cliffHeight - 1;
-    this.backgroundTi = tile(
-      tilePos,
-      cellTextureSize,
-      cliffHieghtTextureIndexMap[subCliffHeight],
-    );
-  }
-
-  private _setCliffFaceTileInfo(): void {
-    // const tilePos = this._getTilePosOrigin();
-    // if (this.cliffHeight === 0) return;
-    // const subCliffHeight = this.cliffHeight - 1;
-    // this.subTileInfo = tile(
-    //   tilePos,
-    //   cellTextureSize,
-    //   cliffHieghtTextureIndexMap[subCliffHeight],
-    // );
+    // ========================
+    // Ramp Tiles
+    // ========================
+    if (this.rampDir !== undefined) {
+      tilePos = rampDirOriginMap[this.rampDir];
+      this.mainTi = tile(
+        tilePos,
+        cellTextureSize,
+        cliffHieghtTextureIndexMap[this.cliffHeight + 1],
+      );
+      tilePos = tilePos.add(vec2(0, -1));
+      this.upperRampTi = tile(
+        tilePos,
+        cellTextureSize,
+        cliffHieghtTextureIndexMap[this.cliffHeight + 1],
+      );
+    }
   }
 
   private _getCliffType(): CliffType {
@@ -185,6 +215,16 @@ export class Cell {
 
   private _getTilePosOrigin(): Vector2 {
     return cliffTypeOriginMap[this._getCliffType()];
+  }
+
+  private _getCliffFaceOffset(
+    cliffToNorth: boolean | undefined,
+    cliffToSouth: boolean | undefined,
+  ): Vector2 {
+    if (cliffToNorth && cliffToSouth) {
+      return vec2(0, -1);
+    }
+    return vec2(0, 1);
   }
 
   /** Tile offset for situations when it is a north AND south cliff */
