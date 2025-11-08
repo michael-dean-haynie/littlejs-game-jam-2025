@@ -42,14 +42,14 @@ export type HWD = ReturnType<typeof HWDs.values>[number];
 const tv: {
   [K in PWD]: Vector2;
 } = {
-  n: vec2(0, 1).normalize(),
-  e: vec2(1, 0).normalize(),
-  s: vec2(0, -1).normalize(),
-  w: vec2(-1, 0).normalize(),
-  ne: vec2(1, 1).normalize(),
-  se: vec2(1, -1).normalize(),
-  sw: vec2(-1, -1).normalize(),
-  nw: vec2(-1, 1).normalize(),
+  n: vec2(0, 1),
+  e: vec2(1, 0),
+  s: vec2(0, -1),
+  w: vec2(-1, 0),
+  ne: vec2(1, 1),
+  se: vec2(1, -1),
+  sw: vec2(-1, -1),
+  nw: vec2(-1, 1),
 } as const;
 
 export const DirectionToVectorMap: {
@@ -63,12 +63,12 @@ export const DirectionToVectorMap: {
   se: tv.se,
   sw: tv.sw,
   nw: tv.nw,
-  nne: tv.n.add(tv.ne).normalize(),
-  ene: tv.e.add(tv.ne).normalize(),
-  ese: tv.e.add(tv.se).normalize(),
-  sse: tv.s.add(tv.se).normalize(),
-  ssw: tv.s.add(tv.sw).normalize(),
-  wsw: tv.w.add(tv.sw).normalize(),
-  wnw: tv.w.add(tv.nw).normalize(),
-  nnw: tv.n.add(tv.nw).normalize(),
+  nne: tv.n.add(tv.ne),
+  ene: tv.e.add(tv.ne),
+  ese: tv.e.add(tv.se),
+  sse: tv.s.add(tv.se),
+  ssw: tv.s.add(tv.sw),
+  wsw: tv.w.add(tv.sw),
+  wnw: tv.w.add(tv.nw),
+  nnw: tv.n.add(tv.nw),
 } as const;

@@ -30,7 +30,6 @@ function bothOffset(type: CliffType, axis: Axis): Vector2 {
   return tileVector;
 }
 
-/** Whether the lower level is grass or water (NOTE: not supporting water directly to cliff face for now)*/
 export type Axis = "x" | "y";
 
 /** Whether the lower level is grass or water (NOTE: not supporting water directly to cliff face for now)*/

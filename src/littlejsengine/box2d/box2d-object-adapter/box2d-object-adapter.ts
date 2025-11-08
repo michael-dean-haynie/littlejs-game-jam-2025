@@ -4,6 +4,7 @@ import { Box2dObject, Vector2 } from "littlejsengine";
 import { vec2 } from "../../littlejsengine.pure";
 import type { ILJS } from "../../littlejsengine.impure";
 import type { IWorld } from "../../../world/world.types";
+import { cliffHeightObliqueOffsets } from "../../../world/renderers/cliff-height-oblique-offsets";
 
 /** Default adapter used in the real app. Callbacks can be assigned for onUpdate etc. */
 export class Box2dObjectAdapter
@@ -22,8 +23,10 @@ export class Box2dObjectAdapter
   /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
   public spriteOffset = 0;
 
-  /** The vertical offset from cliff height */
-  public terrainHeight = 0;
+  /** Cliff height + ramp height */
+  public cliffHeight = 0;
+
+  private _rampHeight = 0;
 
   constructor(
     ljs: ILJS,
@@ -44,10 +47,10 @@ export class Box2dObjectAdapter
     // const alpha = this._terrainThing.isObscured(pos) ? 0.5 : 1;
     // this.box2dObjectAdapter.color = new Color(1, 1, 1, alpha);
 
-    // manage height
-    this.terrainHeight = this._world.getTerrainHeight(pos);
+    this.cliffHeight = this._world.getCell(pos).cliffHeight;
+    this._rampHeight = this._world.getRampHeight(pos);
     // michael: formalize this. Cliffs take the integer heights, within those, units are .1, maybe other things will be .2, etc
-    this.renderOrder = this.terrainHeight + 0.1;
+    this.renderOrder = this.cliffHeight + 0.1;
     super.update();
   }
 
@@ -71,10 +74,15 @@ export class Box2dObjectAdapter
   }
 
   getPerspectivePos(): Vector2 {
-    const perspectiveY =
-      this._world.perspective === "topdown"
-        ? 0
-        : this.terrainHeight + this.spriteOffset;
-    return this.pos.add(vec2(0, perspectiveY));
+    const pos = this.getCenterOfMass();
+    switch (this._world.perspective) {
+      case "topdown":
+        return pos;
+      case "topdown-oblique":
+        return pos
+          .add(vec2(0, cliffHeightObliqueOffsets[this.cliffHeight]))
+          .add(vec2(0, this._rampHeight))
+          .add(vec2(0, this.spriteOffset));
+    }
   }
 }

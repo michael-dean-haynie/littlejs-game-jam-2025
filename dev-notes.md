@@ -132,3 +132,24 @@ Generally, factories are for instantiating types with normal parameters as well 
 
 - switching to tile layers (with webgl enabled) helped a log
 - droping a fram whenever we cross sector boundaries though, seems because of "set width"
+- release build + only one cliff level (so only 3 tilelayers) seems like it can work
+  - increasing the sector size and the sector render extent brought back the frame dropping
+
+- ideas to fix
+  - max one tilelayer per frame
+    - this seemed to make things worse
+  - maybe destroying tile layers also has load
+
+## revisiting terrain painting
+
+- squares vs tiles
+- top down vs perspective
+  - (probably no need for layers with top-down since no occlusion from perspective)
+    - or maybe top down just produces one layer, and perspective will produce many, and game will just render whatever there is
+  - (minimap reuse if decoupled from world sectors cells/layers)
+  - (drawing just cells in sector, or include cells occluding sector with perspective)
+
+- the logic for rendering a cell/sector should not know how it's drawn (using a layer or just draw rect)
+  - as much as possible
+- optimized render loop should avoid:
+  - object creation

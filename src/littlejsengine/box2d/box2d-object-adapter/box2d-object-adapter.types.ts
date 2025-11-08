@@ -22,8 +22,7 @@ export type IBox2dObjectAdapter = Pick<
 > & {
   update$: Observable<void>;
   render$: Observable<void>;
-  /** Offset for cliff height and ramp height */
-  terrainHeight: number;
+  cliffHeight: number;
   /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
   spriteOffset: number;
   /** Returns the position in world space after perspective has been applied */

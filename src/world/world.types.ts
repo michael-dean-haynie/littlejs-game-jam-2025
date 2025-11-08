@@ -1,15 +1,24 @@
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import type { IUnit } from "../units/unit.types";
+import type { Cell } from "./cell";
+import type { Sector } from "./sector";
+import type { TileLayerQueueItem } from "./world.al";
 
 export const WORLD_TOKEN = "WORLD_TOKEN" as const;
 
 export interface IWorld {
   init(): void;
   update(): void;
+  tileLayerQueue: TileLayerQueueItem[];
   get perspective(): Perspective;
+  get sectorSize(): number;
 
   unit?: IUnit;
-  getTerrainHeight(pos: Vector2): number;
+  readonly wc: WorldConfig;
+  sectors: Map<number, Sector>;
+  cells: Map<number, Cell>;
+  getCell(pos: Vector2): Cell;
+  getRampHeight(pos: Vector2): number;
 }
 
 /** Either true 2d, or 2.5d */
@@ -31,9 +40,9 @@ export type WorldConfig = {
   tnOctaves: number;
   tnPersistance: number;
   tnLacunarity: number;
-  /** Terrain noise x offset (in sectors) */
+  /** Terrain noise x offset (in world units) */
   tnOffsetX: number;
-  /** Terrain noise y offset (in sectors) */
+  /** Terrain noise y offset (in world units) */
   tnOffsetY: number;
   tnClamp: number;
   /** The boundaries that define different cliff levels (should be asc) */
@@ -43,21 +52,21 @@ export type WorldConfig = {
 };
 
 export const defaultWorldConfig: WorldConfig = {
-  cameraZoom: 54,
+  cameraZoom: 87,
   renderTerrain: true,
   useTiles: false,
   topDownPerspective: true,
-  sectorExtent: 2,
-  sectorRenderExtent: 1,
+  sectorExtent: 3,
+  sectorRenderExtent: 3,
   seed: 3851,
   tnScale: 184,
   tnOctaves: 4,
   tnPersistance: 0.56,
   tnLacunarity: 3.2,
-  tnOffsetX: -2,
-  tnOffsetY: 1,
+  tnOffsetX: 0,
+  tnOffsetY: 0,
   tnClamp: 0.37,
-  cliffHeightBounds: [0.2, 0.4, 0.6, 0.8],
+  cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
   rampSlopeThreshold: 0.11,
 };
 

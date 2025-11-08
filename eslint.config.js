@@ -68,29 +68,29 @@ export default defineConfig([
   // ============================================
   // RESTRICT littlejsengine IMPORTS
   // ============================================
-  {
-    files: ["**/*.{js,ts}"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            {
-              name: "littlejsengine",
-              message:
-                "Don't import from 'littlejsengine' directly. Use 'src/littlejsengine/littlejsengine.types.ts' for types or pure impls. Inject ImpureLJS for impure impls.",
-            },
-          ],
-        },
-      ],
-    },
-  },
+  // {
+  //   files: ["**/*.{js,ts}"],
+  //   rules: {
+  //     "no-restricted-imports": [
+  //       "error",
+  //       {
+  //         paths: [
+  //           {
+  //             name: "littlejsengine",
+  //             message:
+  //               "Don't import from 'littlejsengine' directly. Use 'src/littlejsengine/littlejsengine.types.ts' for types or pure impls. Inject ImpureLJS for impure impls.",
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // },
 
-  // Allow specific files to import from littlejsengine
-  {
-    files: ["src/littlejsengine/**/*"],
-    rules: {
-      "no-restricted-imports": "off",
-    },
-  },
+  // // Allow specific files to import from littlejsengine
+  // {
+  //   files: ["src/littlejsengine/**/*"],
+  //   rules: {
+  //     "no-restricted-imports": "off",
+  //   },
+  // },
 ]);

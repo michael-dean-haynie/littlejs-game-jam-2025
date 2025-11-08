@@ -3,6 +3,7 @@ export {
   clamp,
   vec2,
   min,
+  max,
   abs,
   percent,
   rgb,
@@ -12,4 +13,5 @@ export {
   rand,
   debugRect,
   Color,
+  EngineObject,
 } from "littlejsengine";
