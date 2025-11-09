@@ -58,7 +58,7 @@ export const defaultWorldConfig: WorldConfig = {
   topDownPerspective: false,
   sectorExtent: 2,
   sectorRenderExtent: 3,
-  seed: 4160,
+  seed: 5643,
   tnScale: 184,
   tnOctaves: 4,
   tnPersistance: 0.56,

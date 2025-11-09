@@ -1,6 +1,8 @@
-import { drawTile } from "littlejsengine";
+import { Color, drawTile } from "littlejsengine";
 import { CliffRenderer } from "./cliff-renderer";
 import { cellWorldSize } from "../cell";
+
+const semiTransparent = new Color(1, 1, 1, 0.5);
 
 /** Cliff Renderer using drawTile() with Top-Down-Oblique perspective */
 export class TdoDrawTileCliffRenderer extends CliffRenderer {
@@ -14,6 +16,8 @@ export class TdoDrawTileCliffRenderer extends CliffRenderer {
         if (cell.cliffs?.length ?? false) {
           if (cell.cliffHeight - 1 < 1) {
             this._drawWater(cell.mainPos);
+          } else if (cell.backgroundRampTi) {
+            drawTile(cell.mainPos, cellWorldSize, cell.backgroundRampTi);
           } else {
             drawTile(cell.mainPos, cellWorldSize, cell.backgroundTi);
           }
@@ -35,7 +39,13 @@ export class TdoDrawTileCliffRenderer extends CliffRenderer {
           if (this._cliffHeight === 0) {
             this._drawWater(cell.mainPos);
           } else {
-            drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
+            // drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
+            drawTile(
+              cell.mainPos,
+              cellWorldSize,
+              cell.mainTi,
+              cell.transparent ? semiTransparent : undefined,
+            );
           }
         }
       }
@@ -45,7 +55,13 @@ export class TdoDrawTileCliffRenderer extends CliffRenderer {
         cell.cliffHeight + 1 === this._cliffHeight &&
         cell.rampDir !== undefined
       ) {
-        drawTile(cell.upperRampPos!, cellWorldSize, cell.upperRampTi);
+        // drawTile(cell.upperRampPos!, cellWorldSize, cell.upperRampTi);
+        drawTile(
+          cell.upperRampPos!,
+          cellWorldSize,
+          cell.upperRampTi,
+          cell.transparent ? semiTransparent : undefined,
+        );
       }
     }
   }

@@ -1,10 +1,11 @@
 import { Subject } from "rxjs";
 import type { IBox2dObjectAdapter } from "./box2d-object-adapter.types";
-import { Box2dObject, Vector2 } from "littlejsengine";
+import { box2d, Box2dObject, Vector2 } from "littlejsengine";
 import { vec2 } from "../../littlejsengine.pure";
 import type { ILJS } from "../../littlejsengine.impure";
 import type { IWorld } from "../../../world/world.types";
 import { cliffHeightObliqueOffsets } from "../../../world/renderers/cliff-height-oblique-offsets";
+import type { Cell } from "../../../world/cell";
 
 /** Default adapter used in the real app. Callbacks can be assigned for onUpdate etc. */
 export class Box2dObjectAdapter
@@ -28,6 +29,8 @@ export class Box2dObjectAdapter
 
   private _rampHeight = 0;
 
+  private _transparentCells: Cell[] = [];
+
   constructor(
     ljs: ILJS,
     world: IWorld,
@@ -38,20 +41,49 @@ export class Box2dObjectAdapter
     this._world = world;
   }
 
+  override destroy(): void {
+    this._clearTransparentCells();
+    super.destroy();
+  }
+
   override update(): void {
     this._update$.next();
     const pos = this.getCenterOfMass();
 
-    // michael: performance: maybe not for now, might be expensive
-    // make semi-transparent with terrain
-    // const alpha = this._terrainThing.isObscured(pos) ? 0.5 : 1;
-    // this.box2dObjectAdapter.color = new Color(1, 1, 1, alpha);
-
     this.cliffHeight = this._world.getCell(pos).cliffHeight;
     this._rampHeight = this._world.getRampHeight(pos);
     // michael: formalize this. Cliffs take the integer heights, within those, units are .1, maybe other things will be .2, etc
-    this.renderOrder = this.cliffHeight + 0.6;
+    const rampRenderOrder = this._rampHeight > 0 ? 1 : 0;
+    this.renderOrder = this.cliffHeight + rampRenderOrder + 0.1;
+
+    // transparent cells
+    this._clearTransparentCells();
+    const cell = this._world.getCell(pos);
+    const standCells = [
+      cell.getAdjacentCell("w"),
+      cell,
+      cell.getAdjacentCell("e"),
+    ];
+    for (const sCell of standCells) {
+      if (sCell === cell || box2d.raycastAll(pos, sCell.pos).length === 0) {
+        const oCell = sCell.getAdjacentCell("s");
+        const isHigher = oCell.cliffHeight > sCell.cliffHeight;
+        const isSame = oCell.cliffHeight === sCell.cliffHeight;
+        if (isHigher || (isSame && oCell.isRamp() && !sCell.isRamp())) {
+          oCell.transparent = true;
+          this._transparentCells.push(oCell);
+        }
+      }
+    }
+
     super.update();
+  }
+
+  private _clearTransparentCells(): void {
+    for (const cell of this._transparentCells) {
+      cell.transparent = false;
+    }
+    this._transparentCells = [];
   }
 
   override render(): void {

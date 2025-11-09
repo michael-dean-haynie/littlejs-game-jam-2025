@@ -26,7 +26,7 @@ export class WorldObject extends Box2dObject {
 
     this.cliffHeight = this._world.getCell(pos).cliffHeight;
     this._rampHeight = this._world.getRampHeight(pos);
-    const rampRenderOrder = this._rampHeight > 0 ? 0.5 : 0;
+    const rampRenderOrder = this._rampHeight > 0 ? 1 : 0;
 
     this.renderOrder = this.cliffHeight + rampRenderOrder;
   }

@@ -252,23 +252,25 @@ export function advanceToRails(sector: Sector): void {
   const thickScalar: number = 0.1;
   for (const cell of sector.cells) {
     const adjCells = cell.getAdjacentCells();
-    // ramp to the north/south/west/east
-    const rp2n = !!adjCells.get("n")?.rampDir;
-    const rp2s = !!adjCells.get("s")?.rampDir;
+    // ramp to the west/east
     const rp2w = adjCells.get("w")?.rampDir === "e";
     const rp2e = adjCells.get("e")?.rampDir === "w";
 
     // cliff to the north/south/east/west
-    const c2n = cell.cliffs?.includes("n");
-    const c2s = cell.cliffs?.includes("s");
-    const c2w = cell.cliffs?.includes("w") && !rp2w;
-    const c2e = cell.cliffs?.includes("e") && !rp2e;
+    const c2n = cell.cliffs?.includes("n") ?? false;
+    const c2s = cell.cliffs?.includes("s") ?? false;
+    const c2w = cell.cliffs?.includes("w") ?? false;
+    const c2e = cell.cliffs?.includes("e") ?? false;
+
+    const rampHere = !!cell.rampDir;
+    const rampJoinsNorth = cell.rampDir === adjCells.get("n")?.rampDir;
+    const rampJoinsSouth = cell.rampDir === adjCells.get("s")?.rampDir;
 
     // rail to the north/south/east/west
-    const rl2n = c2n || (!!cell.rampDir && !rp2n);
-    const rl2s = c2s || (!!cell.rampDir && !rp2s);
-    const rl2w = c2w;
-    const rl2e = c2e;
+    const rl2n = c2n || (rampHere && !rampJoinsNorth);
+    const rl2s = c2s || (rampHere && !rampJoinsSouth);
+    const rl2w = c2w && !rp2w;
+    const rl2e = c2e && !rp2e;
 
     const dirs: OrdinalDirection[] = [];
     if (rl2n) dirs.push("n");

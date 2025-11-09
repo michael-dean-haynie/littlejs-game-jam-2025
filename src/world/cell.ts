@@ -56,6 +56,8 @@ export class Cell {
   mainTi?: TileInfo;
   /** The tile for background art "behind" the main tile */
   backgroundTi?: TileInfo;
+  /** The tile for background art "behind" the main tile when north cell is ramp */
+  backgroundRampTi?: TileInfo;
   /** The tile with the cliff face for this cell if it is elevated cliff */
   cliffFaceTi?: TileInfo;
   /** The tile with the lower ramp for this cell if it is a ramp */
@@ -69,6 +71,9 @@ export class Cell {
   cliffFacePos?: Vector2;
   /** Position in world space to draw the top upperRamp tile */
   upperRampPos?: Vector2;
+
+  /** flag to render this cell as semi transparent to show units behind it */
+  transparent = false;
 
   private readonly _world: IWorld;
 
@@ -100,6 +105,10 @@ export class Cell {
         this.upperRampPos = this.mainPos.add(vec2(0, 1));
         break;
     }
+  }
+
+  isRamp(): this is { rampDir: RampDirection } {
+    return !!this.rampDir;
   }
 
   getAdjacentCells(): Map<PWD, Cell> {
@@ -147,7 +156,7 @@ export class Cell {
     // ========================
     if (this.cliffHeight !== 0) {
       this.backgroundTi = tile(
-        tilePos.add(cliffHeightTileOffsets[this.cliffHeight]),
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight - 1]),
         cellTextureSize,
         textureIndexMap["terrain/All_Tilemaps.png"],
       );
@@ -196,7 +205,7 @@ export class Cell {
     // ========================
     // Ramp Tiles
     // ========================
-    if (this.rampDir !== undefined) {
+    if (this.isRamp()) {
       tilePos = rampDirOriginMap[this.rampDir];
       this.lowerRampTi = tile(
         tilePos.add(cliffHeightTileOffsets[this.cliffHeight + 1]),
@@ -206,6 +215,15 @@ export class Cell {
       tilePos = tilePos.add(vec2(0, -1));
       this.upperRampTi = tile(
         tilePos.add(cliffHeightTileOffsets[this.cliffHeight + 1]),
+        cellTextureSize,
+        textureIndexMap["terrain/All_Tilemaps.png"],
+      );
+    }
+    const nCell = this.getAdjacentCell("n");
+    if (nCell.isRamp()) {
+      tilePos = rampDirOriginMap[nCell.rampDir];
+      this.backgroundRampTi = tile(
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight]),
         cellTextureSize,
         textureIndexMap["terrain/All_Tilemaps.png"],
       );
