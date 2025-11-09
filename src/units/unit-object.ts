@@ -2,7 +2,6 @@ import { Subject, Subscription, takeUntil, tap } from "rxjs";
 import { WorldObject } from "../world/world-object";
 import type { Cell } from "../world/cell";
 import { box2d, drawTile, vec2, Vector2, WHITE } from "littlejsengine";
-import type { IWorld } from "../world/world.types";
 import { mkTile } from "../textures/tile-sheets/mk-tile";
 import type { IUnit, UnitType } from "./unit.types";
 import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
@@ -11,6 +10,7 @@ import type { IUnitState, UnitState } from "./states/states.types";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import { noCap } from "../core/util/no-cap";
 import type { Message } from "../messages/messages.types";
+import { world } from "../world/world.al";
 
 export class UnitObject extends WorldObject implements IUnit {
   readonly type: UnitType;
@@ -20,8 +20,8 @@ export class UnitObject extends WorldObject implements IUnit {
 
   private _transparentCells: Cell[] = [];
 
-  constructor(pos: Vector2, world: IWorld, unitType: UnitType) {
-    super(pos, box2d.bodyTypeDynamic, world);
+  constructor(pos: Vector2, unitType: UnitType) {
+    super(pos, box2d.bodyTypeDynamic);
 
     this.type = unitType;
     this.tileInfo = mkTile("empty");
@@ -59,7 +59,7 @@ export class UnitObject extends WorldObject implements IUnit {
 
     // transparent cells
     this._clearTransparentCells();
-    const cell = this._world.getCell(pos);
+    const cell = world.getCell(pos);
     const standCells = [cell.getAdj("w"), cell, cell.getAdj("e")];
     for (const sCell of standCells) {
       if (sCell === cell || box2d.raycastAll(pos, sCell.pos).length === 0) {

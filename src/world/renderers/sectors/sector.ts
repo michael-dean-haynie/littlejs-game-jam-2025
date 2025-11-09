@@ -11,7 +11,7 @@ import type {
 } from "../../../littlejsengine/littlejsengine.types";
 import { Cell } from "../../cell";
 import { CliffRenderer } from "../cliff-renderer";
-import { f2dmk, type IWorld } from "../../world.types";
+import { f2dmk } from "../../world.types";
 import {
   advanceToPhaseFns,
   degradeFromPhaseFns,
@@ -19,6 +19,7 @@ import {
   phases,
   type Phase,
 } from "./sector-phases";
+import { world } from "../../world.al";
 
 /** The distance from the center of a sector to the edge (flat side) in world units */
 // export const sectorExtent = 5;
@@ -93,12 +94,9 @@ export class Sector {
   /** For preventing co-recursion between adjacent cells with dependencies */
   private _waitingOnDependencies = false;
 
-  world: IWorld;
-
-  constructor(pos: Vector2, world: IWorld) {
+  constructor(pos: Vector2) {
     this.pos = pos;
-    this.world = world;
-    this.worldPos = sectorToWorld(pos, this.world.wc.sectorExtent);
+    this.worldPos = sectorToWorld(pos, world.wc.sectorExtent);
   }
 
   getAdjacentSectors(): Map<PWD, Sector> {
@@ -111,7 +109,7 @@ export class Sector {
 
   getAdjacentSector(dir: PWD): Sector {
     const adjPos = this.pos.add(DirectionToVectorMap[dir]);
-    return Sector.getOrCreateSector(adjPos, this.world);
+    return Sector.getOrCreateSector(adjPos);
   }
 
   advanceMinPhase(targetPhase: Phase): void {
@@ -146,7 +144,7 @@ export class Sector {
     if (this._phase !== "bare") {
       this.degradeToPhase("bare");
     }
-    this.world.sectors.delete(f2dmk(this.pos));
+    world.sectors.delete(f2dmk(this.pos));
   }
 
   advanceAdjSectorsTo(phase: Phase) {
@@ -195,13 +193,10 @@ export class Sector {
     paths.get(this.pos.toString())!.push(this._phase);
   }
 
-  public static getOrCreateSector(
-    sectorVector: Vector2,
-    world: IWorld,
-  ): Sector {
+  public static getOrCreateSector(sectorVector: Vector2): Sector {
     let sector = world.sectors.get(f2dmk(sectorVector));
     if (sector !== undefined) return sector;
-    sector = new Sector(sectorVector, world);
+    sector = new Sector(sectorVector);
     world.sectors.set(f2dmk(sectorVector), sector);
     return sector;
   }

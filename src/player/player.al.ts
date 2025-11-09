@@ -12,33 +12,22 @@ import { createUnitMoveMessage } from "../units/unit-messages.types";
 import { FaceDirection } from "../input/game-inputs/face-direction";
 import { FacePosition } from "../input/game-inputs/face-position";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
-import {
-  UNIT_FACTORY_TOKEN,
-  type IUnitFactory,
-} from "../units/factory/unit-factory.types";
 import { GuardToggle } from "../input/game-inputs/guard-toggle";
 import { Attack } from "../input/game-inputs/attack";
-import { WORLD_TOKEN, type IWorld } from "../world/world.types";
 import type { UnitObject } from "../units/unit-object";
+import { Lancer } from "../units/lancer/lancer";
+import { world } from "../world/world.al";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
 })
 export class Player implements IPlayer {
   private readonly _inputManager: IInputManager;
-  private readonly _unitFactory: IUnitFactory;
-  private readonly _world: IWorld;
 
   unit: UnitObject | null = null;
 
-  constructor(
-    @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
-    @inject(UNIT_FACTORY_TOKEN) unitFactory: IUnitFactory,
-    @inject(WORLD_TOKEN) world: IWorld,
-  ) {
+  constructor(@inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager) {
     this._inputManager = inputManager;
-    this._unitFactory = unitFactory;
-    this._world = world;
 
     this._inputManager.commands$
       .pipe(
@@ -81,10 +70,10 @@ export class Player implements IPlayer {
 
   spawnUnit(): void {
     // for (let i = 0; i < 100; i++) {
-    this.unit = this._unitFactory.createUnit("warrior", vec2(0));
+    this.unit = new Lancer(vec2(0));
     // }
 
-    this._world.unit = this.unit;
+    world.unit = this.unit;
     // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).unit = this.unit;

@@ -1,12 +1,11 @@
 import type { Vector2 } from "littlejsengine";
 import { Attack } from "../../abilities/attack";
-import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
-import type { IWorld } from "../../world/world.types";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { unitTypeStatsMap } from "../unit-type-stats-map";
 import { UnitObject } from "../unit-object";
+import { SpriteAnimation } from "../../sprite-animation/sprite-animation";
 
 unitTypeStatsMap.spider = {
   ...unitTypeStatsMap.spider,
@@ -16,25 +15,21 @@ unitTypeStatsMap.spider = {
 };
 
 export class Spider extends UnitObject {
-  constructor(
-    pos: Vector2,
-    world: IWorld,
-    spriteAnimationFactory: ISpriteAnimationFactory,
-  ) {
-    super(pos, world, "spider");
+  constructor(pos: Vector2) {
+    super(pos, "spider");
 
     // register animations
     this._registerAnimation(
       "idling",
-      spriteAnimationFactory.createSpriteAnimation("units.spider.idling"),
+      new SpriteAnimation("units.spider.idling"),
     );
     this._registerAnimation(
       "moving",
-      spriteAnimationFactory.createSpriteAnimation("units.spider.moving"),
+      new SpriteAnimation("units.spider.moving"),
     );
     this._registerAnimation(
       "attack",
-      spriteAnimationFactory.createSpriteAnimation("units.spider.attack"),
+      new SpriteAnimation("units.spider.attack"),
     );
 
     // register abilities

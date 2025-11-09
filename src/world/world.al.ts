@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Autoloadable } from "../core/autoload/autoloadable";
 import { LitWorldConfigOverlay } from "../lit/components/lit-world-config-overlay.al";
-import {
-  defaultWorldConfig,
-  f2dmk,
-  WORLD_TOKEN,
-  type IWorld,
-  type Perspective,
-} from "./world.types";
+import { defaultWorldConfig, f2dmk, type Perspective } from "./world.types";
 import type { Cell } from "./cell";
 import { noCap } from "../core/util/no-cap";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
@@ -17,23 +10,15 @@ import {
   Sector,
   worldToSector,
 } from "./renderers/sectors/sector";
-import { inject } from "inversify";
-import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
-import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { tap } from "rxjs";
 import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
-import { debugRect, time } from "littlejsengine";
+import { debugRect, setCameraScale, time } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
-@Autoloadable({
-  serviceIdentifier: WORLD_TOKEN,
-})
-export class World implements IWorld {
+export class World {
   unit?: UnitObject;
-
-  private readonly _ljs: ILJS;
 
   private _worldConfigOverlay!: LitWorldConfigOverlay;
 
@@ -60,9 +45,7 @@ export class World implements IWorld {
   tileLayerQueue: TileLayerQueueItem[] = [];
   private _lastBuildTileLayer: number = Number.NEGATIVE_INFINITY;
 
-  constructor(@inject(LJS_TOKEN) ljs: ILJS) {
-    this._ljs = ljs;
-  }
+  constructor() {}
 
   init(): void {
     // michael: remove
@@ -74,11 +57,8 @@ export class World implements IWorld {
 
   update(): void {
     // build tile layers
-    if (
-      this.tileLayerQueue.length &&
-      this._ljs.time - this._lastBuildTileLayer > 0.05
-    ) {
-      this._lastBuildTileLayer = this._ljs.time;
+    if (this.tileLayerQueue.length && time - this._lastBuildTileLayer > 0.05) {
+      this._lastBuildTileLayer = time;
       // const { sectorVector, cliff } = this.tileLayerQueue.shift()!;
       // this._buildSectorLayer(sectorVector, cliff);
       return;
@@ -136,7 +116,7 @@ export class World implements IWorld {
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const sectorVector = unitSectorVector.add(vec2(x, y));
-        const sector = Sector.getOrCreateSector(sectorVector, this);
+        const sector = Sector.getOrCreateSector(sectorVector);
         sector.advanceMinPhase("rails");
         sector.advanceToPhase();
       }
@@ -258,7 +238,7 @@ export class World implements IWorld {
               : "topdown-oblique";
           }
 
-          this._ljs.setCameraScale(this.wc.cameraZoom);
+          setCameraScale(this.wc.cameraZoom);
 
           if (time > 0.1) {
             this._updateSectors();
@@ -284,3 +264,5 @@ export class World implements IWorld {
       .subscribe();
   }
 }
+
+export const world = new World();

@@ -1,14 +1,13 @@
 import type { Vector2 } from "littlejsengine";
 import { Attack } from "../../abilities/attack";
 import { Guard } from "../../abilities/guard";
-import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
 import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
-import type { IWorld } from "../../world/world.types";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitObject } from "../unit-object";
 import { unitTypeStatsMap } from "../unit-type-stats-map";
+import { SpriteAnimation } from "../../sprite-animation/sprite-animation";
 
 unitTypeStatsMap.lancer = {
   ...unitTypeStatsMap.lancer,
@@ -18,25 +17,21 @@ unitTypeStatsMap.lancer = {
 };
 
 export class Lancer extends UnitObject {
-  constructor(
-    pos: Vector2,
-    world: IWorld,
-    spriteAnimationFactory: ISpriteAnimationFactory,
-  ) {
-    super(pos, world, "lancer");
+  constructor(pos: Vector2) {
+    super(pos, "lancer");
 
     // register animations
     this._registerAnimation(
       "idling",
-      spriteAnimationFactory.createSpriteAnimation("units.lancer.idling"),
+      new SpriteAnimation("units.lancer.idling"),
     );
     this._registerAnimation(
       "moving",
-      spriteAnimationFactory.createSpriteAnimation("units.lancer.moving"),
+      new SpriteAnimation("units.lancer.moving"),
     );
     this._registerAnimation(
       "guard",
-      spriteAnimationFactory.createSpriteAnimation({
+      new SpriteAnimation({
         n: spriteSheetMap["units.lancer.guardUp"],
         ne: spriteSheetMap["units.lancer.guardUpRight"],
         e: spriteSheetMap["units.lancer.guardRight"],
@@ -46,7 +41,7 @@ export class Lancer extends UnitObject {
     );
     this._registerAnimation(
       "attack",
-      spriteAnimationFactory.createSpriteAnimation({
+      new SpriteAnimation({
         n: spriteSheetMap["units.lancer.attackUp"],
         ne: spriteSheetMap["units.lancer.attackUpRight"],
         e: spriteSheetMap["units.lancer.attackRight"],

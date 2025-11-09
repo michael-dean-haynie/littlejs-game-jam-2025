@@ -7,18 +7,20 @@ import {
   type FrameChangedData,
   type ISpriteAnimation,
 } from "./sprite-animation.types";
-import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
-import type { SpriteSheet } from "../textures/sprite-sheets/sprite-sheet.types";
+import type {
+  SpriteSheet,
+  SpriteSheetId,
+} from "../textures/sprite-sheets/sprite-sheet.types";
 import { textureIndexMap } from "../textures/texture-index-map";
 import { range } from "lit/directives/range.js";
+import { tile, time, type Vector2 } from "littlejsengine";
+import { spriteSheetMap } from "../textures/sprite-sheets/sprite-sheet-map";
 
 /** A sprite animation that progresses and tracks its own state */
 export class SpriteAnimation implements ISpriteAnimation {
   private _spriteSheet: SpriteSheet;
   private _direction: AnimationDirection;
   private readonly _dirSpriteSheetMap: DirSpriteSheetMap;
-  private readonly _ljs: ILJS;
 
   /** The animation frame duration in seconds */
   private readonly _frameDuration: number = 0.1;
@@ -43,9 +45,18 @@ export class SpriteAnimation implements ISpriteAnimation {
   private _stopped$ = new Subject<void>();
   public stopped$ = this._stopped$.asObservable();
 
-  constructor(dirSpriteSheetMap: DirSpriteSheetMap, ljs: ILJS) {
-    this._dirSpriteSheetMap = dirSpriteSheetMap;
-    this._ljs = ljs;
+  constructor(spriteSheetData: SpriteSheetId | DirSpriteSheetMap) {
+    if (typeof spriteSheetData === "string") {
+      this._dirSpriteSheetMap = {
+        n: spriteSheetMap[spriteSheetData],
+        ne: spriteSheetMap[spriteSheetData],
+        e: spriteSheetMap[spriteSheetData],
+        se: spriteSheetMap[spriteSheetData],
+        s: spriteSheetMap[spriteSheetData],
+      };
+    } else {
+      this._dirSpriteSheetMap = spriteSheetData;
+    }
 
     // assumption: each texture has the same duration and number of frames
     this._direction = "e";
@@ -62,7 +73,7 @@ export class SpriteAnimation implements ISpriteAnimation {
   /** Starts or restarts the animation from the begining */
   restart(): void {
     this._currentFrameIndex = 0;
-    this._startTime = this._ljs.time;
+    this._startTime = time;
     this._emitFrameChanged();
   }
 
@@ -82,7 +93,7 @@ export class SpriteAnimation implements ISpriteAnimation {
     const startingDirection = this._direction;
     this._updateActiveFramesForDirection(faceDirection);
 
-    const engineTimeNow = this._ljs.time;
+    const engineTimeNow = time;
     const delta = (engineTimeNow - this._startTime) % this._fullDuration;
     const startingFrameIndex = this._currentFrameIndex;
     this._currentFrameIndex = Math.floor(delta / this._frameDuration);
@@ -114,7 +125,7 @@ export class SpriteAnimation implements ISpriteAnimation {
   private _emitFrameChanged(): void {
     noCap.notNull(this._currentFrameIndex);
     this._frameChanged$.next({
-      tileInfo: this._ljs.tile(
+      tileInfo: tile(
         this._frames[this._currentFrameIndex],
         this._spriteSheet.frameSize,
         textureIndexMap[this._spriteSheet.texture],

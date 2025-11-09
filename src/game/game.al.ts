@@ -10,7 +10,7 @@ import {
   type IInputManager,
 } from "../input/input-manager/input-manager.types";
 import { textures } from "../textures/textures.types";
-import { WORLD_TOKEN, type IWorld } from "../world/world.types";
+import { world } from "../world/world.al";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
@@ -19,18 +19,15 @@ export class Game implements IGame {
   private readonly _ljs: ILJS;
   private readonly _inputManager: IInputManager;
   private readonly _player: IPlayer;
-  private readonly _world: IWorld;
 
   constructor(
     @inject(LJS_TOKEN) ljs: ILJS,
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(PLAYER_TOKEN) player: IPlayer,
-    @inject(WORLD_TOKEN) world: IWorld,
   ) {
     this._ljs = ljs;
     this._inputManager = inputManager;
     this._player = player;
-    this._world = world;
   }
 
   start(): void {
@@ -55,7 +52,7 @@ export class Game implements IGame {
     await this._ljs.box2dInit();
 
     // michael: organize
-    this._world.init();
+    world.init();
 
     this._ljs.setCameraPos(vec2(0, 0));
 
@@ -79,7 +76,7 @@ export class Game implements IGame {
    */
   private _gameUpdate(): void {
     this._inputManager.triggerFrameDrivenInputs();
-    this._world.update();
+    world.update();
   }
 
   /**

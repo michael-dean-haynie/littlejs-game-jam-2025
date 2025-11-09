@@ -1,16 +1,15 @@
 import { drawRect, Vector2 } from "littlejsengine";
 import { EngineObject, vec2 } from "../../littlejsengine/littlejsengine.pure";
 import type { Sector } from "./sectors/sector";
-import type { IWorld } from "../world.types";
 import { cellWorldSize } from "../cell";
 import { cliffHeightColors } from "./cliff-height-colors";
+import { world } from "../world.al";
 
 export abstract class CliffRenderer extends EngineObject {
   protected readonly _sector: Sector;
-  protected readonly _world: IWorld;
   protected readonly _cliffHeight: number;
 
-  constructor(sector: Sector, world: IWorld, cliffHeight: number) {
+  constructor(sector: Sector, cliffHeight: number) {
     super(
       sector.worldPos,
       vec2(world.sectorSize),
@@ -20,7 +19,6 @@ export abstract class CliffRenderer extends EngineObject {
       cliffHeight,
     );
     this._sector = sector;
-    this._world = world;
     this._cliffHeight = cliffHeight;
   }
 

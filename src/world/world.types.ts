@@ -1,25 +1,4 @@
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
-import type { IUnit } from "../units/unit.types";
-import type { Cell } from "./cell";
-import type { Sector } from "./renderers/sectors/sector";
-import type { TileLayerQueueItem } from "./world.al";
-
-export const WORLD_TOKEN = "WORLD_TOKEN" as const;
-
-export interface IWorld {
-  init(): void;
-  update(): void;
-  tileLayerQueue: TileLayerQueueItem[];
-  get perspective(): Perspective;
-  get sectorSize(): number;
-
-  unit?: IUnit;
-  readonly wc: WorldConfig;
-  sectors: Map<number, Sector>;
-  cells: Map<number, Cell>;
-  getCell(pos: Vector2): Cell;
-  getRampHeight(pos: Vector2): number;
-}
 
 /** Either true 2d, or 2.5d */
 export type Perspective = "topdown" | "topdown-oblique";

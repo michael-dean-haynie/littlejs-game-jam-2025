@@ -9,10 +9,11 @@ import { max, min, vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import { quantize } from "../noise/quantize";
 import { sectorToWorld, worldToSector } from "./renderers/sectors/sector";
-import { f2dmk, type IWorld } from "./world.types";
+import { f2dmk } from "./world.types";
 import { cliffHeightObliqueOffsets } from "./renderers/cliff-height-oblique-offsets";
 import { cliffHeightTileOffsets } from "./renderers/cliff-height-tile-offsets";
 import { textureIndexMap } from "../textures/texture-index-map";
+import { world } from "./world.al";
 
 export type Axis = "x" | "y";
 /** Whether the lower level is grass or water (NOTE: not supporting water directly to cliff face for now)*/
@@ -75,25 +76,22 @@ export class Cell {
   /** flag to render this cell as semi transparent to show units behind it */
   transparent = false;
 
-  private readonly _world: IWorld;
-
-  constructor(pos: Vector2, noise: number, world: IWorld) {
+  constructor(pos: Vector2, noise: number) {
     this.pos = pos;
     this.noise = noise;
-    this._world = world;
 
     const sectorCenter = sectorToWorld(
-      worldToSector(this.pos, this._world.wc.sectorExtent),
-      this._world.wc.sectorExtent,
+      worldToSector(this.pos, world.wc.sectorExtent),
+      world.wc.sectorExtent,
     );
     this.offsetSectorCenter = this.pos.subtract(sectorCenter);
     this.tileLayerPos = this.offsetSectorCenter.add(
-      vec2(this._world.wc.sectorExtent),
+      vec2(world.wc.sectorExtent),
     );
-    this.cliffHeight = quantize(noise, this._world.wc.cliffHeightBounds);
-    this._world.cells.set(f2dmk(this.pos), this);
+    this.cliffHeight = quantize(noise, world.wc.cliffHeightBounds);
+    world.cells.set(f2dmk(this.pos), this);
 
-    switch (this._world.perspective) {
+    switch (world.perspective) {
       case "topdown":
         this.mainPos = this.pos;
         break;
@@ -121,7 +119,7 @@ export class Cell {
 
   getAdj(dir: PWD): Cell {
     const adjPos = this.pos.add(DirectionToVectorMap[dir]);
-    return this._world.getCell(adjPos);
+    return world.getCell(adjPos);
   }
 
   public static getSlope(cell1: Cell, cell2: Cell): number {
@@ -131,8 +129,8 @@ export class Cell {
 
     const highCliff = max(cell1.cliffHeight, cell2.cliffHeight);
     const noiseRange =
-      cell1._world.wc.cliffHeightBounds[highCliff] -
-      cell1._world.wc.cliffHeightBounds[highCliff - 2];
+      world.wc.cliffHeightBounds[highCliff] -
+      world.wc.cliffHeightBounds[highCliff - 2];
 
     const slope = noiseDiff / noiseRange;
     return slope;

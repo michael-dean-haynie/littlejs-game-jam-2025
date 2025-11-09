@@ -10,6 +10,7 @@ import { TdoDrawTileCliffRenderer } from "../tdo-draw-tile-cliff-renderer";
 import { TdoDrawRectCliffRenderer } from "../tdo-draw-rect-cliff-renderer";
 import { type OrdinalDirection } from "../../../core/types/directions.types";
 import { Rail } from "../../rail";
+import { world } from "../../world.al";
 
 export const phases = [
   "bare",
@@ -58,7 +59,7 @@ export function degradeFromBare(sector: Sector): void {
 export function degradeFromNoise(sector: Sector): void {
   // delete cells
   for (const cell of sector.cells) {
-    sector.world.cells.delete(f2dmk(cell.pos));
+    world.cells.delete(f2dmk(cell.pos));
   }
   sector.cells = [];
 
@@ -110,32 +111,30 @@ export function degradeFromRails(sector: Sector): void {
 
 export function advanceToNoise(sector: Sector): void {
   // generate noise
-  const offset = sectorToWorld(sector.pos, sector.world.wc.sectorExtent).add(
-    vec2(sector.world.wc.tnOffsetX, sector.world.wc.tnOffsetY),
+  const offset = sectorToWorld(sector.pos, world.wc.sectorExtent).add(
+    vec2(world.wc.tnOffsetX, world.wc.tnOffsetY),
   );
   const noiseMap = generateNoiseMap(
-    sector.world.wc.seed,
-    sector.world.sectorSize,
-    sector.world.sectorSize,
-    sector.world.wc.tnScale,
-    sector.world.wc.tnOctaves,
-    sector.world.wc.tnPersistance,
-    sector.world.wc.tnLacunarity,
+    world.wc.seed,
+    world.sectorSize,
+    world.sectorSize,
+    world.wc.tnScale,
+    world.wc.tnOctaves,
+    world.wc.tnPersistance,
+    world.wc.tnLacunarity,
     offset,
-    sector.world.wc.tnClamp,
+    world.wc.tnClamp,
   );
 
   // create cells
-  const upper = sector.world.wc.sectorExtent;
+  const upper = world.wc.sectorExtent;
   const lower = -upper;
   for (let y = upper; y >= lower; y--) {
     for (let x = lower; x <= upper; x++) {
       const pos = sector.worldPos.add(vec2(x, y));
-      const { x: nx, y: ny } = vec2(x, y).add(
-        vec2(sector.world.wc.sectorExtent),
-      );
+      const { x: nx, y: ny } = vec2(x, y).add(vec2(world.wc.sectorExtent));
       const noise = noiseMap[nx][ny];
-      sector.cells.push(new Cell(pos, noise, sector.world));
+      sector.cells.push(new Cell(pos, noise));
     }
   }
 }
@@ -184,7 +183,7 @@ export function advanceToRamps(sector: Sector): void {
 
       // ramps must pass slope threshold
       const slope = Cell.getSlope(cell, adjCell);
-      if (slope > sector.world.wc.rampSlopeThreshold) continue;
+      if (slope > world.wc.rampSlopeThreshold) continue;
 
       // yay! it's a ramp
       cell.rampDir = dir;
@@ -252,11 +251,7 @@ export function advanceToObstacles(sector: Sector): void {
       obs.push([slot % 3, Math.floor(slot / 3)]);
     }
 
-    cellObsToSectorObs(
-      obs,
-      cell.offsetSectorCenter,
-      sector.world.wc.sectorExtent,
-    );
+    cellObsToSectorObs(obs, cell.offsetSectorCenter, world.wc.sectorExtent);
 
     // performance optimized insert
     for (let i = 0; i < obs.length; i++) {
@@ -299,42 +294,26 @@ export function advanceToRenderers(sector: Sector): void {
     cell.setTileInfo();
   }
 
-  const tpdn = sector.world.perspective === "topdown";
-  const tiles = sector.world.wc.useTiles;
+  const tpdn = world.perspective === "topdown";
+  const tiles = world.wc.useTiles;
   for (
     let cliffHeight = 0;
-    cliffHeight <= sector.world.wc.cliffHeightBounds.length;
+    cliffHeight <= world.wc.cliffHeightBounds.length;
     cliffHeight++
   ) {
     let renderer: CliffRenderer;
     switch (true) {
       case tpdn && tiles:
-        renderer = new TdDrawTileCliffRenderer(
-          sector,
-          sector.world,
-          cliffHeight,
-        );
+        renderer = new TdDrawTileCliffRenderer(sector, cliffHeight);
         break;
       case tpdn && !tiles:
-        renderer = new TdDrawRectCliffRenderer(
-          sector,
-          sector.world,
-          cliffHeight,
-        );
+        renderer = new TdDrawRectCliffRenderer(sector, cliffHeight);
         break;
       case !tpdn && tiles:
-        renderer = new TdoDrawTileCliffRenderer(
-          sector,
-          sector.world,
-          cliffHeight,
-        );
+        renderer = new TdoDrawTileCliffRenderer(sector, cliffHeight);
         break;
       case !tpdn && !tiles:
-        renderer = new TdoDrawRectCliffRenderer(
-          sector,
-          sector.world,
-          cliffHeight,
-        );
+        renderer = new TdoDrawRectCliffRenderer(sector, cliffHeight);
         break;
     }
     sector.renderers.push(renderer!);
@@ -401,7 +380,7 @@ export function advanceToRails(sector: Sector): void {
           break;
       }
 
-      const rail = new Rail(pos, sector.world, cell.rampDir, size);
+      const rail = new Rail(pos, cell.rampDir, size);
       sector.rails.push(rail);
     }
   }

@@ -1,14 +1,13 @@
 import type { Vector2 } from "littlejsengine";
 import { Attack } from "../../abilities/attack";
 import { Guard } from "../../abilities/guard";
-import type { ISpriteAnimationFactory } from "../../sprite-animation/sprite-animation-factory.types";
 import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
 import { UnitStateCasting } from "../states/unit-state-casting";
 import { UnitStateIdling } from "../states/unit-state-idling";
 import { UnitStateMoving } from "../states/unit-state-moving";
 import { UnitObject } from "../unit-object";
 import { unitTypeStatsMap } from "../unit-type-stats-map";
-import type { IWorld } from "../../world/world.types";
+import { SpriteAnimation } from "../../sprite-animation/sprite-animation";
 
 unitTypeStatsMap.warrior = {
   ...unitTypeStatsMap.warrior,
@@ -18,29 +17,25 @@ unitTypeStatsMap.warrior = {
 };
 
 export class Warrior extends UnitObject {
-  constructor(
-    pos: Vector2,
-    world: IWorld,
-    spriteAnimationFactory: ISpriteAnimationFactory,
-  ) {
-    super(pos, world, "warrior");
+  constructor(pos: Vector2) {
+    super(pos, "warrior");
 
     // register animations
     this._registerAnimation(
       "idling",
-      spriteAnimationFactory.createSpriteAnimation("units.warrior.idling"),
+      new SpriteAnimation("units.warrior.idling"),
     );
     this._registerAnimation(
       "moving",
-      spriteAnimationFactory.createSpriteAnimation("units.warrior.moving"),
+      new SpriteAnimation("units.warrior.moving"),
     );
     this._registerAnimation(
       "guard",
-      spriteAnimationFactory.createSpriteAnimation("units.warrior.guard"),
+      new SpriteAnimation("units.warrior.guard"),
     );
     this._registerAnimation(
       "attack",
-      spriteAnimationFactory.createSpriteAnimation({
+      new SpriteAnimation({
         n: spriteSheetMap["units.warrior.attack2"],
         ne: spriteSheetMap["units.warrior.attack2"],
         e: spriteSheetMap["units.warrior.attack1"],
