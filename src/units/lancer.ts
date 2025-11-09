@@ -1,13 +1,13 @@
 import type { Vector2 } from "littlejsengine";
-import { Attack } from "../../abilities/attack";
-import { Guard } from "../../abilities/guard";
-import { spriteSheetMap } from "../../textures/sprite-sheets/sprite-sheet-map";
-import { UnitStateCasting } from "../states/unit-state-casting";
-import { UnitStateIdling } from "../states/unit-state-idling";
-import { UnitStateMoving } from "../states/unit-state-moving";
-import { UnitObject } from "../unit-object";
-import { unitTypeStatsMap } from "../unit-type-stats-map";
-import { SpriteAnimation } from "../../sprite-animation/sprite-animation";
+import { unitTypeStatsMap } from "./unit-type-stats-map";
+import { UnitObject } from "./unit-object";
+import { SpriteAnimation } from "../sprite-animation/sprite-animation";
+import { spriteSheetMap } from "../textures/sprite-sheets/sprite-sheet-map";
+import { Attack } from "../abilities/attack";
+import { Guard } from "../abilities/guard";
+import { UnitStateIdling } from "./states/unit-state-idling";
+import { UnitStateMoving } from "./states/unit-state-moving";
+import { UnitStateCasting } from "./states/unit-state-casting";
 
 unitTypeStatsMap.lancer = {
   ...unitTypeStatsMap.lancer,

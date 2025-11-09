@@ -1,29 +1,29 @@
 import { BehaviorSubject } from "rxjs";
 import type { Ability, AbilityPhase, IAbility } from "./abilities.types";
 import { noCap } from "../core/util/no-cap";
-import type { IUnit } from "../units/unit.types";
 import { time } from "littlejsengine";
+import type { UnitObject } from "../units/unit-object";
 
 export abstract class AbilityBase implements IAbility {
   abstract readonly type: Ability;
 
   protected readonly _phase$ = new BehaviorSubject<AbilityPhase>("init");
   readonly phase$ = this._phase$.asObservable();
-  protected readonly _unit: IUnit;
+  protected readonly _unitObject: UnitObject;
 
   protected abstract readonly _preswingDuration: number;
   protected abstract readonly _backswingDuration: number;
 
   private _phaseStart: number | null = null;
 
-  constructor(unit: IUnit) {
-    this._unit = unit;
+  constructor(unitObject: UnitObject) {
+    this._unitObject = unitObject;
   }
 
   progress(): void {
     switch (this._phase$.value) {
       case "init":
-        this._unit.swapAnimation(this.type);
+        this._unitObject.swapAnimation(this.type);
         this._phaseStart = time;
         this._phase$.next("preswing");
         this.progress();

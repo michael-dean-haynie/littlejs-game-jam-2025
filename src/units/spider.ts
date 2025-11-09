@@ -1,11 +1,11 @@
 import type { Vector2 } from "littlejsengine";
-import { Attack } from "../../abilities/attack";
-import { UnitStateCasting } from "../states/unit-state-casting";
-import { UnitStateIdling } from "../states/unit-state-idling";
-import { UnitStateMoving } from "../states/unit-state-moving";
-import { unitTypeStatsMap } from "../unit-type-stats-map";
-import { UnitObject } from "../unit-object";
-import { SpriteAnimation } from "../../sprite-animation/sprite-animation";
+import { unitTypeStatsMap } from "./unit-type-stats-map";
+import { UnitObject } from "./unit-object";
+import { SpriteAnimation } from "../sprite-animation/sprite-animation";
+import { Attack } from "../abilities/attack";
+import { UnitStateIdling } from "./states/unit-state-idling";
+import { UnitStateMoving } from "./states/unit-state-moving";
+import { UnitStateCasting } from "./states/unit-state-casting";
 
 unitTypeStatsMap.spider = {
   ...unitTypeStatsMap.spider,

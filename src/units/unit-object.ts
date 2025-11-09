@@ -3,7 +3,7 @@ import { WorldObject } from "../world/world-object";
 import type { Cell } from "../world/cell";
 import { box2d, drawTile, vec2, Vector2, WHITE } from "littlejsengine";
 import { mkTile } from "../textures/tile-sheets/mk-tile";
-import type { IUnit, UnitType } from "./unit.types";
+import type { UnitType } from "./unit.types";
 import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
 import type { Ability, IAbility } from "../abilities/abilities.types";
 import type { IUnitState, UnitState } from "./states/states.types";
@@ -12,7 +12,7 @@ import { noCap } from "../core/util/no-cap";
 import type { Message } from "../messages/messages.types";
 import { world } from "../world/world.al";
 
-export class UnitObject extends WorldObject implements IUnit {
+export class UnitObject extends WorldObject {
   readonly type: UnitType;
 
   /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */

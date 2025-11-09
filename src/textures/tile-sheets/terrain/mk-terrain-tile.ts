@@ -1,9 +1,9 @@
 import { tile, TileInfo, vec2, type Vector2 } from "littlejsengine";
 import type { OrdinalDirection } from "../../../core/types/directions.types";
-import type { RampDirection } from "../../../terrain/terrain-thing.types";
 import { textureIndexMap } from "../../texture-index-map";
 import type { TerrainTexture } from "../../textures.types";
 import { mkTile } from "../mk-tile";
+import type { RampDirection } from "../../../world/cell";
 
 const tileScale = 64; // from pixels to 1 tile
 const cliffTypeOriginMap: { [key in CliffType]: Vector2 } = {

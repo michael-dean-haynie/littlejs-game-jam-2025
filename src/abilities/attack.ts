@@ -1,4 +1,4 @@
-import type { IUnit } from "../units/unit.types";
+import type { UnitObject } from "../units/unit-object";
 import type { Ability } from "./abilities.types";
 import { AbilityBase } from "./ability-base";
 
@@ -11,11 +11,11 @@ export class Attack extends AbilityBase {
   // michael: pu@ make this flexible for different timings, damage, aoe, mele/missle etc.
   // then work on registering abilities in the unit class rather than in the casting state
   constructor(
-    unit: IUnit,
+    unitObject: UnitObject,
     preswingDuration: number,
     backswingDuration: number,
   ) {
-    super(unit);
+    super(unitObject);
     this._preswingDuration = preswingDuration;
     this._backswingDuration = backswingDuration;
   }

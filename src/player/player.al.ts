@@ -7,10 +7,10 @@ import { FacePosition } from "../input/game-inputs/face-position";
 import { GuardToggle } from "../input/game-inputs/guard-toggle";
 import { Attack } from "../input/game-inputs/attack";
 import type { UnitObject } from "../units/unit-object";
-import { Lancer } from "../units/lancer/lancer";
 import { world } from "../world/world.al";
 import { vec2 } from "littlejsengine";
 import { inputManager } from "../input/input-manager/input-manager.al";
+import { Lancer } from "../units/lancer";
 
 export class Player {
   unit: UnitObject | null = null;
