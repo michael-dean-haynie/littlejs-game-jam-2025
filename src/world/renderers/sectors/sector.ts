@@ -17,56 +17,6 @@ import {
 import { world } from "../../world.al";
 import { EngineObject, max, min, vec2, type Vector2 } from "littlejsengine";
 
-/** The distance from the center of a sector to the edge (flat side) in world units */
-// export const sectorExtent = 5;
-
-// export const sectorSize = extToGridSize(sectorExtent);
-
-/** Converts a sector coordinate to a world coordinate. */
-// export function sctr2Wrld(sector: Vector2): Vector2 {
-// return sector.scale(sectorSize);
-// }
-
-/** Converts a world coordinate to a sector coordinate. */
-// export function wrld2Sctr(world: Vector2): Vector2 {
-//   return world
-//     .add(vec2(sectorSize / 2))
-//     .scale(1 / sectorSize)
-//     .floor();
-// }
-
-/**
- * Centers a grid (with discrete center, odd side length) on zero and returns the bounds (so 11 would be from -5 to 5).
- * This is inclusive.
- */
-export function gridSizeToExtent(size: number): number {
-  return (size - 1) / 2;
-}
-
-/** Get's the key for a coordinate for use in a map. X and Y are expected to be whole numbers. */
-export function coordToKey({ x, y }: Vector2): string {
-  // noCap(x % 1 === 0, "Expected x to be a whole number.");
-  // noCap(y % 1 === 0, "Expected y to be a whole number.");
-  x = Math.round(x);
-  y = Math.round(y);
-  // add zero to avoie -0 situations
-  return `${x + 0},${y + 0}`;
-}
-
-export function keyToCoord(key: string): Vector2 {
-  const [x, y] = key.split(",").map(Number);
-  noCap(!isNaN(x), "Expected x to be a number.");
-  noCap(!isNaN(y), "Expected y to be a number.");
-  noCap(x % 1 === 0, "Expected x to be a whole number.");
-  noCap(y % 1 === 0, "Expected y to be a whole number.");
-  return vec2(x, y);
-}
-
-/**
- * ===========================================================
- * NEW STUFF WITH REWORK
- * ===========================================================
- */
 export type AstarObs = [number, number][];
 
 export class Sector {

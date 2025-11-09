@@ -35,11 +35,5 @@ export default defineConfig({
     printConsoleTrace: true,
     reporters: ["verbose"],
     environment: "jsdom",
-    setupFiles: [
-      // stub out AudioContext (not provided by jsdom)
-      "src/test/audio-context.stub.ts",
-      // autoload test double files
-      "src/core/autoload/autoload-test.ts",
-    ],
   },
 });
