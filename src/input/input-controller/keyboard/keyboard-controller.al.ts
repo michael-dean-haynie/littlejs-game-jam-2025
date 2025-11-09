@@ -1,14 +1,11 @@
 import { Subject } from "rxjs";
-import { Autoloadable } from "../../../core/autoload/autoloadable";
 import {
-  KEYBOARD_CONTROLLER_TOKEN,
   KeyboardModifiers,
   type ActiveModifiers,
   type KeyboardProfile,
   type KeyboardInputMatcher,
   type KeyboardModifier,
   type KeyboardModifierMatcher,
-  type IKeyboardController,
   type KeyupOrKeydown,
   type KeyboardInput,
   MovementKeyboardInputs,
@@ -23,10 +20,7 @@ import { Attack } from "../../game-inputs/attack";
 import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
 import { mousePos, vec2, Vector2 } from "littlejsengine";
 
-@Autoloadable({
-  serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
-})
-export class KeyboardController implements IKeyboardController {
+export class KeyboardController {
   private readonly _inputs$ = new Subject<IGameInputCommand>();
   public readonly inputs$ = this._inputs$.asObservable();
 
@@ -193,3 +187,5 @@ export class KeyboardController implements IKeyboardController {
 
   // michael: remember if shift+a starts ability letting go of shift and then letting go of a should deactivate it (for HOLD setting)
 }
+
+export const keyboardController = new KeyboardController();

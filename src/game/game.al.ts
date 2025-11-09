@@ -1,11 +1,3 @@
-import { inject } from "inversify";
-import { GAME_TOKEN, type IGame } from "./game.types";
-import { Autoloadable } from "../core/autoload/autoloadable";
-import { PLAYER_TOKEN, type IPlayer } from "../player/player.types";
-import {
-  INPUT_MANAGER_TOKEN,
-  type IInputManager,
-} from "../input/input-manager/input-manager.types";
 import { textures } from "../textures/textures.types";
 import { world } from "../world/world.al";
 import {
@@ -15,22 +7,10 @@ import {
   setShowSplashScreen,
   vec2,
 } from "littlejsengine";
+import { player } from "../player/player.al";
+import { inputManager } from "../input/input-manager/input-manager.al";
 
-@Autoloadable({
-  serviceIdentifier: GAME_TOKEN,
-})
-export class Game implements IGame {
-  private readonly _inputManager: IInputManager;
-  private readonly _player: IPlayer;
-
-  constructor(
-    @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
-    @inject(PLAYER_TOKEN) player: IPlayer,
-  ) {
-    this._inputManager = inputManager;
-    this._player = player;
-  }
-
+export class Game {
   start(): void {
     // pre-init setup
     setShowSplashScreen(true);
@@ -57,7 +37,7 @@ export class Game implements IGame {
 
     setCameraPos(vec2(0, 0));
 
-    this._player.spawnUnit();
+    player.spawnUnit();
 
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
@@ -76,7 +56,7 @@ export class Game implements IGame {
    * Handle input and update the game state
    */
   private _gameUpdate(): void {
-    this._inputManager.triggerFrameDrivenInputs();
+    inputManager.triggerFrameDrivenInputs();
     world.update();
   }
 
@@ -86,7 +66,7 @@ export class Game implements IGame {
    */
   private _gameUpdatePost(): void {
     // michael: temp - lock camera to player unit
-    const unit = this._player.unit;
+    const unit = player.unit;
     if (unit !== null) {
       setCameraPos(unit.getPerspectivePos());
     }
@@ -104,3 +84,5 @@ export class Game implements IGame {
    */
   private _gameRenderPost(): void {}
 }
+
+export const game = new Game();

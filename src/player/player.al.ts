@@ -1,10 +1,3 @@
-import { inject } from "inversify";
-import { Autoloadable } from "../core/autoload/autoloadable";
-import { PLAYER_TOKEN, type IPlayer } from "./player.types";
-import {
-  INPUT_MANAGER_TOKEN,
-  type IInputManager,
-} from "../input/input-manager/input-manager.types";
 import { tap } from "rxjs";
 import type { IGameInputCommand } from "../input/game-inputs/game-input.types";
 import { Move } from "../input/game-inputs/move";
@@ -17,19 +10,13 @@ import type { UnitObject } from "../units/unit-object";
 import { Lancer } from "../units/lancer/lancer";
 import { world } from "../world/world.al";
 import { vec2 } from "littlejsengine";
+import { inputManager } from "../input/input-manager/input-manager.al";
 
-@Autoloadable({
-  serviceIdentifier: PLAYER_TOKEN,
-})
-export class Player implements IPlayer {
-  private readonly _inputManager: IInputManager;
-
+export class Player {
   unit: UnitObject | null = null;
 
-  constructor(@inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager) {
-    this._inputManager = inputManager;
-
-    this._inputManager.commands$
+  constructor() {
+    inputManager.commands$
       .pipe(
         // michael: consider takeUntil with destroyref
         tap((command) => this._processGameInputCommand(command)),
@@ -79,3 +66,5 @@ export class Player implements IPlayer {
     (window as any).unit = this.unit;
   }
 }
+
+export const player = new Player();
