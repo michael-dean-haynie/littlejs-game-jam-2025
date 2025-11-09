@@ -1,6 +1,6 @@
 import { vec2, Vector2 } from "littlejsengine";
 import { f2dmk } from "../../world.types";
-import { sectorToWorld, type Sector } from "./sector";
+import { sectorToWorld, type AstarObs, type Sector } from "./sector";
 import { generateNoiseMap } from "../../../noise/generate-noise-map";
 import { Cell, rampDirections } from "../../cell";
 import type { CliffRenderer } from "../cliff-renderer";
@@ -16,6 +16,7 @@ export const phases = [
   "noise",
   "cliffs",
   "ramps",
+  "obstacles",
   "renderers",
   "rails",
 ] as const;
@@ -32,6 +33,7 @@ export const degradeFromPhaseFns: { [key in Phase]: PhaseFn } = {
   noise: degradeFromNoise,
   cliffs: degradeFromCliffs,
   ramps: degradeFromRamps,
+  obstacles: degradeFromObstacles,
   renderers: degradeFromRenderers,
   rails: degradeFromRails,
 };
@@ -40,6 +42,7 @@ export const advanceToPhaseFns: { [key in Exclude<Phase, "bare">]: PhaseFn } = {
   noise: advanceToNoise,
   cliffs: advanceToCliffs,
   ramps: advanceToRamps,
+  obstacles: advanceToObstacles,
   renderers: advanceToRenderers,
   rails: advanceToRails,
 };
@@ -73,6 +76,10 @@ export function degradeFromRamps(sector: Sector): void {
   for (const cell of sector.cells) {
     cell.rampDir = undefined;
   }
+}
+
+export function degradeFromObstacles(sector: Sector): void {
+  sector.obstacles = [];
 }
 
 export function degradeFromRenderers(sector: Sector): void {
@@ -154,19 +161,19 @@ export function advanceToRamps(sector: Sector): void {
   // place ramps
   for (const cell of sector.cells) {
     // cannot ramp into/out of water
-    if (cell.cliffHeight < 2) continue;
+    if (cell.cliffHeight < 1) continue;
 
     for (const dir of rampDirections) {
       const oppositeDir = dir === "e" ? "w" : "e";
-      const adjCell = cell.getAdjacentCell(dir);
+      const adjCell = cell.getAdj(dir);
 
       // ramp must be next to a cliff
       const adjIsCliff = (adjCell.cliffs ?? []).includes(oppositeDir);
       if (!adjIsCliff) continue;
 
       // ramp must lead somewhere (have a "landing" on both sides, not ramps, and correct heights)
-      const highLandingCell = adjCell.getAdjacentCell(dir);
-      const lowLandingCell = cell.getAdjacentCell(oppositeDir);
+      const highLandingCell = adjCell.getAdj(dir);
+      const lowLandingCell = cell.getAdj(oppositeDir);
       if (
         highLandingCell.cliffHeight !== adjCell.cliffHeight ||
         highLandingCell.rampDir !== undefined ||
@@ -183,6 +190,93 @@ export function advanceToRamps(sector: Sector): void {
       cell.rampDir = dir;
       break; // ramp directions loop, not cells loop
     }
+  }
+}
+
+export function advanceToObstacles(sector: Sector): void {
+  sector.advanceAdjSectorsTo("ramps");
+
+  for (const cell of sector.cells) {
+    // cliff to the north/south/east/west
+    const c2n =
+      cell.cliffs?.includes("n") || cell.getAdj("n").cliffs?.includes("s");
+    const c2s =
+      cell.cliffs?.includes("s") || cell.getAdj("s").cliffs?.includes("n");
+    const c2w =
+      cell.cliffs?.includes("w") || cell.getAdj("w").cliffs?.includes("e");
+    const c2e =
+      cell.cliffs?.includes("e") || cell.getAdj("e").cliffs?.includes("w");
+
+    // ramp to the north/south
+    const rp2n =
+      (cell.isRamp() || cell.getAdj("n").isRamp()) &&
+      cell.rampDir !== cell.getAdj("n").rampDir;
+    const rp2s =
+      (cell.isRamp() || cell.getAdj("s").isRamp()) &&
+      cell.rampDir !== cell.getAdj("s").rampDir;
+
+    // ramp to the west/east
+    const rp2w = cell.getAdj("w")?.rampDir === "e";
+    const rp2e = cell.getAdj("e")?.rampDir === "w";
+
+    // obstacles to the north/south/east/west
+    const o2n = c2n || rp2n;
+    const o2s = c2s || rp2s;
+    const o2w = c2w && !rp2w && !cell.isRamp();
+    const o2e = c2e && !rp2e && !cell.isRamp();
+
+    const slots = new Set<number>();
+    if (o2n) {
+      slots.add(0);
+      slots.add(1);
+      slots.add(2);
+    }
+    if (o2s) {
+      slots.add(6);
+      slots.add(7);
+      slots.add(8);
+    }
+    if (o2w) {
+      slots.add(0);
+      slots.add(3);
+      slots.add(6);
+    }
+    if (o2e) {
+      slots.add(2);
+      slots.add(5);
+      slots.add(8);
+    }
+
+    const obs: [number, number][] = [];
+    for (const slot of slots) {
+      obs.push([slot % 3, Math.floor(slot / 3)]);
+    }
+
+    cellObsToSectorObs(
+      obs,
+      cell.offsetSectorCenter,
+      sector.world.wc.sectorExtent,
+    );
+
+    // performance optimized insert
+    for (let i = 0; i < obs.length; i++) {
+      sector.obstacles.push(obs[i]);
+    }
+  }
+}
+
+/** transform in-place */
+function cellObsToSectorObs(
+  cellObs: AstarObs,
+  cellSectorOffset: Vector2,
+  sectorExtent: number,
+): void {
+  const xOffset = (cellSectorOffset.x + sectorExtent) * 3;
+  const yOffset = (-cellSectorOffset.y + sectorExtent) * 3;
+
+  for (const obs of cellObs) {
+    obs[0] = obs[0] + xOffset;
+    obs[1] = obs[1] + yOffset;
   }
 }
 

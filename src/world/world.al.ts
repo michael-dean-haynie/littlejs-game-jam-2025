@@ -22,8 +22,8 @@ import { inject } from "inversify";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { tap } from "rxjs";
-import { phases } from "./renderers/sectors/sector-phases";
-import { time } from "littlejsengine";
+import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
+import { debugRect, time } from "littlejsengine";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -139,6 +139,21 @@ export class World implements IWorld {
         const sector = Sector.getOrCreateSector(sectorVector, this);
         sector.advanceMinPhase("rails");
         sector.advanceToPhase();
+      }
+    }
+
+    // michael: temp: testing
+    const sExt = this.wc.sectorExtent;
+    const aExt = sExt * 3 + 1;
+    for (const sector of this.sectors.values()) {
+      if (phase2Idx[sector._phase] < phase2Idx["obstacles"]) continue;
+      for (const [ox, oy] of sector.obstacles) {
+        const sx = (ox - aExt) / 3;
+        const sy = (-oy + aExt) / 3;
+
+        const sPos = vec2(sx, sy);
+        const wPos = sPos.add(sector.worldPos);
+        debugRect(wPos, vec2(1 / 3), undefined, 1);
       }
     }
 

@@ -59,14 +59,10 @@ export class Box2dObjectAdapter
     // transparent cells
     this._clearTransparentCells();
     const cell = this._world.getCell(pos);
-    const standCells = [
-      cell.getAdjacentCell("w"),
-      cell,
-      cell.getAdjacentCell("e"),
-    ];
+    const standCells = [cell.getAdj("w"), cell, cell.getAdj("e")];
     for (const sCell of standCells) {
       if (sCell === cell || box2d.raycastAll(pos, sCell.pos).length === 0) {
-        const oCell = sCell.getAdjacentCell("s");
+        const oCell = sCell.getAdj("s");
         const isHigher = oCell.cliffHeight > sCell.cliffHeight;
         const isSame = oCell.cliffHeight === sCell.cliffHeight;
         if (isHigher || (isSame && oCell.isRamp() && !sCell.isRamp())) {

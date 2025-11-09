@@ -7,7 +7,7 @@ import type { RampDirection } from "../../world/cell";
 /** A "rail" for cliff edges/ramps to implement terrain pathing/collision */
 export class Rail extends WorldObject {
   private _rampDir?: RampDirection;
-  private _doRender = false;
+  private _doRender = true;
 
   constructor(
     world: IWorld,

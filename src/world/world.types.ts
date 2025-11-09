@@ -52,10 +52,10 @@ export type WorldConfig = {
 };
 
 export const defaultWorldConfig: WorldConfig = {
-  cameraZoom: 87,
+  cameraZoom: 22,
   renderTerrain: true,
-  useTiles: true,
-  topDownPerspective: false,
+  useTiles: false,
+  topDownPerspective: true,
   sectorExtent: 2,
   sectorRenderExtent: 3,
   seed: 5643,

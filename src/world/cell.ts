@@ -114,12 +114,12 @@ export class Cell {
   getAdjacentCells(): Map<PWD, Cell> {
     const result = new Map<PWD, Cell>();
     for (const dir of PWDs.values()) {
-      result.set(dir, this.getAdjacentCell(dir));
+      result.set(dir, this.getAdj(dir));
     }
     return result;
   }
 
-  getAdjacentCell(dir: PWD): Cell {
+  getAdj(dir: PWD): Cell {
     const adjPos = this.pos.add(DirectionToVectorMap[dir]);
     return this._world.getCell(adjPos);
   }
@@ -219,7 +219,7 @@ export class Cell {
         textureIndexMap["terrain/All_Tilemaps.png"],
       );
     }
-    const nCell = this.getAdjacentCell("n");
+    const nCell = this.getAdj("n");
     if (nCell.isRamp()) {
       tilePos = rampDirOriginMap[nCell.rampDir];
       this.backgroundRampTi = tile(

@@ -70,6 +70,7 @@ export function keyToCoord(key: string): Vector2 {
  * NEW STUFF WITH REWORK
  * ===========================================================
  */
+export type AstarObs = [number, number][];
 
 export class Sector {
   /** Position in sector-space */
@@ -82,10 +83,12 @@ export class Sector {
   _minPhase: Phase = "bare";
   /** Cells in this sector, pre-sorted for rendering */
   cells: Cell[] = [];
-  /** Engine objects that act as "rails" or cliff edges for collision/pathing */
-  rails: EngineObject[] = [];
+  /** a* path-finding obstacles */
+  obstacles: AstarObs = [];
   /** Renderers by cliff height? Or render order? */
   renderers: CliffRenderer[] = [];
+  /** Engine objects that act as "rails" or cliff edges for collision/pathing */
+  rails: EngineObject[] = [];
 
   /** For preventing co-recursion between adjacent cells with dependencies */
   private _waitingOnDependencies = false;
