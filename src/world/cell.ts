@@ -1,12 +1,10 @@
-import { tile, type TileInfo } from "littlejsengine";
+import { max, min, tile, vec2, Vector2, type TileInfo } from "littlejsengine";
 import {
   DirectionToVectorMap,
   PWDs,
   type OrdinalDirection,
   type PWD,
 } from "../core/types/directions.types";
-import { max, min, vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import { quantize } from "../noise/quantize";
 import { sectorToWorld, worldToSector } from "./renderers/sectors/sector";
 import { f2dmk } from "./world.types";

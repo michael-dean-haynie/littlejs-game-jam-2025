@@ -1,5 +1,4 @@
-import { vec2 } from "../../littlejsengine/littlejsengine.pure";
-import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
+import { vec2, type Vector2 } from "littlejsengine";
 import { enumerationFactory } from "../enumeration-factory";
 
 export const OrdinalDirections = enumerationFactory("n", "e", "s", "w");

@@ -1,4 +1,4 @@
-import type { Vector2 } from "../../littlejsengine/littlejsengine.types";
+import type { Vector2 } from "littlejsengine";
 import { type GameInput, type IGameInputCommand } from "./game-input.types";
 
 export class FacePosition implements IGameInputCommand {

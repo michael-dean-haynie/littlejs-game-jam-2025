@@ -1,8 +1,8 @@
 import type { Observable } from "rxjs";
-import type { TileInfo, Vector2 } from "../littlejsengine/littlejsengine.types";
 import type { PWD } from "../core/types/directions.types";
 import { enumerationFactory } from "../core/enumeration-factory";
 import type { SpriteSheet } from "../textures/sprite-sheets/sprite-sheet.types";
+import type { TileInfo, Vector2 } from "littlejsengine";
 
 /** Information about the newest frame */
 export type FrameChangedData = {

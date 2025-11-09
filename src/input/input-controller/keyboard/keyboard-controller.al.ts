@@ -16,23 +16,17 @@ import {
 } from "./keyboard-controller.types";
 import type { IGameInputCommand } from "../../game-inputs/game-input.types";
 import { Move } from "../../game-inputs/move";
-import { vec2 } from "../../../littlejsengine/littlejsengine.pure";
-import type { Vector2 } from "../../../littlejsengine/littlejsengine.types";
 import { FaceDirection } from "../../game-inputs/face-direction";
 import { FacePosition } from "../../game-inputs/face-position";
-import { inject } from "inversify";
-import { LJS_TOKEN } from "../../../littlejsengine/littlejsengine.token";
-import type { ILJS } from "../../../littlejsengine/littlejsengine.impure";
 import { GuardToggle } from "../../game-inputs/guard-toggle";
 import { Attack } from "../../game-inputs/attack";
 import { keyboardProfileKenisis } from "./profiles/keyboard-profile-kenisis";
+import { mousePos, vec2, Vector2 } from "littlejsengine";
 
 @Autoloadable({
   serviceIdentifier: KEYBOARD_CONTROLLER_TOKEN,
 })
 export class KeyboardController implements IKeyboardController {
-  private readonly _ljs: ILJS;
-
   private readonly _inputs$ = new Subject<IGameInputCommand>();
   public readonly inputs$ = this._inputs$.asObservable();
 
@@ -48,9 +42,7 @@ export class KeyboardController implements IKeyboardController {
   private readonly _profile: KeyboardProfile = keyboardProfileKenisis;
   private readonly _useCursor = true;
 
-  constructor(@inject(LJS_TOKEN) ljs: ILJS) {
-    this._ljs = ljs;
-
+  constructor() {
     document.addEventListener("keydown", this._onKeyDown.bind(this));
     document.addEventListener("keyup", this._onKeyUp.bind(this));
     document.addEventListener("mousedown", this._onMouseDown.bind(this));
@@ -61,7 +53,7 @@ export class KeyboardController implements IKeyboardController {
     if (!this._useCursor) {
       return;
     }
-    this._inputs$.next(new FacePosition(this._ljs.mousePos));
+    this._inputs$.next(new FacePosition(mousePos));
   }
 
   private _normalizeKey(key: string): string {

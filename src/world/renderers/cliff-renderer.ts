@@ -1,5 +1,4 @@
-import { drawRect, Vector2 } from "littlejsengine";
-import { EngineObject, vec2 } from "../../littlejsengine/littlejsengine.pure";
+import { drawRect, EngineObject, vec2, Vector2 } from "littlejsengine";
 import type { Sector } from "./sectors/sector";
 import { cellWorldSize } from "../cell";
 import { cliffHeightColors } from "./cliff-height-colors";

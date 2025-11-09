@@ -1,6 +1,6 @@
+import type { Vector2 } from "littlejsengine";
 import type { Ability, IAbility } from "../abilities/abilities.types";
 import { enumerationFactory } from "../core/enumeration-factory";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import type { Message } from "../messages/messages.types";
 import type { UnitState } from "./states/states.types";
 import type { UnitStats } from "./unit-type-stats-map";

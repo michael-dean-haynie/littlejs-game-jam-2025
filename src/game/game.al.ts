@@ -1,9 +1,6 @@
 import { inject } from "inversify";
 import { GAME_TOKEN, type IGame } from "./game.types";
 import { Autoloadable } from "../core/autoload/autoloadable";
-import type { ILJS } from "../littlejsengine/littlejsengine.impure";
-import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import { PLAYER_TOKEN, type IPlayer } from "../player/player.types";
 import {
   INPUT_MANAGER_TOKEN,
@@ -11,30 +8,34 @@ import {
 } from "../input/input-manager/input-manager.types";
 import { textures } from "../textures/textures.types";
 import { world } from "../world/world.al";
+import {
+  box2dInit,
+  engineInit,
+  setCameraPos,
+  setShowSplashScreen,
+  vec2,
+} from "littlejsengine";
 
 @Autoloadable({
   serviceIdentifier: GAME_TOKEN,
 })
 export class Game implements IGame {
-  private readonly _ljs: ILJS;
   private readonly _inputManager: IInputManager;
   private readonly _player: IPlayer;
 
   constructor(
-    @inject(LJS_TOKEN) ljs: ILJS,
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,
     @inject(PLAYER_TOKEN) player: IPlayer,
   ) {
-    this._ljs = ljs;
     this._inputManager = inputManager;
     this._player = player;
   }
 
   start(): void {
     // pre-init setup
-    this._ljs.setShowSplashScreen(true);
+    setShowSplashScreen(true);
 
-    this._ljs.engineInit(
+    engineInit(
       this._gameInit.bind(this),
       this._gameUpdate.bind(this),
       this._gameUpdatePost.bind(this),
@@ -49,12 +50,12 @@ export class Game implements IGame {
    */
   private async _gameInit(): Promise<void> {
     // start up LittleJS Box2D plugin
-    await this._ljs.box2dInit();
+    await box2dInit();
 
     // michael: organize
     world.init();
 
-    this._ljs.setCameraPos(vec2(0, 0));
+    setCameraPos(vec2(0, 0));
 
     this._player.spawnUnit();
 
@@ -87,7 +88,7 @@ export class Game implements IGame {
     // michael: temp - lock camera to player unit
     const unit = this._player.unit;
     if (unit !== null) {
-      this._ljs.setCameraPos(unit.getPerspectivePos());
+      setCameraPos(unit.getPerspectivePos());
     }
   }
 

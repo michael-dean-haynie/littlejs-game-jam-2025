@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { LitWorldConfigOverlay } from "../lit/components/lit-world-config-overlay.al";
 import { defaultWorldConfig, f2dmk, type Perspective } from "./world.types";
 import type { Cell } from "./cell";
 import { noCap } from "../core/util/no-cap";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import {
   extToGridSize,
   Sector,
@@ -12,7 +9,7 @@ import {
 } from "./renderers/sectors/sector";
 import { tap } from "rxjs";
 import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
-import { debugRect, setCameraScale, time } from "littlejsengine";
+import { debugRect, setCameraScale, time, vec2, Vector2 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };

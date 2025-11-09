@@ -1,4 +1,4 @@
-import { vec2 } from "../../littlejsengine/littlejsengine.pure";
+import { vec2 } from "littlejsengine";
 import type { UnitObject } from "../unit-object";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";

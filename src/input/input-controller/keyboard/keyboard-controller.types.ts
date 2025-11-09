@@ -1,8 +1,7 @@
 import type { Observable } from "rxjs";
 import { enumerationFactory } from "../../../core/enumeration-factory";
 import type { IGameInputCommand } from "../../game-inputs/game-input.types";
-import type { Vector2 } from "../../../littlejsengine/littlejsengine.types";
-import { vec2 } from "../../../littlejsengine/littlejsengine.pure";
+import { vec2, Vector2 } from "littlejsengine";
 
 export const KEYBOARD_CONTROLLER_TOKEN = "KEYBOARD_CONTROLLER_TOKEN" as const;
 

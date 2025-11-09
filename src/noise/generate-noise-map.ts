@@ -1,7 +1,6 @@
 import alea from "alea";
-import { clamp, percent, vec2 } from "../littlejsengine/littlejsengine.pure";
+import { clamp, percent, vec2, type Vector2 } from "littlejsengine";
 import { createNoise2D } from "simplex-noise";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 
 export function generateNoiseMap(
   seed: unknown,

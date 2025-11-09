@@ -4,11 +4,6 @@ import {
   type PWD,
 } from "../../../core/types/directions.types";
 import { noCap } from "../../../core/util/no-cap";
-import { max, min, vec2 } from "../../../littlejsengine/littlejsengine.pure";
-import type {
-  EngineObject,
-  Vector2,
-} from "../../../littlejsengine/littlejsengine.types";
 import { Cell } from "../../cell";
 import { CliffRenderer } from "../cliff-renderer";
 import { f2dmk } from "../../world.types";
@@ -20,6 +15,7 @@ import {
   type Phase,
 } from "./sector-phases";
 import { world } from "../../world.al";
+import { EngineObject, max, min, vec2, type Vector2 } from "littlejsengine";
 
 /** The distance from the center of a sector to the edge (flat side) in world units */
 // export const sectorExtent = 5;

@@ -1,4 +1,4 @@
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
+import type { Vector2 } from "littlejsengine";
 
 /** Either true 2d, or 2.5d */
 export type Perspective = "topdown" | "topdown-oblique";

@@ -11,12 +11,12 @@ import { Move } from "../input/game-inputs/move";
 import { createUnitMoveMessage } from "../units/unit-messages.types";
 import { FaceDirection } from "../input/game-inputs/face-direction";
 import { FacePosition } from "../input/game-inputs/face-position";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import { GuardToggle } from "../input/game-inputs/guard-toggle";
 import { Attack } from "../input/game-inputs/attack";
 import type { UnitObject } from "../units/unit-object";
 import { Lancer } from "../units/lancer/lancer";
 import { world } from "../world/world.al";
+import { vec2 } from "littlejsengine";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,

@@ -1,5 +1,5 @@
+import type { Vector2 } from "littlejsengine";
 import type { OrdinalDirection } from "../core/types/directions.types";
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 
 export const TERRAIN_THING_TOKEN = "TERRAIN_THING_TOKEN" as const;
 

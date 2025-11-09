@@ -1,4 +1,4 @@
-import type { Vector2 } from "../littlejsengine/littlejsengine.types";
+import type { Vector2 } from "littlejsengine";
 import type { Ability } from "../abilities/abilities.types";
 
 export type UnitMessage =
