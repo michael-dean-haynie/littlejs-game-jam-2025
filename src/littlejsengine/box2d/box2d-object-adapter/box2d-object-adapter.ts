@@ -50,7 +50,7 @@ export class Box2dObjectAdapter
     this.cliffHeight = this._world.getCell(pos).cliffHeight;
     this._rampHeight = this._world.getRampHeight(pos);
     // michael: formalize this. Cliffs take the integer heights, within those, units are .1, maybe other things will be .2, etc
-    this.renderOrder = this.cliffHeight + Math.ceil(this._rampHeight) + 0.1;
+    this.renderOrder = this.cliffHeight + 0.6;
     super.update();
   }
 

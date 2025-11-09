@@ -159,7 +159,7 @@ export class LitWorldConfigOverlay extends BaseLitElement {
         type="range"
         data-field="rampSlopeThreshold"
         min="0"
-        max="0.3"
+        max="1"
         step="0.01"
         value=${this._wc.rampSlopeThreshold}
         @input=${this._onNumericInput}

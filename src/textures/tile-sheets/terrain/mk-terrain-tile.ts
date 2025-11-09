@@ -8,7 +8,7 @@ import type {
 import type { RampDirection } from "../../../terrain/terrain-thing.types";
 import { textureIndexMap } from "../../texture-index-map";
 import type { TerrainTexture } from "../../textures.types";
-import { mkTile } from "../mk-tile";
+import { mkTile_deprecated } from "../mk-tile";
 
 const tileScale = 64; // from pixels to 1 tile
 const cliffTypeOriginMap: { [key in CliffType]: Vector2 } = {
@@ -45,7 +45,7 @@ export function mkTerrainTile(
   cliffFace = false,
 ): TileInfo {
   if (cliffIdx < 1) {
-    return mkTile("terrain.water", ljs);
+    return mkTile_deprecated("terrain.water", ljs);
   }
 
   // north edge is cliff ... etc

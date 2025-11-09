@@ -18,7 +18,7 @@ import { Warrior } from "../warrior/warrior";
 import { Lancer } from "../lancer/lancer";
 import { Spider } from "../spider/spider";
 import type { IBox2dObjectAdapter } from "../../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
-import { mkTile } from "../../textures/tile-sheets/mk-tile";
+import { mkTile_deprecated } from "../../textures/tile-sheets/mk-tile";
 import { unitTypeStatsMap } from "../unit-type-stats-map";
 import { WORLD_TOKEN, type IWorld } from "../../world/world.types";
 
@@ -58,7 +58,7 @@ export class UnitFactory implements IUnitFactory {
     const b2ObjAdpt = this._box2dObjectAdapterFactory.createBox2dObjectAdapter(
       position,
       size,
-      mkTile("empty", this._ljs),
+      mkTile_deprecated("empty", this._ljs),
       0,
       WHITE,
       this._ljs.box2d.bodyTypeDynamic,

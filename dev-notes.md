@@ -153,3 +153,9 @@ Generally, factories are for instantiating types with normal parameters as well 
   - as much as possible
 - optimized render loop should avoid:
   - object creation
+
+## TODO fixing terrain painting
+
+- some ramps when partially covered by cliff have wrong background color strip between
+- units on ramp which is partially covered by cliff appear on top of the cliff too
+- combine terrains into 1 texture to speed up render loop

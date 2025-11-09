@@ -5,23 +5,38 @@ import { cellWorldSize } from "../cell";
 /** Cliff Renderer using drawTile() with Top-Down-Oblique perspective */
 export class TdoDrawTileCliffRenderer extends CliffRenderer {
   override render(): void {
+    // debugRect(this._sector.worldPos, vec2(this._world.sectorSize));
+
     for (const cell of this._sector.cells) {
-      // render any cliff face tiles right below this cliff height
-      if (
-        cell.cliffHeight - 1 === this._cliffHeight &&
-        cell.cliffFaceTi !== undefined
-      ) {
-        drawTile(cell.cliffFacePos!, cellWorldSize, cell.backgroundTi);
-        drawTile(cell.cliffFacePos!, cellWorldSize, cell.cliffFaceTi);
+      // render tiles below the cell's cliff height
+      if (cell.cliffHeight - 1 === this._cliffHeight) {
+        // background
+        if (cell.cliffs?.length ?? false) {
+          if (cell.cliffHeight - 1 < 1) {
+            this._drawWater(cell.mainPos);
+          } else {
+            drawTile(cell.mainPos, cellWorldSize, cell.backgroundTi);
+          }
+        }
+        // cliff face
+        if (cell.cliffFaceTi !== undefined) {
+          drawTile(cell.cliffFacePos!, cellWorldSize, cell.backgroundTi);
+          drawTile(cell.cliffFacePos!, cellWorldSize, cell.cliffFaceTi);
+        }
       }
 
       // render any main/lower-ramp tiles at this cliffHeight
       if (cell.cliffHeight === this._cliffHeight) {
-        // main/ramp
-        if (this._cliffHeight === 0) {
-          this._drawWater(cell.mainPos);
-        } else {
+        if (cell.rampDir !== undefined) {
           drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
+          drawTile(cell.mainPos, cellWorldSize, cell.lowerRampTi);
+        } else {
+          // main
+          if (this._cliffHeight === 0) {
+            this._drawWater(cell.mainPos);
+          } else {
+            drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
+          }
         }
       }
 
@@ -32,33 +47,6 @@ export class TdoDrawTileCliffRenderer extends CliffRenderer {
       ) {
         drawTile(cell.upperRampPos!, cellWorldSize, cell.upperRampTi);
       }
-
-      // // at background cliff height
-      // const backgroundCliffHeight = cell.cliffHeight - 1;
-      // if (backgroundCliffHeight === this._cliffHeight) {
-      //   if (backgroundCliffHeight === 0) {
-      //     drawRect(
-      //       cell.mainPos,
-      //       cellWorldSize,
-      //       cliffHeightColors[this._cliffHeight],
-      //     );
-      //   } else {
-      //     drawTile(cell.mainPos, cellWorldSize, cell.backgroundTi);
-      //   }
-      // }
-
-      // // at cliff height
-      // if (cell.cliffHeight === this._cliffHeight) {
-      //   if (this._cliffHeight === 0) {
-      //     drawRect(
-      //       cell.mainPos,
-      //       cellWorldSize,
-      //       cliffHeightColors[this._cliffHeight],
-      //     );
-      //   } else {
-      //     drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
-      //   }
-      // }
     }
   }
 }

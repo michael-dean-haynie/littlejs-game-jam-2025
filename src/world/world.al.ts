@@ -12,12 +12,18 @@ import type { Cell } from "./cell";
 import { noCap } from "../core/util/no-cap";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
-import { extToGridSize, Sector, worldToSector } from "./sector";
+import {
+  extToGridSize,
+  Sector,
+  worldToSector,
+} from "./renderers/sectors/sector";
 import type { IUnit } from "../units/unit.types";
 import { inject } from "inversify";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { tap } from "rxjs";
+import { phases } from "./renderers/sectors/sector-phases";
+import { time } from "littlejsengine";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -59,11 +65,11 @@ export class World implements IWorld {
   }
 
   init(): void {
-    this._initOverlay();
-
     // michael: remove
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).world = this;
+
+    this._initOverlay();
   }
 
   update(): void {
@@ -121,7 +127,7 @@ export class World implements IWorld {
 
     // reset each sectors minPhase
     for (const sector of this.sectors.values()) {
-      sector.degradeMinPhase("bare");
+      sector.degradeMinPhase(phases.at(0)!);
     }
 
     // advance needed sectors and any dependencies they have
@@ -131,7 +137,7 @@ export class World implements IWorld {
       for (let x = lower; x <= upper; x++) {
         const sectorVector = unitSectorVector.add(vec2(x, y));
         const sector = Sector.getOrCreateSector(sectorVector, this);
-        sector.advanceMinPhase("renderers");
+        sector.advanceMinPhase("rails");
         sector.advanceToPhase();
       }
     }
@@ -224,7 +230,7 @@ export class World implements IWorld {
         tap((config) => {
           // nuke stuff before extent and configs change
           for (const sector of this.sectors.values()) {
-            sector.degradeMinPhase("bare");
+            sector.degradeMinPhase(phases.at(0)!);
             sector.degradeToPhase();
           }
 
@@ -239,7 +245,9 @@ export class World implements IWorld {
 
           this._ljs.setCameraScale(this.wc.cameraZoom);
 
-          this._updateSectors();
+          if (time > 0.1) {
+            this._updateSectors();
+          }
 
           // for (const layer of this._sectorCanvasLayers.values()) {
           //   layer.destroy();

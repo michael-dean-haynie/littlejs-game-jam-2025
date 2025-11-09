@@ -1,7 +1,6 @@
-import { drawRect, drawTile } from "littlejsengine";
+import { drawTile } from "littlejsengine";
 import { CliffRenderer } from "./cliff-renderer";
 import { cellWorldSize } from "../cell";
-import { cliffHeightColors } from "./cliff-height-colors";
 
 /** Cliff Renderer using drawTile() with Top-Down perspective */
 export class TdDrawTileCliffRenderer extends CliffRenderer {
@@ -11,26 +10,21 @@ export class TdDrawTileCliffRenderer extends CliffRenderer {
       const backgroundCliffHeight = cell.cliffHeight - 1;
       if (backgroundCliffHeight === this._cliffHeight) {
         if (backgroundCliffHeight === 0) {
-          drawRect(
-            cell.mainPos,
-            cellWorldSize,
-            cliffHeightColors[this._cliffHeight],
-          );
+          this._drawWater(cell.mainPos);
         } else {
           drawTile(cell.mainPos, cellWorldSize, cell.backgroundTi);
         }
       }
 
-      // at cliff height
+      // at cliff height (main or ramp?)
       if (cell.cliffHeight === this._cliffHeight) {
         if (this._cliffHeight === 0) {
-          drawRect(
-            cell.mainPos,
-            cellWorldSize,
-            cliffHeightColors[this._cliffHeight],
-          );
+          this._drawWater(cell.mainPos);
         } else {
           drawTile(cell.mainPos, cellWorldSize, cell.mainTi);
+          if (cell.rampDir !== undefined) {
+            drawTile(cell.mainPos, cellWorldSize, cell.upperRampTi);
+          }
         }
       }
     }

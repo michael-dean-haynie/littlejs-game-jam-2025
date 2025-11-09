@@ -1,7 +1,7 @@
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import type { IUnit } from "../units/unit.types";
 import type { Cell } from "./cell";
-import type { Sector } from "./sector";
+import type { Sector } from "./renderers/sectors/sector";
 import type { TileLayerQueueItem } from "./world.al";
 
 export const WORLD_TOKEN = "WORLD_TOKEN" as const;
@@ -56,9 +56,9 @@ export const defaultWorldConfig: WorldConfig = {
   renderTerrain: true,
   useTiles: true,
   topDownPerspective: false,
-  sectorExtent: 1,
-  sectorRenderExtent: 4,
-  seed: 3851,
+  sectorExtent: 2,
+  sectorRenderExtent: 3,
+  seed: 4160,
   tnScale: 184,
   tnOctaves: 4,
   tnPersistance: 0.56,

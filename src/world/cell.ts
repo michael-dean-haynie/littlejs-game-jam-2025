@@ -8,10 +8,11 @@ import {
 import { max, min, vec2 } from "../littlejsengine/littlejsengine.pure";
 import type { Vector2 } from "../littlejsengine/littlejsengine.types";
 import { quantize } from "../noise/quantize";
-import { sectorToWorld, worldToSector } from "./sector";
+import { sectorToWorld, worldToSector } from "./renderers/sectors/sector";
 import { f2dmk, type IWorld } from "./world.types";
-import { cliffHieghtTextureIndexMap } from "./renderers/cliff-height-textures";
 import { cliffHeightObliqueOffsets } from "./renderers/cliff-height-oblique-offsets";
+import { cliffHeightTileOffsets } from "./renderers/cliff-height-tile-offsets";
+import { textureIndexMap } from "../textures/texture-index-map";
 
 export type Axis = "x" | "y";
 /** Whether the lower level is grass or water (NOTE: not supporting water directly to cliff face for now)*/
@@ -53,10 +54,12 @@ export class Cell {
 
   /** The tile with the main cliff art (the spot where unit would stand) */
   mainTi?: TileInfo;
-  /** The tile for background art "behind" the main tile (based on perspective) */
+  /** The tile for background art "behind" the main tile */
   backgroundTi?: TileInfo;
   /** The tile with the cliff face for this cell if it is elevated cliff */
   cliffFaceTi?: TileInfo;
+  /** The tile with the lower ramp for this cell if it is a ramp */
+  lowerRampTi?: TileInfo;
   /** The tile with the upper ramp for this cell if it is a ramp */
   upperRampTi?: TileInfo;
 
@@ -144,9 +147,9 @@ export class Cell {
     // ========================
     if (this.cliffHeight !== 0) {
       this.backgroundTi = tile(
-        tilePos,
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight]),
         cellTextureSize,
-        cliffHieghtTextureIndexMap[this.cliffHeight - 1],
+        textureIndexMap["terrain/All_Tilemaps.png"],
       );
     }
 
@@ -173,9 +176,9 @@ export class Cell {
     }
 
     this.mainTi = tile(
-      tilePos,
+      tilePos.add(cliffHeightTileOffsets[this.cliffHeight]),
       cellTextureSize,
-      cliffHieghtTextureIndexMap[this.cliffHeight],
+      textureIndexMap["terrain/All_Tilemaps.png"],
     );
 
     // ========================
@@ -184,9 +187,9 @@ export class Cell {
     if (this.cliffHeight > 1 && c2s) {
       tilePos = tilePos.add(this._getCliffFaceOffset(c2n, c2s));
       this.cliffFaceTi = tile(
-        tilePos,
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight]),
         cellTextureSize,
-        cliffHieghtTextureIndexMap[this.cliffHeight],
+        textureIndexMap["terrain/All_Tilemaps.png"],
       );
     }
 
@@ -195,16 +198,16 @@ export class Cell {
     // ========================
     if (this.rampDir !== undefined) {
       tilePos = rampDirOriginMap[this.rampDir];
-      this.mainTi = tile(
-        tilePos,
+      this.lowerRampTi = tile(
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight + 1]),
         cellTextureSize,
-        cliffHieghtTextureIndexMap[this.cliffHeight + 1],
+        textureIndexMap["terrain/All_Tilemaps.png"],
       );
       tilePos = tilePos.add(vec2(0, -1));
       this.upperRampTi = tile(
-        tilePos,
+        tilePos.add(cliffHeightTileOffsets[this.cliffHeight + 1]),
         cellTextureSize,
-        cliffHieghtTextureIndexMap[this.cliffHeight + 1],
+        textureIndexMap["terrain/All_Tilemaps.png"],
       );
     }
   }
