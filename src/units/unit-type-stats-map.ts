@@ -11,8 +11,8 @@ export type UnitStats = {
 };
 
 export const defaultUnitStats: UnitStats = {
-  size: 1,
-  drawSizeScale: 1,
+  size: 0.5,
+  drawSizeScale: 4,
   spriteOffset: 0,
   moveSpeed: 3,
 } as const;

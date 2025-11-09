@@ -77,7 +77,7 @@ export function generateNoiseMap(
     }
   }
 
-  // michael: for optimizing the clamp
+  // michael: debug: for visualizing the clamp
   // dotPlot(noiseMap.flat());
 
   return noiseMap;

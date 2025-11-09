@@ -256,7 +256,7 @@ export class LitWorldConfigOverlay extends BaseLitElement {
 
   private _onNumericInput(ev: InputEvent): void {
     const input = ev.target as HTMLInputElement;
-    // michael: good way to assert this so runtime and compile time safe with context inference awareness magic?
+    // michael: improve: good way to assert this so runtime and compile time safe with context inference awareness magic?
     const field = input.dataset.field as keyof WorldConfig;
     noCap(field, "Expected data-field attribute on input element");
 
@@ -392,8 +392,8 @@ export class LitWorldConfigOverlay extends BaseLitElement {
     }
   }
 
-  // michael: todo - doc daisy ui
-  // michael: document perspective is top-down oblique.
+  // michael: document: - doc daisy ui
+  // michael: document:  perspective is top-down oblique.
 
   private _parseNumericInputEventValue(ev: InputEvent): number {
     noCap(

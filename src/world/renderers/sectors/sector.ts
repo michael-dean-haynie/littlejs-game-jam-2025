@@ -103,40 +103,16 @@ export class Sector {
   }
 
   private _degrade1Phase(): void {
-    // michael: remove
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paths = (window as any).paths ?? new Map();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).paths = paths;
-    if (paths.get(this.pos.toString()) === undefined) {
-      paths.set(this.pos.toString(), []);
-    }
-
     const degradeFn = degradeFromPhaseFns[this._phase];
     this._phase = phases[phase2Idx[this._phase] - 1] ?? phases.at(0);
     degradeFn(this);
-
-    // michael: remove
-    paths.get(this.pos.toString())!.push(this._phase);
   }
 
   private _advance1Phase(): void {
-    // michael: remove
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paths = (window as any).paths ?? new Map();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).paths = paths;
-    if (paths.get(this.pos.toString()) === undefined) {
-      paths.set(this.pos.toString(), []);
-    }
-
     this._phase = phases[phase2Idx[this._phase] + 1] ?? phases.at(-1);
     if (this._phase === "bare") return;
     const advanceFn = advanceToPhaseFns[this._phase];
     advanceFn(this);
-
-    // michael: remove
-    paths.get(this.pos.toString())!.push(this._phase);
   }
 
   public static getOrCreateSector(sectorVector: Vector2): Sector {

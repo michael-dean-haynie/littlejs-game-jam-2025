@@ -45,7 +45,7 @@ export class World {
   constructor() {}
 
   init(): void {
-    // michael: remove
+    // michael: debug
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).world = this;
 
@@ -119,7 +119,7 @@ export class World {
       }
     }
 
-    // michael: temp: testing
+    // michael: debug
     const sExt = this.wc.sectorExtent;
     const aExt = sExt * 3 + 1;
     for (const sector of this.sectors.values()) {
@@ -189,15 +189,6 @@ export class World {
 
   /**
    * ==================================================================
-   * SECTOR CANVAS LAYER RENDERING
-   * ==================================================================
-   */
-
-  /** tile scale */
-  // private _tileScale = 64;
-
-  /**
-   * ==================================================================
    * LIT WORLD OVERLAY
    * ==================================================================
    */
@@ -240,22 +231,6 @@ export class World {
           if (time > 0.1) {
             this._updateSectors();
           }
-
-          // for (const layer of this._sectorCanvasLayers.values()) {
-          //   layer.destroy();
-          // }
-          // for (const collision of [
-          //   ...this._sectorCollisionsMap.values(),
-          // ].flat()) {
-          //   collision.destroy();
-          // }
-          // this._terrainConfig = config;
-          // this._generateNoiseMaps();
-          // if (!this._terrainConfig.paintTerrain) return;
-          // this._generateAllCliffs();
-          // this._remarkRamps();
-          // this._rebuildCollisionsMap();
-          // this._rebuildCanvasLayers();
         }),
       )
       .subscribe();

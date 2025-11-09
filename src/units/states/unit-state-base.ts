@@ -44,7 +44,7 @@ export abstract class UnitStateBase implements IUnitState {
       return "skip";
     }
 
-    // michael: maybe improve - might be design or ts limitation
+    // michael: improve: maybe - might be design or ts limitation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return handler(message as any);
   }

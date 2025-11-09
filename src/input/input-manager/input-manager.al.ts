@@ -8,10 +8,8 @@ export class InputManager {
 
   constructor() {
     keyboardController.inputs$
-      .pipe(
-        // michael: consider takeUntil with destroy ref
-        tap((gameInput) => this._commands$.next(gameInput)),
-      )
+      // no takeUntil because singleton
+      .pipe(tap((gameInput) => this._commands$.next(gameInput)))
       .subscribe();
   }
 

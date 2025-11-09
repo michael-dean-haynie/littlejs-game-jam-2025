@@ -287,7 +287,7 @@ export function advanceToRenderers(sector: Sector): void {
   //   this._world.tileLayerQueue.push({ sectorVector: this.pos, cliff });
   // }
 
-  // michael: switch to layer-by-cliff after frank's updates to tile layer redraw performance
+  // michael: improve: switch to layer-by-cliff after frank's updates to tile layer redraw performance
   // this._world.tileLayerQueue.push({ sectorVector: this.pos, cliff: 0 });
 
   for (const cell of sector.cells) {

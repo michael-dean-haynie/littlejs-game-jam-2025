@@ -8,8 +8,7 @@ export class Attack extends AbilityBase {
   protected readonly _preswingDuration: number;
   protected readonly _backswingDuration: number;
 
-  // michael: pu@ make this flexible for different timings, damage, aoe, mele/missle etc.
-  // then work on registering abilities in the unit class rather than in the casting state
+  // michael: improve: make this flexible for different timings, damage, aoe, mele/missle etc.
   constructor(
     unitObject: UnitObject,
     preswingDuration: number,

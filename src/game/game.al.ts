@@ -4,6 +4,7 @@ import {
   box2dInit,
   engineInit,
   setCameraPos,
+  setInputPreventDefault,
   setShowSplashScreen,
   vec2,
 } from "littlejsengine";
@@ -14,6 +15,9 @@ export class Game {
   start(): void {
     // pre-init setup
     setShowSplashScreen(true);
+
+    // don't interrupt html stuff (lit components)
+    setInputPreventDefault(false);
 
     engineInit(
       this._gameInit.bind(this),
@@ -32,7 +36,6 @@ export class Game {
     // start up LittleJS Box2D plugin
     await box2dInit();
 
-    // michael: organize
     world.init();
 
     setCameraPos(vec2(0, 0));
@@ -65,7 +68,7 @@ export class Game {
    * Setup camera and prepare for render
    */
   private _gameUpdatePost(): void {
-    // michael: temp - lock camera to player unit
+    // michael: improve: temp - lock camera to player unit - better place
     const unit = player.unit;
     if (unit !== null) {
       setCameraPos(unit.getPerspectivePos());

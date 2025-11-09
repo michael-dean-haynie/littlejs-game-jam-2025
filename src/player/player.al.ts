@@ -18,13 +18,13 @@ export class Player {
   constructor() {
     inputManager.commands$
       .pipe(
-        // michael: consider takeUntil with destroyref
+        // no takeUntil because expected singleton
         tap((command) => this._processGameInputCommand(command)),
       )
       .subscribe();
   }
 
-  // michael: improve organization, consider many commands and many units possible
+  // michael: improve: organization, consider many commands and many units possible
   private _processGameInputCommand(giCommand: IGameInputCommand): void {
     if (giCommand instanceof Move) {
       this.unit?.enqueueMessage(createUnitMoveMessage(giCommand.direction));
@@ -61,7 +61,7 @@ export class Player {
     // }
 
     world.unit = this.unit;
-    // michael: remove
+    // michael: debug
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).unit = this.unit;
   }
