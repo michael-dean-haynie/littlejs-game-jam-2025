@@ -1,47 +1,47 @@
 import { vec2 } from "../../littlejsengine/littlejsengine.pure";
-import type { IUnit } from "../unit.types";
+import type { UnitObject } from "../unit-object";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
 
 export class UnitStateMoving extends UnitStateBase {
   state: UnitState = "moving";
 
-  constructor(unit: IUnit) {
-    super(unit);
+  constructor(unitObject: UnitObject) {
+    super(unitObject);
 
     // message handlers
     this._messageHandlers["unit.move"] = (msg) => {
       if (msg.direction.length() === 0) {
-        this._unit.popState();
+        this._unitObject.popState();
         return "none";
       }
-      this._unit.moveDirection = msg.direction;
-      this._unit.box2dObjectAdapter.setLinearVelocity(
-        this._unit.moveDirection.scale(this._unit.stats.moveSpeed),
+      this._unitObject.moveDirection = msg.direction;
+      this._unitObject.setLinearVelocity(
+        this._unitObject.moveDirection.scale(this._unitObject.stats.moveSpeed),
       );
       return "none";
     };
     this._messageHandlers["unit.cast"] = () => {
-      this._unit.pushState("casting");
+      this._unitObject.pushState("casting");
       return "requeue";
     };
     this._messageHandlers["unit.toggleCast"] = () => {
-      this._unit.pushState("casting");
+      this._unitObject.pushState("casting");
       return "requeue";
     };
   }
 
   override onEnter(): void {
-    this._unit.swapAnimation(this.state);
+    this._unitObject.swapAnimation(this.state);
   }
 
   override onExit(): void {
-    this._unit.box2dObjectAdapter.setLinearVelocity(vec2(0));
+    this._unitObject.setLinearVelocity(vec2(0));
   }
 
   override onUpdate(): void {
-    this._unit.box2dObjectAdapter.setLinearVelocity(
-      this._unit.moveDirection.scale(this._unit.stats.moveSpeed),
+    this._unitObject.setLinearVelocity(
+      this._unitObject.moveDirection.scale(this._unitObject.stats.moveSpeed),
     );
   }
 }

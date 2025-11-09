@@ -17,13 +17,13 @@ import {
   Sector,
   worldToSector,
 } from "./renderers/sectors/sector";
-import type { IUnit } from "../units/unit.types";
 import { inject } from "inversify";
 import { LJS_TOKEN } from "../littlejsengine/littlejsengine.token";
 import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { tap } from "rxjs";
 import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
 import { debugRect, time } from "littlejsengine";
+import type { UnitObject } from "../units/unit-object";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -31,7 +31,7 @@ export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
   serviceIdentifier: WORLD_TOKEN,
 })
 export class World implements IWorld {
-  unit?: IUnit;
+  unit?: UnitObject;
 
   private readonly _ljs: ILJS;
 
@@ -84,7 +84,7 @@ export class World implements IWorld {
       return;
     }
 
-    const unitPos = this.unit?.box2dObjectAdapter.getCenterOfMass() ?? vec2();
+    const unitPos = this.unit?.getCenterOfMass() ?? vec2();
     const sectorVector = worldToSector(unitPos, this.wc.sectorExtent);
     const sectorKey = f2dmk(sectorVector);
     if (sectorKey === this._prevSectorKey) return;
@@ -122,7 +122,7 @@ export class World implements IWorld {
   /** Update all sectors */
   private _updateSectors(): void {
     // return;
-    const unitPos = this.unit?.box2dObjectAdapter.getCenterOfMass() ?? vec2();
+    const unitPos = this.unit?.getCenterOfMass() ?? vec2();
     const unitSectorVector = worldToSector(unitPos, this.wc.sectorExtent);
 
     // reset each sectors minPhase

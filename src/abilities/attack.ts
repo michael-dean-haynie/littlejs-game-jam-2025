@@ -1,4 +1,3 @@
-import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import type { IUnit } from "../units/unit.types";
 import type { Ability } from "./abilities.types";
 import { AbilityBase } from "./ability-base";
@@ -13,11 +12,10 @@ export class Attack extends AbilityBase {
   // then work on registering abilities in the unit class rather than in the casting state
   constructor(
     unit: IUnit,
-    ljs: ILJS,
     preswingDuration: number,
     backswingDuration: number,
   ) {
-    super(unit, ljs);
+    super(unit);
     this._preswingDuration = preswingDuration;
     this._backswingDuration = backswingDuration;
   }

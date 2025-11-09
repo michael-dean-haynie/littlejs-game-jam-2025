@@ -9,7 +9,7 @@ import { TdDrawRectCliffRenderer } from "../td-draw-rect-cliff-renderer";
 import { TdoDrawTileCliffRenderer } from "../tdo-draw-tile-cliff-renderer";
 import { TdoDrawRectCliffRenderer } from "../tdo-draw-rect-cliff-renderer";
 import { type OrdinalDirection } from "../../../core/types/directions.types";
-import { Rail } from "../../../littlejsengine/box2d/rail";
+import { Rail } from "../../rail";
 
 export const phases = [
   "bare",
@@ -401,7 +401,7 @@ export function advanceToRails(sector: Sector): void {
           break;
       }
 
-      const rail = new Rail(sector.world, cell.rampDir, pos, size);
+      const rail = new Rail(pos, sector.world, cell.rampDir, size);
       sector.rails.push(rail);
     }
   }

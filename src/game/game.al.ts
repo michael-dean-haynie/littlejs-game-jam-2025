@@ -90,7 +90,7 @@ export class Game implements IGame {
     // michael: temp - lock camera to player unit
     const unit = this._player.unit;
     if (unit !== null) {
-      this._ljs.setCameraPos(unit.box2dObjectAdapter.getPerspectivePos());
+      this._ljs.setCameraPos(unit.getPerspectivePos());
     }
   }
 

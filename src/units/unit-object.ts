@@ -1,56 +1,97 @@
 import { Subject, Subscription, takeUntil, tap } from "rxjs";
-import { noCap } from "../core/util/no-cap";
-import type { IBox2dObjectAdapter } from "../littlejsengine/box2d/box2d-object-adapter/box2d-object-adapter.types";
-import type { IUnit, UnitType } from "./unit.types";
-import { type Vector2 } from "../littlejsengine/littlejsengine.types";
-import { vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
-import type { IUnitState, UnitState } from "./states/states.types";
-import type { Message } from "../messages/messages.types";
-import type { Ability, IAbility } from "../abilities/abilities.types";
-import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
+import { WorldObject } from "../world/world-object";
+import type { Cell } from "../world/cell";
+import { box2d, drawTile, vec2, Vector2, WHITE } from "littlejsengine";
 import type { IWorld } from "../world/world.types";
+import { mkTile } from "../textures/tile-sheets/mk-tile";
+import type { IUnit, UnitType } from "./unit.types";
+import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
+import type { Ability, IAbility } from "../abilities/abilities.types";
+import type { IUnitState, UnitState } from "./states/states.types";
+import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
+import { noCap } from "../core/util/no-cap";
+import type { Message } from "../messages/messages.types";
 
-export abstract class UnitBase implements IUnit {
-  abstract readonly type: UnitType;
+export class UnitObject extends WorldObject implements IUnit {
+  readonly type: UnitType;
 
-  private _box2dObjectAdapterRenderSub$: Subscription;
-  private _box2dObjectAdapterUpdateSub$: Subscription;
-  readonly box2dObjectAdapter: IBox2dObjectAdapter;
+  /** The vertical offset to place a unit's sprite's "feet" in the physical b2d circle */
+  public spriteOffset = 0;
 
-  // @ts-expect-error TS6133 - michael: will use this property soon
-  private readonly _world: IWorld;
+  private _transparentCells: Cell[] = [];
 
-  constructor(box2dObjectAapter: IBox2dObjectAdapter, world: IWorld) {
-    this._world = world;
+  constructor(pos: Vector2, world: IWorld, unitType: UnitType) {
+    super(pos, box2d.bodyTypeDynamic, world);
 
-    // wire up to box2dObjectAdapter
-    this.box2dObjectAdapter = box2dObjectAapter;
-    this._box2dObjectAdapterRenderSub$ = this.box2dObjectAdapter.render$
-      .pipe(
-        takeUntil(this._destroyRef$),
-        tap(() => {
-          this._animation?.progress(this._faceDirection);
-        }),
-      )
-      .subscribe();
-    this._box2dObjectAdapterUpdateSub$ = this.box2dObjectAdapter.update$
-      .pipe(
-        takeUntil(this._destroyRef$),
-        tap(() => {
-          this._update();
-        }),
-      )
-      .subscribe();
+    this.type = unitType;
+    this.tileInfo = mkTile("empty");
+    this.color = WHITE;
+
+    // init body
+    const {
+      size: sizeScalar,
+      drawSizeScale,
+      spriteOffset: drawHeight3d,
+    } = unitTypeStatsMap[unitType];
+    const size = vec2(sizeScalar);
+
+    // fit circle diameter to similar size of box around body
+    this.addCircle(size.scale(0.75).length());
+    // make the sprite tile fit to the physics body shape
+    this.drawSize = size.scale(drawSizeScale);
+    // make the sprite stand in its physical bd2 circle
+    this.spriteOffset = size.y / 2 + drawHeight3d * size.y;
+
+    this.setFixedRotation(true);
   }
 
-  // destroy
   protected readonly _destroyRef$ = new Subject<void>();
-  destroy(): void {
-    this._box2dObjectAdapterRenderSub$.unsubscribe();
-    this._box2dObjectAdapterUpdateSub$.unsubscribe();
-    this.box2dObjectAdapter.destroy();
+  override destroy(): void {
     this._destroyRef$.next();
+    this._clearTransparentCells();
+    super.destroy();
+  }
+
+  override update(): void {
+    super.update();
+    this.renderOrder += 0.1;
+    const pos = this.getCenterOfMass();
+
+    // transparent cells
+    this._clearTransparentCells();
+    const cell = this._world.getCell(pos);
+    const standCells = [cell.getAdj("w"), cell, cell.getAdj("e")];
+    for (const sCell of standCells) {
+      if (sCell === cell || box2d.raycastAll(pos, sCell.pos).length === 0) {
+        const oCell = sCell.getAdj("s");
+        const isHigher = oCell.cliffHeight > sCell.cliffHeight;
+        const isSame = oCell.cliffHeight === sCell.cliffHeight;
+        if (isHigher || (isSame && oCell.isRamp() && !sCell.isRamp())) {
+          oCell.transparent = true;
+          this._transparentCells.push(oCell);
+        }
+      }
+    }
+
+    // messages/state
+    this._processMessages();
+    this._getStateObj().onUpdate();
+  }
+
+  override render(): void {
+    // progress animation
+    this._animation?.progress(this._faceDirection);
+
+    // note: coppied from default impl - just updated the pos argument
+    drawTile(
+      this.getPerspectivePos(),
+      this.drawSize || this.size,
+      this.tileInfo,
+      this.color,
+      this.angle,
+      this.mirror,
+      this.additiveColor,
+    );
   }
 
   // abilities
@@ -66,6 +107,13 @@ export abstract class UnitBase implements IUnit {
     this._animationMap.set(stateOrAbility, animation);
   }
 
+  private _clearTransparentCells(): void {
+    for (const cell of this._transparentCells) {
+      cell.transparent = false;
+    }
+    this._transparentCells = [];
+  }
+
   protected _animation?: ISpriteAnimation;
   protected _animationFrameChangedSub?: Subscription;
   swapAnimation(stateOrAbility: UnitState | Ability): void {
@@ -79,7 +127,7 @@ export abstract class UnitBase implements IUnit {
       .pipe(
         takeUntil(this._destroyRef$),
         tap((frameChangedData) => {
-          this.box2dObjectAdapter.tileInfo = frameChangedData.tileInfo;
+          this.tileInfo = frameChangedData.tileInfo;
         }),
       )
       .subscribe();
@@ -135,8 +183,9 @@ export abstract class UnitBase implements IUnit {
 
     // update mirror for sprite animation
     if (direction.x === 0) return;
-    this.box2dObjectAdapter.mirror = direction.x < 0;
+    this.mirror = direction.x < 0;
   }
+
   get stats(): UnitStats {
     return unitTypeStatsMap[this.type];
   }
@@ -166,10 +215,5 @@ export abstract class UnitBase implements IUnit {
     }
 
     this._messageBuffer.push(...skippedMessages);
-  }
-
-  private _update(): void {
-    this._processMessages();
-    this._getStateObj().onUpdate();
   }
 }

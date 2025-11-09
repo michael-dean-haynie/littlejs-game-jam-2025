@@ -3,7 +3,7 @@ import type {
   MessageId,
   MessagePostProcessAction,
 } from "../../messages/messages.types";
-import type { IUnit } from "../unit.types";
+import type { UnitObject } from "../unit-object";
 import type { IUnitState, UnitState } from "./states.types";
 
 export type MessageHandlerMap = {
@@ -15,18 +15,18 @@ export type MessageHandlerMap = {
 export abstract class UnitStateBase implements IUnitState {
   abstract readonly state: UnitState;
   protected readonly _messageHandlers: Partial<MessageHandlerMap> = {};
-  protected readonly _unit: IUnit;
+  protected readonly _unitObject: UnitObject;
 
-  constructor(unit: IUnit) {
-    this._unit = unit;
+  constructor(unitObject: UnitObject) {
+    this._unitObject = unitObject;
 
     this._messageHandlers["unit.faceDirection"] = (msg) => {
-      this._unit.faceDirection = msg.direction;
+      this._unitObject.faceDirection = msg.direction;
       return "none";
     };
     this._messageHandlers["unit.facePosition"] = (msg) => {
-      this._unit.faceDirection = msg.position.subtract(
-        this._unit.box2dObjectAdapter.getCenterOfMass(),
+      this._unitObject.faceDirection = msg.position.subtract(
+        this._unitObject.getCenterOfMass(),
       );
       return "none";
     };

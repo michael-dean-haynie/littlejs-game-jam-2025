@@ -1,6 +1,6 @@
 import { Box2dObject, drawTile, vec2, Vector2 } from "littlejsengine";
-import type { IWorld } from "../../world/world.types";
-import { cliffHeightObliqueOffsets } from "../../world/renderers/cliff-height-oblique-offsets";
+import type { IWorld } from "./world.types";
+import { cliffHeightObliqueOffsets } from "./renderers/cliff-height-oblique-offsets";
 
 /** An object that can be placed and rendered in the world with perspective */
 export class WorldObject extends Box2dObject {
@@ -12,11 +12,9 @@ export class WorldObject extends Box2dObject {
   /** The ramp height for this object (0 if not currently on a ramp) */
   private _rampHeight = 0;
 
-  constructor(
-    world: IWorld,
-    ...args: ConstructorParameters<typeof Box2dObject>
-  ) {
-    super(...args);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(pos: Vector2, bodyType: any, world: IWorld) {
+    super(pos, undefined, undefined, undefined, undefined, bodyType);
     this._world = world;
   }
 
@@ -34,7 +32,7 @@ export class WorldObject extends Box2dObject {
   override render(): void {
     // note: coppied from default impl - just updated the pos argument
     drawTile(
-      this._getPerspectivePos(),
+      this.getPerspectivePos(),
       this.drawSize || this.size,
       this.tileInfo,
       this.color,
@@ -44,7 +42,7 @@ export class WorldObject extends Box2dObject {
     );
   }
 
-  protected _getPerspectivePos(): Vector2 {
+  public getPerspectivePos(): Vector2 {
     const pos = this.getCenterOfMass();
     switch (this._world.perspective) {
       case "topdown":

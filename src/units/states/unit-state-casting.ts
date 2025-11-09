@@ -1,8 +1,8 @@
 import { filter, Subscription, tap } from "rxjs";
 import type { IAbility } from "../../abilities/abilities.types";
-import type { IUnit } from "../unit.types";
 import type { UnitState } from "./states.types";
 import { UnitStateBase } from "./unit-state-base";
+import type { UnitObject } from "../unit-object";
 
 export class UnitStateCasting extends UnitStateBase {
   state: UnitState = "casting";
@@ -10,13 +10,13 @@ export class UnitStateCasting extends UnitStateBase {
   private _ability: IAbility | null = null;
   private _abilityCompleteSub?: Subscription;
 
-  constructor(unit: IUnit) {
-    super(unit);
+  constructor(unitObject: UnitObject) {
+    super(unitObject);
 
     // message handlers
     this._messageHandlers["unit.cast"] = (msg) => {
       if (this._ability === null) {
-        this._ability = this._unit.abilityMap.get(msg.ability) ?? null;
+        this._ability = this._unitObject.abilityMap.get(msg.ability) ?? null;
         if (this._ability === null) {
           console.warn("Ability triggered, but missing on unit");
           return "none";
@@ -26,7 +26,7 @@ export class UnitStateCasting extends UnitStateBase {
           .pipe(
             filter((phase) => phase === "complete"),
             tap(() => {
-              this._unit.popState();
+              this._unitObject.popState();
             }),
           )
           .subscribe();
@@ -37,7 +37,7 @@ export class UnitStateCasting extends UnitStateBase {
 
     this._messageHandlers["unit.toggleCast"] = (msg) => {
       if (this._ability === null) {
-        this._ability = this._unit.abilityMap.get(msg.ability) ?? null;
+        this._ability = this._unitObject.abilityMap.get(msg.ability) ?? null;
         if (this._ability === null) {
           console.warn("Ability triggered, but missing on unit");
           return "none";
@@ -47,7 +47,7 @@ export class UnitStateCasting extends UnitStateBase {
           .pipe(
             filter((phase) => phase === "complete"),
             tap(() => {
-              this._unit.popState();
+              this._unitObject.popState();
             }),
           )
           .subscribe();
@@ -55,7 +55,7 @@ export class UnitStateCasting extends UnitStateBase {
         return "none";
       }
       if (this._ability?.type === msg.ability) {
-        this._unit.popState();
+        this._unitObject.popState();
         return "none";
       }
       return "none";

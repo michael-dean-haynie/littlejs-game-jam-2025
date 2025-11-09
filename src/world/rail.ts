@@ -1,31 +1,26 @@
 import { box2d, RED, type Vector2 } from "littlejsengine";
-import type { IWorld } from "../../world/world.types";
+import type { IWorld } from "./world.types";
 import { WorldObject } from "./world-object";
-import { mkTile } from "../../textures/tile-sheets/mk-tile";
-import type { RampDirection } from "../../world/cell";
+import { mkTile } from "../textures/tile-sheets/mk-tile";
+import type { RampDirection } from "./cell";
 
 /** A "rail" for cliff edges/ramps to implement terrain pathing/collision */
 export class Rail extends WorldObject {
   private _rampDir?: RampDirection;
-  private _doRender = true;
+  private _doRender = false;
 
   constructor(
+    pos: Vector2,
     world: IWorld,
     rampDir: RampDirection | undefined,
-    pos: Vector2,
     size: Vector2,
   ) {
-    super(
-      world,
-      pos,
-      size,
-      mkTile("terrain.water"),
-      0,
-      RED,
-      box2d.bodyTypeStatic,
-    );
+    super(pos, box2d.bodyTypeStatic, world);
     this._rampDir = rampDir;
+    this.size = size;
     this.drawSize = size;
+    this.tileInfo = mkTile("terrain.water");
+    this.color = RED;
     this.addBox(size, undefined, this.angle, undefined, 0);
   }
 

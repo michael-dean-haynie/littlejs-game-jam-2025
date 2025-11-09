@@ -12,7 +12,6 @@ import { createUnitMoveMessage } from "../units/unit-messages.types";
 import { FaceDirection } from "../input/game-inputs/face-direction";
 import { FacePosition } from "../input/game-inputs/face-position";
 import { vec2 } from "../littlejsengine/littlejsengine.pure";
-import type { IUnit } from "../units/unit.types";
 import {
   UNIT_FACTORY_TOKEN,
   type IUnitFactory,
@@ -20,6 +19,7 @@ import {
 import { GuardToggle } from "../input/game-inputs/guard-toggle";
 import { Attack } from "../input/game-inputs/attack";
 import { WORLD_TOKEN, type IWorld } from "../world/world.types";
+import type { UnitObject } from "../units/unit-object";
 
 @Autoloadable({
   serviceIdentifier: PLAYER_TOKEN,
@@ -29,7 +29,7 @@ export class Player implements IPlayer {
   private readonly _unitFactory: IUnitFactory;
   private readonly _world: IWorld;
 
-  unit: IUnit | null = null;
+  unit: UnitObject | null = null;
 
   constructor(
     @inject(INPUT_MANAGER_TOKEN) inputManager: IInputManager,

@@ -1,8 +1,8 @@
-import type { IUnit } from "../units/unit.types";
+import type { UnitObject } from "../units/unit-object";
 
 export const PLAYER_TOKEN = "PLAYER_TOKEN" as const;
 
 export interface IPlayer {
   spawnUnit(): void;
-  unit: IUnit | null;
+  unit: UnitObject | null;
 }

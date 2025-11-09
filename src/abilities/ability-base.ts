@@ -1,8 +1,8 @@
 import { BehaviorSubject } from "rxjs";
 import type { Ability, AbilityPhase, IAbility } from "./abilities.types";
-import type { ILJS } from "../littlejsengine/littlejsengine.impure";
 import { noCap } from "../core/util/no-cap";
 import type { IUnit } from "../units/unit.types";
+import { time } from "littlejsengine";
 
 export abstract class AbilityBase implements IAbility {
   abstract readonly type: Ability;
@@ -14,25 +14,23 @@ export abstract class AbilityBase implements IAbility {
   protected abstract readonly _preswingDuration: number;
   protected abstract readonly _backswingDuration: number;
 
-  private readonly _ljs: ILJS;
   private _phaseStart: number | null = null;
 
-  constructor(unit: IUnit, ljs: ILJS) {
+  constructor(unit: IUnit) {
     this._unit = unit;
-    this._ljs = ljs;
   }
 
   progress(): void {
     switch (this._phase$.value) {
       case "init":
         this._unit.swapAnimation(this.type);
-        this._phaseStart = this._ljs.time;
+        this._phaseStart = time;
         this._phase$.next("preswing");
         this.progress();
         break;
       case "preswing":
         if (this.getPhaseDelta() >= this._preswingDuration) {
-          this._phaseStart = this._ljs.time;
+          this._phaseStart = time;
           this._phase$.next("swing");
           this.progress();
         }
@@ -44,7 +42,7 @@ export abstract class AbilityBase implements IAbility {
         break;
       case "backswing":
         if (this.getPhaseDelta() >= this._backswingDuration) {
-          this._phaseStart = this._ljs.time;
+          this._phaseStart = time;
           this._phase$.next("complete");
         }
         break;
@@ -61,6 +59,6 @@ export abstract class AbilityBase implements IAbility {
 
   private getPhaseDelta(): number {
     noCap(this._phaseStart !== null);
-    return this._ljs.time - this._phaseStart;
+    return time - this._phaseStart;
   }
 }
