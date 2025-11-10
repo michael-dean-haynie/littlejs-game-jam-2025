@@ -35,7 +35,7 @@ export class World {
   cells = new Map<number, Cell>();
   getCell(pos: Vector2): Cell {
     const cell = this.cells.get(f2dmk(pos));
-    noCap.notUndefined(cell);
+    noCap.isDefined(cell);
     return cell;
   }
 
