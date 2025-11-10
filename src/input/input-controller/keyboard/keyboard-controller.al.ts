@@ -34,7 +34,7 @@ export class KeyboardController {
   // private readonly _useCursor = false;
 
   private readonly _profile: KeyboardProfile = keyboardProfileKenisis;
-  private readonly _useCursor = true;
+  private readonly _useCursor = false;
 
   constructor() {
     document.addEventListener("keydown", this._onKeyDown.bind(this));
