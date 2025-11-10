@@ -11,6 +11,9 @@ import { world } from "../world/world.al";
 import { vec2 } from "littlejsengine";
 import { inputManager } from "../input/input-manager/input-manager.al";
 import { Lancer } from "../units/lancer";
+import { Warrior } from "../units/warrior";
+import { Spider } from "../units/spider";
+import { Skull } from "../units/skull";
 
 export class Player {
   unit: UnitObject | null = null;
@@ -56,9 +59,10 @@ export class Player {
   }
 
   spawnUnit(): void {
-    // for (let i = 0; i < 100; i++) {
-    this.unit = new Lancer(vec2(0));
-    // }
+    this.unit = new Skull(vec2(2, 0));
+    this.unit = new Lancer(vec2(0, 0));
+    this.unit = new Spider(vec2(1, 0));
+    this.unit = new Warrior(vec2(-1, 0));
 
     world.unit = this.unit;
     // michael: debug

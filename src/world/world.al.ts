@@ -8,8 +8,8 @@ import {
   worldToSector,
 } from "./renderers/sectors/sector";
 import { tap } from "rxjs";
-import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
-import { debugRect, setCameraScale, time, vec2, Vector2 } from "littlejsengine";
+import { phases } from "./renderers/sectors/sector-phases";
+import { setCameraScale, time, vec2, Vector2 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
@@ -120,19 +120,19 @@ export class World {
     }
 
     // michael: debug
-    const sExt = this.wc.sectorExtent;
-    const aExt = sExt * 3 + 1;
-    for (const sector of this.sectors.values()) {
-      if (phase2Idx[sector._phase] < phase2Idx["obstacles"]) continue;
-      for (const [ox, oy] of sector.obstacles) {
-        const sx = (ox - aExt) / 3;
-        const sy = (-oy + aExt) / 3;
+    // const sExt = this.wc.sectorExtent;
+    // const aExt = sExt * 3 + 1;
+    // for (const sector of this.sectors.values()) {
+    //   if (phase2Idx[sector._phase] < phase2Idx["obstacles"]) continue;
+    //   for (const [ox, oy] of sector.obstacles) {
+    //     const sx = (ox - aExt) / 3;
+    //     const sy = (-oy + aExt) / 3;
 
-        const sPos = vec2(sx, sy);
-        const wPos = sPos.add(sector.worldPos);
-        debugRect(wPos, vec2(1 / 3), undefined, 1);
-      }
-    }
+    //     const sPos = vec2(sx, sy);
+    //     const wPos = sPos.add(sector.worldPos);
+    //     debugRect(wPos, vec2(1 / 3), undefined, 1);
+    //   }
+    // }
 
     // reduce sectors to min phase
     for (const sector of this.sectors.values()) {

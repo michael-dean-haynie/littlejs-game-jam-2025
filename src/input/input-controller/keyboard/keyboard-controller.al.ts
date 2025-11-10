@@ -27,7 +27,7 @@ export class KeyboardController {
   private readonly _activeKeys = new Set<string>();
   private _activeModifiers: ActiveModifiers = {};
 
-  // michael: document decision about character facing mouse limitation for laptop touchpad
+  // michael: document: decision about character facing mouse limitation for laptop touchpad
   // also find some way to incorporate it into the profile
   // maybe if gameplay ends up requiring cursor, maybe no need.
   // private readonly _profile: KeyboardProfile = keyboardProfileLaptop;
@@ -67,7 +67,7 @@ export class KeyboardController {
     };
   }
 
-  // michael: document I'm gonna use "key" value because gives the user the best control over their input
+  // michael: document: I'm gonna use "key" value because gives the user the best control over their input
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
   private _onKeyDown(event: KeyboardEvent): void {
     const key = this._normalizeKey(event.key);
@@ -85,7 +85,7 @@ export class KeyboardController {
     this._process(key, "keyup");
   }
 
-  // michael: doc how mouse buttons are treated same as keyboard keys after this point
+  // michael: document: how mouse buttons are treated same as keyboard keys after this point
   private _onMouseDown(event: MouseEvent): void {
     const key = `mouse${event.button}`;
     this._activeKeys.add(key);
@@ -185,7 +185,7 @@ export class KeyboardController {
     }
   }
 
-  // michael: remember if shift+a starts ability letting go of shift and then letting go of a should deactivate it (for HOLD setting)
+  // michael: improve: remember if shift+a starts ability letting go of shift and then letting go of a should deactivate it (for HOLD setting)
 }
 
 export const keyboardController = new KeyboardController();

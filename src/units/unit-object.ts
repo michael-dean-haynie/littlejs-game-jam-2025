@@ -4,13 +4,13 @@ import type { Cell } from "../world/cell";
 import { box2d, drawTile, vec2, Vector2, WHITE } from "littlejsengine";
 import { mkTile } from "../textures/tile-sheets/mk-tile";
 import type { UnitType } from "./unit.types";
-import { unitTypeStatsMap, type UnitStats } from "./unit-type-stats-map";
 import type { Ability, IAbility } from "../abilities/abilities.types";
 import type { IUnitState, UnitState } from "./states/states.types";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import { noCap } from "../core/util/no-cap";
 import type { Message } from "../messages/messages.types";
 import { world } from "../world/world.al";
+import { unitTypeInfoMap, type UnitInfo } from "./unit-type-info";
 
 export class UnitObject extends WorldObject {
   readonly type: UnitType;
@@ -32,7 +32,7 @@ export class UnitObject extends WorldObject {
       size: sizeScalar,
       drawSizeScale,
       spriteOffset: drawHeight3d,
-    } = unitTypeStatsMap[unitType];
+    } = unitTypeInfoMap[unitType];
     const size = vec2(sizeScalar);
 
     // fit circle diameter to similar size of box around body
@@ -43,6 +43,13 @@ export class UnitObject extends WorldObject {
     this.spriteOffset = size.y / 2 + drawHeight3d * size.y;
 
     this.setFixedRotation(true);
+    this.setLinearDamping(2);
+  }
+
+  public override getPerspectivePos(): Vector2 {
+    const yOffset =
+      world.perspective === "topdown-oblique" ? this.spriteOffset : 0;
+    return super.getPerspectivePos().add(vec2(0, yOffset));
   }
 
   protected readonly _destroyRef$ = new Subject<void>();
@@ -186,8 +193,8 @@ export class UnitObject extends WorldObject {
     this.mirror = direction.x < 0;
   }
 
-  get stats(): UnitStats {
-    return unitTypeStatsMap[this.type];
+  get stats(): UnitInfo {
+    return unitTypeInfoMap[this.type];
   }
 
   // messages

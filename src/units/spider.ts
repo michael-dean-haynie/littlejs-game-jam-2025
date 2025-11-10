@@ -1,16 +1,15 @@
 import type { Vector2 } from "littlejsengine";
-import { unitTypeStatsMap } from "./unit-type-stats-map";
 import { UnitObject } from "./unit-object";
 import { SpriteAnimation } from "../sprite-animation/sprite-animation";
 import { Attack } from "../abilities/attack";
 import { UnitStateIdling } from "./states/unit-state-idling";
 import { UnitStateMoving } from "./states/unit-state-moving";
 import { UnitStateCasting } from "./states/unit-state-casting";
+import { unitTypeInfoMap } from "./unit-type-info";
 
-unitTypeStatsMap.spider = {
-  ...unitTypeStatsMap.spider,
+unitTypeInfoMap.spider = {
+  ...unitTypeInfoMap.spider,
   size: 0.25,
-  drawSizeScale: 4,
   moveSpeed: 2,
 };
 
@@ -33,7 +32,7 @@ export class Spider extends UnitObject {
     );
 
     // register abilities
-    this.abilityMap.set("attack", new Attack(this, 0, 0.8));
+    this.abilityMap.set("attack", new Attack(this, 0.4, 0.4));
 
     // register states
     this._stateMap.set("idling", new UnitStateIdling(this));

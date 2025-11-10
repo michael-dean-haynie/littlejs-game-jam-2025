@@ -1,6 +1,6 @@
 import { UnitTypes, type UnitType } from "./unit.types";
 
-export type UnitStats = {
+export type UnitInfo = {
   /** Box2d object physical size */
   size: number;
   /** Sprite size (scaled from size) */
@@ -10,13 +10,13 @@ export type UnitStats = {
   moveSpeed: number;
 };
 
-export const defaultUnitStats: UnitStats = {
+export const defaultUnitStats: UnitInfo = {
   size: 0.5,
   drawSizeScale: 4,
   spriteOffset: 0,
   moveSpeed: 3,
 } as const;
 
-export const unitTypeStatsMap = Object.fromEntries(
+export const unitTypeInfoMap = Object.fromEntries(
   UnitTypes.values().map((unitType) => [unitType, { ...defaultUnitStats }]),
-) as { [K in UnitType]: UnitStats };
+) as { [K in UnitType]: UnitInfo };

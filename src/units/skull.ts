@@ -9,48 +9,37 @@ import { UnitStateMoving } from "./states/unit-state-moving";
 import { UnitStateCasting } from "./states/unit-state-casting";
 import { unitTypeInfoMap } from "./unit-type-info";
 
-unitTypeInfoMap.lancer = {
-  ...unitTypeInfoMap.lancer,
-  size: 0.5,
-  drawSizeScale: 6,
+unitTypeInfoMap.skull = {
+  ...unitTypeInfoMap.skull,
 };
 
-export class Lancer extends UnitObject {
+export class Skull extends UnitObject {
   constructor(pos: Vector2) {
-    super(pos, "lancer");
+    super(pos, "skull");
 
     // register animations
     this._registerAnimation(
       "idling",
-      new SpriteAnimation("units.lancer.idling"),
+      new SpriteAnimation("units.skull.idling"),
     );
     this._registerAnimation(
       "moving",
-      new SpriteAnimation("units.lancer.moving"),
+      new SpriteAnimation("units.skull.moving"),
     );
-    this._registerAnimation(
-      "guard",
-      new SpriteAnimation({
-        n: spriteSheetMap["units.lancer.guardUp"],
-        ne: spriteSheetMap["units.lancer.guardUpRight"],
-        e: spriteSheetMap["units.lancer.guardRight"],
-        se: spriteSheetMap["units.lancer.guardDownRight"],
-        s: spriteSheetMap["units.lancer.guardDown"],
-      }),
-    );
+    this._registerAnimation("guard", new SpriteAnimation("units.skull.guard"));
     this._registerAnimation(
       "attack",
       new SpriteAnimation({
-        n: spriteSheetMap["units.lancer.attackUp"],
-        ne: spriteSheetMap["units.lancer.attackUpRight"],
-        e: spriteSheetMap["units.lancer.attackRight"],
-        se: spriteSheetMap["units.lancer.attackDownRight"],
-        s: spriteSheetMap["units.lancer.attackDown"],
+        n: spriteSheetMap["units.skull.attack"],
+        ne: spriteSheetMap["units.skull.attack"],
+        e: spriteSheetMap["units.skull.attack"],
+        se: spriteSheetMap["units.skull.attack"],
+        s: spriteSheetMap["units.skull.attack"],
       }),
     );
 
     // register abilities
-    this.abilityMap.set("attack", new Attack(this, 0, 0.3));
+    this.abilityMap.set("attack", new Attack(this, 0.2, 0.4));
     this.abilityMap.set("guard", new Guard(this));
 
     // register states

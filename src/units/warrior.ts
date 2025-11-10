@@ -1,5 +1,4 @@
 import type { Vector2 } from "littlejsengine";
-import { unitTypeStatsMap } from "./unit-type-stats-map";
 import { UnitObject } from "./unit-object";
 import { SpriteAnimation } from "../sprite-animation/sprite-animation";
 import { spriteSheetMap } from "../textures/sprite-sheets/sprite-sheet-map";
@@ -8,12 +7,12 @@ import { Guard } from "../abilities/guard";
 import { UnitStateIdling } from "./states/unit-state-idling";
 import { UnitStateMoving } from "./states/unit-state-moving";
 import { UnitStateCasting } from "./states/unit-state-casting";
+import { unitTypeInfoMap } from "./unit-type-info";
 
-unitTypeStatsMap.warrior = {
-  ...unitTypeStatsMap.warrior,
+unitTypeInfoMap.warrior = {
+  ...unitTypeInfoMap.warrior,
   size: 0.5,
   drawSizeScale: 4,
-  moveSpeed: 3,
 };
 
 export class Warrior extends UnitObject {

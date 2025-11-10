@@ -1,9 +1,4 @@
 export const textures = [
-  "terrain/Tilemap_color1.png",
-  "terrain/Tilemap_color2.png",
-  "terrain/Tilemap_color3.png",
-  "terrain/Tilemap_color4.png",
-  "terrain/Tilemap_color5.png",
   "terrain/All_Tilemaps.png",
   "terrain/Shadow.png",
   "terrain/Water_Background_color.png",
@@ -27,16 +22,11 @@ export const textures = [
   "units/spider/Spider_Idle.png",
   "units/spider/Spider_Run.png",
   "units/spider/Spider_Attack.png",
+  "units/skull/Skull_Idle.png",
+  "units/skull/Skull_Run.png",
+  "units/skull/Skull_Guard.png",
+  "units/skull/Skull_Attack.png",
   "white.png",
   "empty.png",
 ] as const satisfies string[];
 export type Texture = (typeof textures)[number];
-
-export const terrainTextures = [
-  "terrain/Tilemap_color1.png",
-  "terrain/Tilemap_color2.png",
-  "terrain/Tilemap_color3.png",
-  "terrain/Tilemap_color4.png",
-  "terrain/Tilemap_color5.png",
-] as const satisfies Texture[];
-export type TerrainTexture = (typeof terrainTextures)[number];
