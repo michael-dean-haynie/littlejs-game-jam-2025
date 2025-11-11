@@ -11,6 +11,7 @@ import { tap } from "rxjs";
 import { phases } from "./renderers/sectors/sector-phases";
 import { setCameraScale, time, vec2, Vector2 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
+import { sus } from "../core/util/sus";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -42,7 +43,9 @@ export class World {
   tileLayerQueue: TileLayerQueueItem[] = [];
   private _lastBuildTileLayer: number = Number.NEGATIVE_INFINITY;
 
-  constructor() {}
+  constructor() {
+    sus({ sectors: this.sectors });
+  }
 
   init(): void {
     // michael: debug
