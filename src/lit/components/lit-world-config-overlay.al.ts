@@ -65,6 +65,15 @@ export class LitWorldConfigOverlay extends BaseLitElement {
 
       <div></div>
       <input
+        type="checkbox"
+        data-field="debugSectors"
+        .checked=${this._wc.debugSectors}
+        @input=${this._onBooleanInput}
+      />
+      <span>Debug Sectors</span>
+
+      <div></div>
+      <input
         type="range"
         data-field="sectorExtent"
         min="1"

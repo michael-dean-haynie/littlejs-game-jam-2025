@@ -9,7 +9,14 @@ import {
 } from "./renderers/sectors/sector";
 import { tap } from "rxjs";
 import { phases } from "./renderers/sectors/sector-phases";
-import { setCameraScale, time, vec2, Vector2 } from "littlejsengine";
+import {
+  debugRect,
+  debugText,
+  setCameraScale,
+  time,
+  vec2,
+  Vector2,
+} from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
@@ -79,6 +86,7 @@ export class World {
     xProg = cell.rampDir === "e" ? xProg : 1 - xProg;
     return xProg;
   }
+
   /**
    * ==================================================================
    * WORLD CONFIG UTILS
@@ -137,6 +145,17 @@ export class World {
     // reduce sectors to min phase
     for (const sector of this.sectors.values()) {
       sector.degradeToPhase();
+    }
+  }
+
+  render(): void {
+    // draw debug info for sectors
+    if (this.wc.debugSectors) {
+      for (const sector of this.sectors.values()) {
+        const sectorSize = vec2(this.sectorSize);
+        debugRect(sector.worldPos, sectorSize, "#ffffff");
+        debugText(sector._phase, sector.worldPos, 0.5, "#ffffff");
+      }
     }
   }
 

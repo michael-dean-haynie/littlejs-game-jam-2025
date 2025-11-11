@@ -28,6 +28,8 @@ export type WorldConfig = {
   cliffHeightBounds: number[];
   /** The terrain slope between cells must be below this for a ramp to be placed */
   rampSlopeThreshold: number;
+  /** Draw debug rectangles around sectors with phase info */
+  debugSectors: boolean;
 };
 
 export const defaultWorldConfig: WorldConfig = {
@@ -47,6 +49,7 @@ export const defaultWorldConfig: WorldConfig = {
   tnClamp: 0.37,
   cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
   rampSlopeThreshold: 0.11,
+  debugSectors: false,
 };
 
 /** Fast 2d map key */

@@ -85,7 +85,9 @@ export class Game {
    * Called after objects are rendered
    * Draw effects or hud that appear above all objects
    */
-  private _gameRenderPost(): void {}
+  private _gameRenderPost(): void {
+    world.render();
+  }
 }
 
 export const game = new Game();
