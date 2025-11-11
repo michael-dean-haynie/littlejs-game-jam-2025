@@ -11,7 +11,6 @@ import { tap } from "rxjs";
 import { phases } from "./renderers/sectors/sector-phases";
 import { setCameraScale, time, vec2, Vector2 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
-import { sus } from "../core/util/sus";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -32,8 +31,8 @@ export class World {
     return this._perspective;
   }
 
-  sectors = new Map<number, Sector>();
-  cells = new Map<number, Cell>();
+  readonly sectors = new Map<number, Sector>();
+  readonly cells = new Map<number, Cell>();
   getCell(pos: Vector2): Cell {
     const cell = this.cells.get(f2dmk(pos));
     noCap.isDefined(cell);
@@ -43,9 +42,7 @@ export class World {
   tileLayerQueue: TileLayerQueueItem[] = [];
   private _lastBuildTileLayer: number = Number.NEGATIVE_INFINITY;
 
-  constructor() {
-    sus({ sectors: this.sectors });
-  }
+  constructor() {}
 
   init(): void {
     // michael: debug
