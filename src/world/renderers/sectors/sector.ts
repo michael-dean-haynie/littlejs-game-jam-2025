@@ -11,6 +11,7 @@ import {
   advanceToPhaseFns,
   degradeFromPhaseFns,
   phase2Idx,
+  phaseDependencies,
   phases,
   type Phase,
 } from "./sector-phases";
@@ -109,7 +110,12 @@ export class Sector {
   }
 
   private _advance1Phase(): void {
-    this._phase = phases[phase2Idx[this._phase] + 1] ?? phases.at(-1);
+    const newPhase = phases[phase2Idx[this._phase] + 1] ?? phases.at(-1);
+    const dependency = phaseDependencies[newPhase];
+    if (dependency) {
+      this.advanceAdjSectorsTo(dependency);
+    }
+    this._phase = newPhase;
     if (this._phase === "bare") return;
     const advanceFn = advanceToPhaseFns[this._phase];
     advanceFn(this);

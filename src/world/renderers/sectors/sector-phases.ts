@@ -27,6 +27,17 @@ export const phase2Idx = Object.fromEntries(
   phases.map((phase, index) => [phase, index]),
 ) as { [K in Phase]: number };
 
+/** If a phase needs it's adj sectors to be at a certain phase */
+export const phaseDependencies: { [key in Phase]: Phase | undefined } = {
+  bare: undefined,
+  noise: undefined,
+  cliffs: "noise",
+  ramps: "cliffs",
+  obstacles: "ramps",
+  renderers: "ramps",
+  rails: "ramps",
+};
+
 export type PhaseFn = (sector: Sector) => void;
 
 export const degradeFromPhaseFns: { [key in Phase]: PhaseFn } = {
@@ -140,8 +151,6 @@ export function advanceToNoise(sector: Sector): void {
 }
 
 export function advanceToCliffs(sector: Sector): void {
-  sector.advanceAdjSectorsTo("noise");
-
   // place cliffs
   for (const cell of sector.cells) {
     cell.cliffs = [];
@@ -155,8 +164,6 @@ export function advanceToCliffs(sector: Sector): void {
 }
 
 export function advanceToRamps(sector: Sector): void {
-  sector.advanceAdjSectorsTo("cliffs");
-
   // place ramps
   for (const cell of sector.cells) {
     // cannot ramp into/out of water
@@ -193,8 +200,6 @@ export function advanceToRamps(sector: Sector): void {
 }
 
 export function advanceToObstacles(sector: Sector): void {
-  sector.advanceAdjSectorsTo("ramps");
-
   for (const cell of sector.cells) {
     // cliff to the north/south/east/west
     const c2n =
@@ -276,8 +281,6 @@ function cellObsToSectorObs(
 }
 
 export function advanceToRenderers(sector: Sector): void {
-  sector.advanceAdjSectorsTo("ramps");
-
   // queue layers
   // for (
   //   let cliff = 0;
