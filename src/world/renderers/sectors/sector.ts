@@ -26,8 +26,7 @@ import {
   vec2,
   type Vector2,
 } from "littlejsengine";
-
-export type AstarObs = [number, number][];
+import type { AstarObs } from "../../pathing";
 
 export class Sector {
   /** Position in sector-space */

@@ -1,6 +1,6 @@
 import { vec2, Vector2 } from "littlejsengine";
 import { f2dmk } from "../../world.types";
-import { sectorToWorld, type AstarObs, type Sector } from "./sector";
+import { sectorToWorld, type Sector } from "./sector";
 import { generateNoiseMap } from "../../../noise/generate-noise-map";
 import { Cell, rampDirections } from "../../cell";
 import type { CliffRenderer } from "../cliff-renderer";
@@ -11,14 +11,22 @@ import { TdoDrawRectCliffRenderer } from "../tdo-draw-rect-cliff-renderer";
 import { type OrdinalDirection } from "../../../core/types/directions.types";
 import { Rail } from "../../rail";
 import { world } from "../../world.al";
+import { cellObsToSectorObs } from "../../pathing";
 
 export const phases = [
+  /** no data */
   "bare",
+  /** simplex noise generated */
   "noise",
+  /** cliff data generated */
   "cliffs",
+  /** ramp data generated */
   "ramps",
+  /** astar pathing obstacles generated */
   "obstacles",
+  /** rendering data created (tiles, layers, cliff data etc.) */
   "renderers",
+  /** cliffedge collision "rails" created */
   "rails",
 ] as const;
 export type Phase = (typeof phases)[number];
@@ -262,21 +270,6 @@ export function advanceToObstacles(sector: Sector): void {
     for (let i = 0; i < obs.length; i++) {
       sector.obstacles.push(obs[i]);
     }
-  }
-}
-
-/** transform in-place */
-function cellObsToSectorObs(
-  cellObs: AstarObs,
-  cellSectorOffset: Vector2,
-  sectorExtent: number,
-): void {
-  const xOffset = (cellSectorOffset.x + sectorExtent) * 3;
-  const yOffset = (-cellSectorOffset.y + sectorExtent) * 3;
-
-  for (const obs of cellObs) {
-    obs[0] = obs[0] + xOffset;
-    obs[1] = obs[1] + yOffset;
   }
 }
 

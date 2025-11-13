@@ -12,6 +12,8 @@ export type WorldConfig = {
   sectorExtent: number;
   /** How far out to render sectors */
   sectorRenderExtent: number;
+  /** How far out to load pathing for sectors */
+  sectorPathingExtent: number;
   /** For deterministic randomness */
   seed: number;
   /** Terrain noise Scale */
@@ -40,6 +42,7 @@ export const defaultWorldConfig: WorldConfig = {
   useTiles: true,
   topDownPerspective: false,
   sectorExtent: 2,
+  sectorPathingExtent: 3,
   sectorRenderExtent: 3,
   seed: 5486,
   tnScale: 184,

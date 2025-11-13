@@ -64,9 +64,9 @@ noCap.isUndefined = function isUndefined<T>(
 
 /** Asserts that a value is not defined (or is undefined) */
 noCap.notDefined = function notDefined<T>(
-  value: T,
+  value: T | undefined,
   msg?: string,
-): asserts value is Exclude<T, undefined> {
+): asserts value is undefined {
   if (import.meta.env.PROD) return;
   return noCap.isUndefined(value, msg);
 };
@@ -75,7 +75,7 @@ noCap.notDefined = function notDefined<T>(
 noCap.notUndefined = function notUndefined<T>(
   value: T | undefined,
   msg?: string,
-): asserts value is undefined {
+): asserts value is Exclude<T, undefined> {
   if (import.meta.env.PROD) return;
   return noCap.isDefined(value, msg);
 };

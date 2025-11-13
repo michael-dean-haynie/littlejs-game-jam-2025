@@ -106,6 +106,17 @@ export class LitWorldConfigOverlay extends BaseLitElement {
       <div></div>
       <input
         type="range"
+        data-field="sectorPathingExtent"
+        min="1"
+        max="10"
+        value=${this._wc.sectorPathingExtent}
+        @input=${this._onNumericInput}
+      />
+      <span>Sector Pathing Extent: ${this._wc.sectorPathingExtent}</span>
+
+      <div></div>
+      <input
+        type="range"
         data-field="seed"
         min="0"
         max="10000"

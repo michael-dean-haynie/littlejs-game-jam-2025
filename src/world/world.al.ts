@@ -10,6 +10,7 @@ import {
 import { tap } from "rxjs";
 import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
 import {
+  Color,
   debugRect,
   debugText,
   setCameraScale,
@@ -18,6 +19,8 @@ import {
   Vector2,
 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
+import { Grid, Astar } from "fast-astar";
+import { getPath, refreshAstarPathing } from "./pathing";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -37,6 +40,11 @@ export class World {
   public get perspective(): Perspective {
     return this._perspective;
   }
+
+  /** The astar lib loaded with obstacles, ready to be queried for paths */
+  astar = new Astar(new Grid({ col: 0, row: 0 }));
+  /** The sector which has the astar grid origin at its top left */
+  astarOriginSector: Vector2 = vec2(0);
 
   readonly sectors = new Map<number, Sector>();
   readonly cells = new Map<number, Cell>();
@@ -115,15 +123,30 @@ export class World {
       sector.degradeMinPhase(phases[0]);
     }
 
-    // advance needed sectors and any dependencies they have
-    const advPhase = phases[phases.length - 1];
-    const upper = this.wc.sectorRenderExtent;
-    const lower = -upper;
+    // advance sectors for pathing
+    let upper = this.wc.sectorPathingExtent;
+    let lower = -upper;
+    this.astarOriginSector = unitSectorVector.add(vec2(lower, upper));
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const sectorVector = unitSectorVector.add(vec2(x, y));
         const sector = Sector.getOrCreateSector(sectorVector);
-        sector.advanceToPhase(advPhase);
+        sector.advanceToPhase("obstacles");
+      }
+    }
+
+    // advance sectors for rendering (all the way to rails for now)
+    noCap(
+      this.wc.sectorRenderExtent <= this.wc.sectorPathingExtent,
+      "Pathing should be at least as broad as rendering.",
+    );
+    upper = this.wc.sectorRenderExtent;
+    lower = -upper;
+    for (let y = upper; y >= lower; y--) {
+      for (let x = lower; x <= upper; x++) {
+        const sectorVector = unitSectorVector.add(vec2(x, y));
+        const sector = Sector.getOrCreateSector(sectorVector);
+        sector.advanceToPhase("rails");
       }
     }
 
@@ -131,6 +154,21 @@ export class World {
     const degPhase = phases[0];
     for (const sector of this.sectors.values()) {
       sector.degradeToPhase(degPhase);
+    }
+
+    // refresh pathing grid
+    refreshAstarPathing();
+    // michael: remove
+    for (const sector of this.sectors.values()) {
+      const path = getPath(vec2(0), sector.worldPos);
+      for (const part of path) {
+        debugRect(
+          part,
+          vec2(1 / 3),
+          new Color(0, 0, 1) as unknown as string,
+          2,
+        );
+      }
     }
   }
 
