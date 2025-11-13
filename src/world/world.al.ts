@@ -112,18 +112,18 @@ export class World {
 
     // reset each sectors minPhase
     for (const sector of this.sectors.values()) {
-      sector.degradeMinPhase(phases.at(0)!);
+      sector.degradeMinPhase(phases[0]);
     }
 
     // advance needed sectors and any dependencies they have
+    const advPhase = phases[phases.length - 1];
     const upper = this.wc.sectorRenderExtent;
     const lower = -upper;
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
         const sectorVector = unitSectorVector.add(vec2(x, y));
         const sector = Sector.getOrCreateSector(sectorVector);
-        sector.advanceMinPhase("rails");
-        sector.advanceToPhase();
+        sector.advanceToPhase(advPhase);
       }
     }
 
@@ -143,8 +143,9 @@ export class World {
     // }
 
     // reduce sectors to min phase
+    const degPhase = phases[0];
     for (const sector of this.sectors.values()) {
-      sector.degradeToPhase();
+      sector.degradeToPhase(degPhase);
     }
   }
 
@@ -232,8 +233,8 @@ export class World {
         tap((config) => {
           // nuke stuff before extent and configs change
           for (const sector of this.sectors.values()) {
-            sector.degradeMinPhase(phases.at(0)!);
-            sector.degradeToPhase();
+            sector.degradeMinPhase(phases[0]!);
+            sector.degradeToPhase(phases[0]);
           }
 
           this._pwc = this.wc;

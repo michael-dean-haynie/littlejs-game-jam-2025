@@ -16,7 +16,16 @@ import {
   type Phase,
 } from "./sector-phases";
 import { world } from "../../world.al";
-import { EngineObject, max, min, vec2, type Vector2 } from "littlejsengine";
+import {
+  clamp,
+  Color,
+  debugRect,
+  EngineObject,
+  max,
+  min,
+  vec2,
+  type Vector2,
+} from "littlejsengine";
 
 export type AstarObs = [number, number][];
 
@@ -39,7 +48,7 @@ export class Sector {
   rails: EngineObject[] = [];
 
   /** For preventing co-recursion between adjacent cells with dependencies */
-  private _waitingOnDependencies = false;
+  private _advanceInProgress = false;
 
   constructor(pos: Vector2) {
     this.pos = pos;
@@ -59,6 +68,19 @@ export class Sector {
     return Sector.getOrCreateSector(adjPos);
   }
 
+  destroy(): void {
+    if (this._phase !== "noise") {
+      this.degradeToPhase("bare");
+    }
+    world.sectors.delete(f2dmk(this.pos));
+  }
+
+  advanceAdjSectorsTo(phase: Phase) {
+    for (const adjSector of this.getAdjacentSectors().values()) {
+      adjSector.advanceToPhase(phase);
+    }
+  }
+
   advanceMinPhase(targetPhase: Phase): void {
     this._minPhase =
       phases[max(phase2Idx[this._minPhase], phase2Idx[targetPhase])];
@@ -69,56 +91,99 @@ export class Sector {
       phases[min(phase2Idx[this._minPhase], phase2Idx[targetPhase])];
   }
 
-  // will advance to own minPhase by default
-  advanceToPhase(targetPhase?: Phase) {
-    if (this._waitingOnDependencies) return;
-    targetPhase ??= this._minPhase;
-    while (phase2Idx[this._phase] < phase2Idx[targetPhase]) {
+  advanceToPhase(targetPhase: Phase) {
+    if (this._advanceInProgress) return;
+
+    // update one phase at a time
+    while (phase2Idx[this._minPhase] < phase2Idx[targetPhase]) {
       this._advance1Phase();
     }
   }
 
-  // will degrade to own minPhase by default
-  degradeToPhase(targetPhase?: Phase) {
-    targetPhase ??= this._minPhase;
+  degradeToPhase(targetPhase: Phase) {
     if (this._phase === "bare") this.destroy();
-    while (phase2Idx[this._phase] > phase2Idx[targetPhase]) {
+
+    // do not degrade past minPhase
+    targetPhase =
+      phases[max(phase2Idx[this._minPhase], phase2Idx[targetPhase])];
+
+    // degrade one phase at a time
+    while (
+      phase2Idx[this._phase] > phase2Idx[targetPhase] ||
+      phase2Idx[this._minPhase] > phase2Idx[targetPhase]
+    ) {
       this._degrade1Phase();
     }
   }
 
-  destroy(): void {
-    if (this._phase !== "bare") {
-      this.degradeToPhase("bare");
-    }
-    world.sectors.delete(f2dmk(this.pos));
-  }
-
-  advanceAdjSectorsTo(phase: Phase) {
-    this._waitingOnDependencies = true;
-    for (const adjSector of this.getAdjacentSectors().values()) {
-      adjSector.advanceMinPhase(phase);
-      adjSector.advanceToPhase();
-    }
-    this._waitingOnDependencies = false;
-  }
-
   private _degrade1Phase(): void {
+    const newPhaseIdx = clamp(phase2Idx[this._phase] - 1, 0, phases.length - 1);
+    const newPhase = phases[newPhaseIdx];
+
     const degradeFn = degradeFromPhaseFns[this._phase];
-    this._phase = phases[phase2Idx[this._phase] - 1] ?? phases.at(0);
     degradeFn(this);
+    this._debugDegradeSector();
+
+    this._phase = newPhase;
+    this.degradeMinPhase(newPhase);
   }
 
   private _advance1Phase(): void {
-    const newPhase = phases[phase2Idx[this._phase] + 1] ?? phases.at(-1);
+    this._advanceInProgress = true;
+
+    const newPhaseIdx = clamp(
+      phase2Idx[this._minPhase] + 1,
+      0,
+      phases.length - 1,
+    );
+    const newPhase = phases[newPhaseIdx];
+
+    // advance dependencies
     const dependency = phaseDependencies[newPhase];
     if (dependency) {
       this.advanceAdjSectorsTo(dependency);
     }
-    this._phase = newPhase;
-    if (this._phase === "bare") return;
-    const advanceFn = advanceToPhaseFns[this._phase];
-    advanceFn(this);
+
+    // advance minPhase
+    this.advanceMinPhase(newPhase);
+
+    // only actually advance phase if it is below minPhase
+    if (phase2Idx[this._phase] < phase2Idx[newPhase] && newPhase !== "bare") {
+      const advanceFn = advanceToPhaseFns[newPhase];
+      advanceFn(this);
+      this._phase = newPhase;
+      this._debugAdvanceSector();
+    }
+
+    this._advanceInProgress = false;
+  }
+
+  private _debugAdvanceSector(): void {
+    if (import.meta.env.PROD) return;
+    if (world.wc.debugSectors) {
+      debugRect(
+        this.worldPos,
+        vec2(world.sectorSize),
+        new Color(0, 1, 0, 0.2) as unknown as string,
+        1,
+        undefined,
+        true,
+      );
+    }
+  }
+
+  private _debugDegradeSector(): void {
+    if (import.meta.env.PROD) return;
+    if (world.wc.debugSectors) {
+      debugRect(
+        this.worldPos,
+        vec2(world.sectorSize),
+        new Color(1, 0, 0, 0.2) as unknown as string,
+        1,
+        undefined,
+        true,
+      );
+    }
   }
 
   public static getOrCreateSector(sectorVector: Vector2): Sector {
