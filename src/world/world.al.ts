@@ -8,7 +8,7 @@ import {
   worldToSector,
 } from "./renderers/sectors/sector";
 import { tap } from "rxjs";
-import { phases } from "./renderers/sectors/sector-phases";
+import { phase2Idx, phases } from "./renderers/sectors/sector-phases";
 import {
   debugRect,
   debugText,
@@ -127,21 +127,6 @@ export class World {
       }
     }
 
-    // michael: debug
-    // const sExt = this.wc.sectorExtent;
-    // const aExt = sExt * 3 + 1;
-    // for (const sector of this.sectors.values()) {
-    //   if (phase2Idx[sector._phase] < phase2Idx["obstacles"]) continue;
-    //   for (const [ox, oy] of sector.obstacles) {
-    //     const sx = (ox - aExt) / 3;
-    //     const sy = (-oy + aExt) / 3;
-
-    //     const sPos = vec2(sx, sy);
-    //     const wPos = sPos.add(sector.worldPos);
-    //     debugRect(wPos, vec2(1 / 3), undefined, 1);
-    //   }
-    // }
-
     // reduce sectors to min phase
     const degPhase = phases[0];
     for (const sector of this.sectors.values()) {
@@ -156,6 +141,23 @@ export class World {
         const sectorSize = vec2(this.sectorSize);
         debugRect(sector.worldPos, sectorSize, "#ffffff");
         debugText(sector._phase, sector.worldPos, 0.5, "#ffffff");
+      }
+    }
+
+    // draw debug info for astar pathing
+    if (this.wc.debugPathing) {
+      const sExt = this.wc.sectorExtent;
+      const aExt = sExt * 3 + 1;
+      for (const sector of this.sectors.values()) {
+        if (phase2Idx[sector._phase] < phase2Idx["obstacles"]) continue;
+        for (const [ox, oy] of sector.obstacles) {
+          const sx = (ox - aExt) / 3;
+          const sy = (-oy + aExt) / 3;
+
+          const sPos = vec2(sx, sy);
+          const wPos = sPos.add(sector.worldPos);
+          debugRect(wPos, vec2(1 / 3));
+        }
       }
     }
   }

@@ -30,6 +30,8 @@ export type WorldConfig = {
   rampSlopeThreshold: number;
   /** Draw debug rectangles around sectors with phase info */
   debugSectors: boolean;
+  /** Draw debug rectangles astar pathing obstacles */
+  debugPathing: boolean;
 };
 
 export const defaultWorldConfig: WorldConfig = {
@@ -50,6 +52,7 @@ export const defaultWorldConfig: WorldConfig = {
   cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
   rampSlopeThreshold: 0.11,
   debugSectors: false,
+  debugPathing: false,
 };
 
 /** Fast 2d map key */
