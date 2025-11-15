@@ -59,9 +59,9 @@ export class Player {
   }
 
   spawnUnit(): void {
-    this.unit = new Skull(vec2(2, 0));
-    this.unit = new Lancer(vec2(0, 0));
-    this.unit = new Spider(vec2(1, 0));
+    // this.unit = new Skull(vec2(2, 0));
+    // this.unit = new Lancer(vec2(0, 0));
+    // this.unit = new Spider(vec2(1, 0));
     this.unit = new Warrior(vec2(-1, 0));
 
     world.unit = this.unit;

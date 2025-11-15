@@ -13,14 +13,14 @@ import {
   Color,
   debugRect,
   debugText,
+  mousePos,
   setCameraScale,
   time,
   vec2,
   Vector2,
 } from "littlejsengine";
 import type { UnitObject } from "../units/unit-object";
-import { Grid, Astar } from "fast-astar";
-import { getPath, refreshAstarPathing } from "./pathing";
+import { pather } from "./pather";
 
 export type TileLayerQueueItem = { sectorVector: Vector2; cliff: number };
 
@@ -32,6 +32,8 @@ export class World {
   public wc = { ...defaultWorldConfig };
   private _pwc = { ...defaultWorldConfig };
 
+  tempPath: Vector2[] | undefined;
+
   private _prevSectorKey?: number;
 
   private _perspective: Perspective = this.wc.topDownPerspective
@@ -41,10 +43,8 @@ export class World {
     return this._perspective;
   }
 
-  /** The astar lib loaded with obstacles, ready to be queried for paths */
-  astar = new Astar(new Grid({ col: 0, row: 0 }));
-  /** The sector which has the astar grid origin at its top left */
-  astarOriginSector: Vector2 = vec2(0);
+  /** the sector with the unit in it, the origin point for loading sectors */
+  centerSectorVector: Vector2 = vec2(0);
 
   readonly sectors = new Map<number, Sector>();
   readonly cells = new Map<number, Cell>();
@@ -68,6 +68,9 @@ export class World {
   }
 
   update(): void {
+    if (world.unit /*&& time % 1 < 0.016*/ && time > 1) {
+      this.tempPath = pather.getPath(world.unit.getCenterOfMass(), mousePos);
+    }
     // build tile layers
     if (this.tileLayerQueue.length && time - this._lastBuildTileLayer > 0.05) {
       this._lastBuildTileLayer = time;
@@ -116,7 +119,7 @@ export class World {
   private _updateSectors(): void {
     // return;
     const unitPos = this.unit?.getCenterOfMass() ?? vec2();
-    const unitSectorVector = worldToSector(unitPos, this.wc.sectorExtent);
+    this.centerSectorVector = worldToSector(unitPos, this.wc.sectorExtent);
 
     // reset each sectors minPhase
     for (const sector of this.sectors.values()) {
@@ -126,25 +129,19 @@ export class World {
     // advance sectors for pathing
     let upper = this.wc.sectorPathingExtent;
     let lower = -upper;
-    this.astarOriginSector = unitSectorVector.add(vec2(lower, upper));
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
-        const sectorVector = unitSectorVector.add(vec2(x, y));
+        const sectorVector = this.centerSectorVector.add(vec2(x, y));
         const sector = Sector.getOrCreateSector(sectorVector);
         sector.advanceToPhase("obstacles");
       }
     }
 
-    // advance sectors for rendering (all the way to rails for now)
-    noCap(
-      this.wc.sectorRenderExtent <= this.wc.sectorPathingExtent,
-      "Pathing should be at least as broad as rendering.",
-    );
     upper = this.wc.sectorRenderExtent;
     lower = -upper;
     for (let y = upper; y >= lower; y--) {
       for (let x = lower; x <= upper; x++) {
-        const sectorVector = unitSectorVector.add(vec2(x, y));
+        const sectorVector = this.centerSectorVector.add(vec2(x, y));
         const sector = Sector.getOrCreateSector(sectorVector);
         sector.advanceToPhase("rails");
       }
@@ -157,19 +154,7 @@ export class World {
     }
 
     // refresh pathing grid
-    refreshAstarPathing();
-    // michael: remove
-    for (const sector of this.sectors.values()) {
-      const path = getPath(vec2(0), sector.worldPos);
-      for (const part of path) {
-        debugRect(
-          part,
-          vec2(1 / 3),
-          new Color(0, 0, 1) as unknown as string,
-          2,
-        );
-      }
-    }
+    pather.refresh();
   }
 
   render(): void {
@@ -195,6 +180,11 @@ export class World {
           const sPos = vec2(sx, sy);
           const wPos = sPos.add(sector.worldPos);
           debugRect(wPos, vec2(1 / 3));
+        }
+      }
+      if (this.tempPath) {
+        for (const part of this.tempPath) {
+          debugRect(part, vec2(1 / 3), new Color(0, 0, 1) as unknown as string);
         }
       }
     }

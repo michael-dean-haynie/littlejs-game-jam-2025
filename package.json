@@ -22,7 +22,6 @@
     "@eslint/js": "^9.35.0",
     "@eslint/json": "^0.13.2",
     "@eslint/markdown": "^7.2.0",
-    "@types/fast-astar": "^1.0.3",
     "@vitest/coverage-v8": "^3.2.4",
     "daisyui": "^5.3.9",
     "eslint": "^9.35.0",
@@ -42,7 +41,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.15",
     "alea": "^1.0.1",
-    "fast-astar": "^1.0.6",
+    "astar-typescript": "^1.2.7",
     "inversify": "^7.10.1",
     "lit": "^3.3.1",
     "littlejsengine": "^1.17.1",

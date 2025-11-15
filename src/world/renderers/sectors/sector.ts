@@ -26,7 +26,7 @@ import {
   vec2,
   type Vector2,
 } from "littlejsengine";
-import type { AstarObs } from "../../pathing";
+import type { V2 } from "../../../core/types/simple-vector-2.types";
 
 export class Sector {
   /** Position in sector-space */
@@ -40,7 +40,7 @@ export class Sector {
   /** Cells in this sector, pre-sorted for rendering */
   cells: Cell[] = [];
   /** a* path-finding obstacles */
-  obstacles: AstarObs = [];
+  obstacles: V2[] = [];
   /** Renderers by cliff height? Or render order? */
   renderers: CliffRenderer[] = [];
   /** Engine objects that act as "rails" or cliff edges for collision/pathing */

@@ -1,4 +1,4 @@
-import type { SimpleVector2 } from "../../core/types/simple-vector-2.types";
+import type { V2 } from "../../core/types/simple-vector-2.types";
 import type { Texture } from "../textures.types";
 import { terrainTiles } from "./terrain/terrain-tile.types";
 
@@ -9,9 +9,9 @@ export type Tile = {
   /** The texture (image) with the raw raster data */
   texture: Texture;
   /** The pos for the TileInfo */
-  pos: SimpleVector2;
+  pos: V2;
   /** The pos for the TileInfo */
-  size: SimpleVector2;
+  size: V2;
 };
 
 /** A tile which is used between multiple textures */
