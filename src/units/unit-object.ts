@@ -9,7 +9,7 @@ import type { IUnitState, UnitState } from "./states/states.types";
 import type { ISpriteAnimation } from "../sprite-animation/sprite-animation.types";
 import { noCap } from "../core/util/no-cap";
 import type { Message } from "../messages/messages.types";
-import { world } from "../world/world.al";
+import { world } from "../world/world";
 import { unitTypeInfoMap, type UnitInfo } from "./unit-type-info";
 
 export class UnitObject extends WorldObject {

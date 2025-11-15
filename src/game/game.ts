@@ -1,5 +1,5 @@
 import { textures } from "../textures/textures.types";
-import { world } from "../world/world.al";
+import { world } from "../world/world";
 import {
   box2dInit,
   engineInit,
@@ -8,8 +8,8 @@ import {
   setShowSplashScreen,
   vec2,
 } from "littlejsengine";
-import { player } from "../player/player.al";
-import { inputManager } from "../input/input-manager/input-manager.al";
+import { player } from "../player/player";
+import { inputManager } from "../input/input-manager/input-manager";
 
 export class Game {
   start(): void {

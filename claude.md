@@ -14,13 +14,13 @@ This is a **2.5D real-time strategy (RTS) game** built with the LittleJS engine,
 - **UI Framework**: Lit (v3.3.1) - Web components for overlays
 - **Styling**: Tailwind CSS (v4.1.15) + DaisyUI (v5.3.9)
 - **Dependency Injection**: Inversify (v7.10.1) - NOT YET IMPLEMENTED (planned)
-- **Pathfinding**: fast-astar (v1.0.6) - A* pathfinding algorithm
+- **Pathfinding**: fast-astar (v1.0.6) - A\* pathfinding algorithm
 - **Random Generation**: alea (v1.0.1) - Seeded PRNG + simplex-noise (v4.0.3)
 - **Testing**: Vitest (v3.2.4) with V8 coverage, jsdom for browser API simulation
 
 ## Project Structure
 
-```
+```txt
 src/
 ├── abilities/          # Unit abilities (attack, guard)
 ├── core/              # Shared utilities and types
@@ -57,6 +57,7 @@ Files ending in `.al.ts` are **"autoload"** files designed for the planned IoC (
 **Current Status**: The IoC system is NOT yet implemented. These files currently use manual singleton patterns (exporting const instances) instead of dependency injection.
 
 Examples:
+
 - `game.al.ts` → exports `export const game = new Game()`
 - `world.al.ts` → exports `export const world = new World()`
 - `player.al.ts` → exports `export const player = new Player()`
@@ -98,13 +99,22 @@ Unit behavior controlled by state objects with stack-based transitions:
 ### 4. Progressive Loading Pattern
 
 Sectors load/unload in phases to support infinite worlds:
-```
-phases = ["bare", "noise", "cliffs", "ramps", "obstacles", "renderers", "rails"]
+
+```ts
+phases = [
+  "bare",
+  "noise",
+  "cliffs",
+  "ramps",
+  "obstacles",
+  "renderers",
+  "rails",
+];
 ```
 
 ## Game Architecture Flow
 
-```
+```txt
 Input Events (Keyboard/Mouse)
   ↓
 KeyboardController → converts to → Game Input Commands
@@ -144,14 +154,15 @@ Units use a state stack with message-driven transitions:
 
 ```typescript
 // State transitions
-pushState(state)  // Enter new state (push to stack)
-popState()        // Exit current state (pop from stack)
-enqueueMessage()  // Add message to processing queue
+pushState(state); // Enter new state (push to stack)
+popState(); // Exit current state (pop from stack)
+enqueueMessage(); // Add message to processing queue
 ```
 
 ### Abilities
 
 Abilities progress through phases:
+
 - `init` - Initialization
 - `preswing` - Windup animation
 - `swing` - Apply effects (damage, knockback)
@@ -170,6 +181,7 @@ Abilities progress through phases:
 ### Keyboard Profiles
 
 Multiple control schemes supported:
+
 - `keyboard-profile-kenisis.ts` - Ergonomic layout (IJKL movement)
 - `keyboard-profile-laptop.ts` - Touchpad-friendly
 - `keyboard-profile-vim.ts` - Vim-style hjkl movement
@@ -181,11 +193,13 @@ Raw keyboard events → KeyboardController → Game Input Commands → InputMana
 ## Important Conventions
 
 ### Timing
+
 - All durations in **seconds**, never frames
 - Enables framerate independence
 - Example: `0.1` = 100ms
 
 ### Code Comments
+
 ```typescript
 // michael: improve: <description>  - Improvement needed
 // michael: debug: <description>    - Temporary debug code
@@ -193,6 +207,7 @@ Raw keyboard events → KeyboardController → Game Input Commands → InputMana
 ```
 
 ### Naming
+
 ```typescript
 private _privateField: string;      // Prefix private with _
 public observable$: Observable;     // Suffix RxJS with $
@@ -201,6 +216,7 @@ public observable$: Observable;     // Suffix RxJS with $
 ## Current Game Features
 
 **Implemented**:
+
 - ✅ Procedurally generated terrain with cliffs and ramps
 - ✅ Player-controlled units with WASD/IJKL movement
 - ✅ Combat system with attack abilities
@@ -212,7 +228,8 @@ public observable$: Observable;     // Suffix RxJS with $
 - ✅ Terrain collision/pathing constraints
 
 **Planned/In Progress**:
-- ❌ Pathfinding with A* algorithm
+
+- ❌ Pathfinding with A\* algorithm
 - ❌ Enemy AI
 - ❌ Doodads (trees, rocks, bushes)
 - ❌ Water rendering with waves
@@ -223,70 +240,84 @@ public observable$: Observable;     // Suffix RxJS with $
 ## Known Issues
 
 **Architecture**:
+
 - IoC container planned but not implemented (using manual singletons)
 - LittleJS imports not isolated (violates planned architecture boundary)
 
 **Units**:
+
 - Guard ability interrupts attack (should requeue instead)
 - Attack can't interrupt guard
 - Mouse interactions don't account for cliff height offset
 - Attack direction locked during animation
 
 **Terrain**:
+
 - Top cliff corners rendering issues
 - Canvas layer building creates tileInfos every loop (inefficient)
 - No viewport culling (renders everything)
 - Ramps only support east/west facing
 
 **Controls**:
+
 - Mouse clicks can get stuck in up/down state
 
 ## Key Files Reference
 
 ### Entry Points
+
 - `/index.html` - HTML entry point
 - `/src/main.ts:1` - TypeScript entry point
 
 ### Core Systems
+
 - `/src/game/game.al.ts:11` - Main game loop (Game class)
 - `/src/world/world.al.ts:1` - World manager
 - `/src/player/player.al.ts:1` - Player controller
 - `/src/input/input-manager/input-manager.al.ts:1` - Input aggregation
 
 ### Unit System
+
 - `/src/units/unit-object.ts:1` - Base unit class
 - `/src/units/states/unit-state-idling.ts:1` - Idle state
 - `/src/units/states/unit-state-moving.ts:1` - Moving state
 - `/src/units/states/unit-state-casting.ts:1` - Ability casting state
 
 ### World/Terrain
+
 - `/src/world/cell.ts:1` - Terrain cell logic
 - `/src/world/renderers/sectors/sector.ts:1` - Sector management
 - `/src/noise/generate-noise-map.ts:1` - Terrain generation
 
 ### Input
+
 - `/src/input/input-controller/keyboard/keyboard-controller.al.ts:1` - Keyboard handler
 - `/src/input/game-inputs/game-input.types.ts:1` - Input command types
 
 ### Abilities
+
 - `/src/abilities/ability-base.ts:1` - Ability base class
 - `/src/abilities/attack.ts:1` - Attack ability
 - `/src/abilities/guard.ts:1` - Guard ability
 
 ### Animation
+
 - `/src/sprite-animation/sprite-animation.ts:1` - Animation controller
 - `/src/textures/sprite-sheets/sprite-sheet.types.ts:1` - Sprite metadata
 
 ### UI
+
 - `/src/lit/components/lit-world-config-overlay.al.ts:1` - Dev tools overlay
 
 ### Utilities
+
 - `/src/core/enumeration-factory.ts:1` - String union helper
 - `/src/messages/messages.types.ts:1` - Message type definitions
 
 ## Development
 
 ### NPM Scripts
+
 ```bash
 npm run dev       # Start dev server with hot reload
 npm run build     # Type-check + production build + zip for itch.io
@@ -299,6 +330,7 @@ npm run check     # Full sanity check before commit
 ```
 
 ### Dev Tools
+
 - **Vite Plugin Checker** - TypeScript errors in browser overlay
 - **Lit Overlay** - Runtime terrain/config editor (backtick ` key to toggle)
 - **Debug Variables** - `window.world`, `window.unit` exposed in console
@@ -308,6 +340,7 @@ npm run check     # Full sanity check before commit
 This is a **well-architected game project** with clear separation of concerns. The codebase demonstrates:
 
 **Strengths**:
+
 - Clean state machine pattern for unit behavior
 - Reactive programming with RxJS for event flow
 - Sophisticated terrain generation with progressive loading
@@ -316,6 +349,7 @@ This is a **well-architected game project** with clear separation of concerns. T
 - Perspective rendering support
 
 **Design Philosophy**:
+
 - Framerate-independent timing
 - Event-driven communication
 - Composition over inheritance

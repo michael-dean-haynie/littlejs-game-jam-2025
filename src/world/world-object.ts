@@ -1,6 +1,6 @@
 import { Box2dObject, drawTile, vec2, Vector2 } from "littlejsengine";
 import { cliffHeightObliqueOffsets } from "./renderers/cliff-height-oblique-offsets";
-import { world } from "./world.al";
+import { world } from "./world";
 
 /** An object that can be placed and rendered in the world with perspective */
 export class WorldObject extends Box2dObject {

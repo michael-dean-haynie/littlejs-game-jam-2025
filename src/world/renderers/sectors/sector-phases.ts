@@ -10,7 +10,7 @@ import { TdoDrawTileCliffRenderer } from "../tdo-draw-tile-cliff-renderer";
 import { TdoDrawRectCliffRenderer } from "../tdo-draw-rect-cliff-renderer";
 import { type OrdinalDirection } from "../../../core/types/directions.types";
 import { Rail } from "../../rail";
-import { world } from "../../world.al";
+import { world } from "../../world";
 import { cellObsToSectorObs } from "../../pather";
 
 export const phases = [

@@ -1,4 +1,4 @@
-import { keyboardController } from "../input-controller/keyboard/keyboard-controller.al";
+import { keyboardController } from "../input-controller/keyboard/keyboard-controller";
 import { Subject, tap } from "rxjs";
 import type { IGameInputCommand } from "../game-inputs/game-input.types";
 

@@ -2,7 +2,7 @@ import { drawRect, EngineObject, vec2, Vector2 } from "littlejsengine";
 import type { Sector } from "./sectors/sector";
 import { cellWorldSize } from "../cell";
 import { cliffHeightColors } from "./cliff-height-colors";
-import { world } from "../world.al";
+import { world } from "../world";
 
 export abstract class CliffRenderer extends EngineObject {
   protected readonly _sector: Sector;

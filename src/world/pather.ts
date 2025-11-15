@@ -1,4 +1,4 @@
-import { world } from "./world.al";
+import { world } from "./world";
 import { extToGridSize, Sector } from "./renderers/sectors/sector";
 import { isOverlapping, vec2, type Vector2 } from "littlejsengine";
 import { AStarFinder } from "astar-typescript";
@@ -60,6 +60,7 @@ export class Pather {
 
   /** Returns a series of world coordinates to get from pos a to pos b */
   getPath(posA: Vector2, posB: Vector2): Vector2[] | undefined {
+    // michael: improve: avoid exhaustive searches maybe with timeout (e.g. for islands)
     const astarPosA = this.worldToAstar(posA);
     const astarPosB = this.worldToAstar(posB);
 

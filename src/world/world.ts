@@ -1,4 +1,4 @@
-import { LitWorldConfigOverlay } from "../lit/components/lit-world-config-overlay.al";
+import { LitWorldConfigOverlay } from "../lit/components/lit-world-config-overlay";
 import { defaultWorldConfig, f2dmk, type Perspective } from "./world.types";
 import type { Cell } from "./cell";
 import { noCap } from "../core/util/no-cap";

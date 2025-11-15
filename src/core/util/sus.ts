@@ -1,9 +1,6 @@
 import type { Sector } from "../../world/renderers/sectors/sector";
-import {
-  phase2Idx,
-  phases,
-} from "../../world/renderers/sectors/sector-phases";
-import { world } from "../../world/world.al";
+import { phase2Idx, phases } from "../../world/renderers/sectors/sector-phases";
+import { world } from "../../world/world";
 
 export type DebugStore = {
   sectors: Map<number, Sector>;

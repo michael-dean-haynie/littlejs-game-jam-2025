@@ -15,7 +15,7 @@ import {
   phases,
   type Phase,
 } from "./sector-phases";
-import { world } from "../../world.al";
+import { world } from "../../world";
 import {
   clamp,
   Color,

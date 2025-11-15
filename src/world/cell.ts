@@ -11,7 +11,7 @@ import { f2dmk } from "./world.types";
 import { cliffHeightObliqueOffsets } from "./renderers/cliff-height-oblique-offsets";
 import { cliffHeightTileOffsets } from "./renderers/cliff-height-tile-offsets";
 import { textureIndexMap } from "../textures/texture-index-map";
-import { world } from "./world.al";
+import { world } from "./world";
 
 export type Axis = "x" | "y";
 /** Whether the lower level is grass or water (NOTE: not supporting water directly to cliff face for now)*/

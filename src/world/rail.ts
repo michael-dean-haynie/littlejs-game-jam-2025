@@ -2,7 +2,7 @@ import { box2d, RED, type Vector2 } from "littlejsengine";
 import { WorldObject } from "./world-object";
 import { mkTile } from "../textures/tile-sheets/mk-tile";
 import type { RampDirection } from "./cell";
-import { world } from "./world.al";
+import { world } from "./world";
 
 /** A "rail" for cliff edges/ramps to implement terrain pathing/collision */
 export class Rail extends WorldObject {
