@@ -159,3 +159,36 @@ Generally, factories are for instantiating types with normal parameters as well 
 - some ramps when partially covered by cliff have wrong background color strip between
 - units on ramp which is partially covered by cliff appear on top of the cliff too
 - combine terrains into 1 texture to speed up render loop
+
+## input/controlls/commands/actions architecture
+
+1. DOM KeyboardEvent
+   - track active physical keys/modifiers
+2. convert to `KbmControlEvent`
+   - knows physical key (`KbmControl`)
+   - knows up/down
+   - knows active ctrls
+   - knows active modifiers
+3. match to `KeyboardAction`s
+   - abstract "action" for configurable bridge from hardware to game logic
+4. convert to `InputAction`s
+   - abstract id for a game action invoked by some controller (hardware)
+5. convert to `InputCommand`s
+   - parameterized command object for game logic to act on
+
+## keyboard / hotkey concerns
+
+- Smart cast vs normal cast - Instantly cast on hover vs click to confirm
+- Rapid fire - Hold key to spam an ability
+- Quick cast with indicator - Show range before releasing
+- Right-click behavior - Attack-move, move, smart command
+- Selection priority - Click preference for units vs buildings
+- Double-tap behavior - Double-tap unit hotkey to center camera
+- Repeat rate - For abilities that can be spammed
+
+## ability / states / interrupt concerns
+
+- can buffer multiple casts of same ability (attack, atttack attack)?
+- face direction can happen right in middle of ability?
+- can ability interrupt current ability? if same? if different? different for each combination?
+  - after interrupt, should resume original one?

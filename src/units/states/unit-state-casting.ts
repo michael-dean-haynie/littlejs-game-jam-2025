@@ -30,9 +30,11 @@ export class UnitStateCasting extends UnitStateBase {
             }),
           )
           .subscribe();
-        this._ability.progress();
+        this._ability.start();
+        return "none";
+      } else {
+        return "defer";
       }
-      return "none";
     };
 
     this._messageHandlers["unit.toggleCast"] = (msg) => {
@@ -51,7 +53,7 @@ export class UnitStateCasting extends UnitStateBase {
             }),
           )
           .subscribe();
-        this._ability.progress();
+        this._ability.start();
         return "none";
       }
       if (this._ability?.type === msg.ability) {

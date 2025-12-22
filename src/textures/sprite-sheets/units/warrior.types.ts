@@ -24,14 +24,12 @@ export const warriorSpriteSheets = [
     texture: "units/warrior/Warrior_Attack1.png",
     frames: 4,
     frameSize: 192,
-    omitFrames: [0, 1],
   },
   {
     id: "units.warrior.attack2",
     texture: "units/warrior/Warrior_Attack2.png",
     frames: 4,
     frameSize: 192,
-    omitFrames: [0, 1],
   },
 ] as const satisfies SpriteSheet[];
 

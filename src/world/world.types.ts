@@ -37,10 +37,10 @@ export type WorldConfig = {
 };
 
 export const defaultWorldConfig: WorldConfig = {
-  cameraZoom: 45,
+  cameraZoom: 79,
   renderTerrain: true,
-  useTiles: false,
-  topDownPerspective: true,
+  useTiles: true,
+  topDownPerspective: false,
   sectorExtent: 2,
   sectorPathingExtent: 2,
   sectorRenderExtent: 3,
@@ -54,8 +54,8 @@ export const defaultWorldConfig: WorldConfig = {
   tnClamp: 0.37,
   cliffHeightBounds: [0.17, 0.33, 0.5, 0.67, 0.83],
   rampSlopeThreshold: 0.11,
-  debugSectors: true,
-  debugPathing: true,
+  debugSectors: false,
+  debugPathing: false,
 };
 
 /** Fast 2d map key */

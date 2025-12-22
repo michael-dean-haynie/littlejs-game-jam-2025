@@ -1,4 +1,4 @@
-import type { KeyboardProfile } from "../keyboard-controller.types";
+import type { KeyboardProfile } from "./keyboard-profile";
 
 export const keyboardProfileKenisis: KeyboardProfile = {
   moveLeft: [

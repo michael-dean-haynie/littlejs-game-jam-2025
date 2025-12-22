@@ -1,19 +1,16 @@
 import { tap } from "rxjs";
-import type { IGameInputCommand } from "../input/game-inputs/game-input.types";
-import { Move } from "../input/game-inputs/move";
-import { createUnitMoveMessage } from "../units/unit-messages.types";
-import { FaceDirection } from "../input/game-inputs/face-direction";
-import { FacePosition } from "../input/game-inputs/face-position";
-import { GuardToggle } from "../input/game-inputs/guard-toggle";
-import { Attack } from "../input/game-inputs/attack";
 import type { UnitObject } from "../units/unit-object";
 import { world } from "../world/world";
 import { vec2 } from "littlejsengine";
 import { inputManager } from "../input/input-manager/input-manager";
-import { Lancer } from "../units/lancer";
 import { Warrior } from "../units/warrior";
-import { Spider } from "../units/spider";
-import { Skull } from "../units/skull";
+import type { IInputCommand } from "../input/commands/input-command";
+import { Move } from "../input/commands/move";
+import { FaceDirection } from "../input/commands/face-direction";
+import { createUnitMoveMessage } from "../units/unit-messages.types";
+import { FacePosition } from "../input/commands/face-position";
+import { GuardToggle } from "../input/commands/guard-toggle";
+import { Attack } from "../input/commands/attack";
 
 export class Player {
   unit: UnitObject | null = null;
@@ -22,35 +19,35 @@ export class Player {
     inputManager.commands$
       .pipe(
         // no takeUntil because expected singleton
-        tap((command) => this._processGameInputCommand(command)),
+        tap((command) => this._processInputCommand(command)),
       )
       .subscribe();
   }
 
   // michael: improve: organization, consider many commands and many units possible
-  private _processGameInputCommand(giCommand: IGameInputCommand): void {
-    if (giCommand instanceof Move) {
-      this.unit?.enqueueMessage(createUnitMoveMessage(giCommand.direction));
+  private _processInputCommand(command: IInputCommand): void {
+    if (command instanceof Move) {
+      this.unit?.enqueueMessage(createUnitMoveMessage(command.direction));
     }
-    if (giCommand instanceof FaceDirection) {
+    if (command instanceof FaceDirection) {
       this.unit?.enqueueMessage({
         id: "unit.faceDirection",
-        direction: giCommand.direction,
+        direction: command.direction,
       });
     }
-    if (giCommand instanceof FacePosition) {
+    if (command instanceof FacePosition) {
       this.unit?.enqueueMessage({
         id: "unit.facePosition",
-        position: giCommand.position,
+        position: command.position,
       });
     }
-    if (giCommand instanceof GuardToggle) {
+    if (command instanceof GuardToggle) {
       this.unit?.enqueueMessage({
         id: "unit.toggleCast",
         ability: "guard",
       });
     }
-    if (giCommand instanceof Attack) {
+    if (command instanceof Attack) {
       this.unit?.enqueueMessage({
         id: "unit.cast",
         ability: "attack",
@@ -59,9 +56,8 @@ export class Player {
   }
 
   spawnUnit(): void {
-    this.unit = new Skull(vec2(2, 0));
-    this.unit = new Lancer(vec2(0, 0));
-    this.unit = new Spider(vec2(1, 0));
+    // this.unit = new Lancer(vec2(0, 0));
+    // this.unit = new Spider(vec2(1, 0));
     this.unit = new Warrior(vec2(-1, 0));
 
     world.unit = this.unit;

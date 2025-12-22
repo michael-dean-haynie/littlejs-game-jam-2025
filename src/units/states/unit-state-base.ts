@@ -41,7 +41,7 @@ export abstract class UnitStateBase implements IUnitState {
   processMessage(message: Message): MessagePostProcessAction {
     const handler = this._messageHandlers[message.id];
     if (handler === undefined) {
-      return "skip";
+      return "defer";
     }
 
     // michael: improve: maybe - might be design or ts limitation

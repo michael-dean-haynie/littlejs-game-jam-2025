@@ -1,21 +1,21 @@
 import type { Observable } from "rxjs";
-import { enumerationFactory } from "../core/enumeration-factory";
 
 export interface IAbility {
   readonly type: Ability;
-  progress(): void;
+  start(): void;
   restart(): void;
+  progress(): void;
   readonly phase$: Observable<AbilityPhase>;
 }
 
-export const AbilityPhases = enumerationFactory(
+export const AbilityPhases = [
   "init",
   "preswing",
   "swing",
   "backswing",
   "complete",
-);
-export type AbilityPhase = ReturnType<typeof AbilityPhases.values>[number];
+] as const;
+export type AbilityPhase = (typeof AbilityPhases)[number];
 
-export const Abilities = enumerationFactory("guard", "attack");
-export type Ability = ReturnType<typeof Abilities.values>[number];
+export const Abilities = ["guard", "attack"] as const;
+export type Ability = (typeof Abilities)[number];

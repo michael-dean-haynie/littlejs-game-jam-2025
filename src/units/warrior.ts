@@ -44,7 +44,7 @@ export class Warrior extends UnitObject {
     );
 
     // register abilities
-    this.abilityMap.set("attack", new Attack(this, 0, 0.2));
+    this.abilityMap.set("attack", new Attack(this, 0.2, 0.2));
     this.abilityMap.set("guard", new Guard(this));
 
     // register states

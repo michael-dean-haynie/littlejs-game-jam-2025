@@ -22,7 +22,7 @@ export class Attack extends AbilityBase {
 
   protected _applyEffect(): void {
     const diameter = 2;
-    const dbhbSize = vec2(diameter).scale(0.5).length();
+    const dbhbSize = vec2(diameter).scale(0.5).length(); // debug hitbox size
     debugCircle(this._unitObject.getPerspectivePos(), dbhbSize, undefined, 1);
 
     const castHits = box2d.circleCastAll(

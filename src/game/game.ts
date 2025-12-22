@@ -10,6 +10,7 @@ import {
 } from "littlejsengine";
 import { player } from "../player/player";
 import { inputManager } from "../input/input-manager/input-manager";
+import { Skull } from "../units/skull";
 
 export class Game {
   start(): void {
@@ -42,6 +43,8 @@ export class Game {
 
     player.spawnUnit();
 
+    const enemyUnit = new Skull(vec2(2, 0));
+
     // to simulate friction on the ground
     // b2Obj.setLinearDamping(0.1); // icey
     // b2Obj.setLinearDamping(0.5); // slippery
@@ -59,7 +62,7 @@ export class Game {
    * Handle input and update the game state
    */
   private _gameUpdate(): void {
-    inputManager.triggerFrameDrivenInputs();
+    inputManager.update();
     world.update();
   }
 

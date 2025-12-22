@@ -51,6 +51,10 @@ export abstract class AbilityBase implements IAbility {
     }
   }
 
+  start(): void {
+    this.restart();
+  }
+
   restart(): void {
     this._phase$.next("init");
   }

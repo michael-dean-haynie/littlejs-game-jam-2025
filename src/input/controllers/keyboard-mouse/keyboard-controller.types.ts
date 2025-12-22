@@ -1,16 +1,6 @@
 import { enumerationFactory } from "../../../core/enumeration-factory";
 import { vec2, Vector2 } from "littlejsengine";
-
-/** These are the inputs for the keyboard that users can map to particular keys via a profile */
-export const KeyboardInputs = enumerationFactory(
-  "moveLeft",
-  "moveRight",
-  "moveUp",
-  "moveDown",
-  "guard",
-  "attack",
-);
-export type KeyboardInput = ReturnType<typeof KeyboardInputs.values>[number];
+import type { KeyboardInput } from "./keyboard-input";
 
 const _tempMovementKeyboardInputs = [
   "moveLeft",
@@ -34,10 +24,6 @@ export const MovementKeyboardInputVectors = {
   moveDown: vec2(0, -1),
 } as const satisfies Record<MovementKeyboardInput, Vector2>;
 
-export type KeyboardProfile = Partial<{
-  [index in KeyboardInput]: KeyboardInputMatcher[];
-}>;
-
 export type HoldOrToggle = "hold" | "toggle";
 export type KeyupOrKeydown = "keyup" | "keydown";
 
@@ -48,24 +34,15 @@ export type KeyboardInputMatcher = {
   [index in KeyboardModifier]: KeyboardModifierMatcher;
 }>;
 
-export const KeyboardModifierMatchers = enumerationFactory(
+export const keyboardModifierMatchers = [
   "required",
   "forbidden",
   "default",
-);
-export type KeyboardModifierMatcher = ReturnType<
-  typeof KeyboardModifierMatchers.values
->[number];
+] as const;
+export type KeyboardModifierMatcher = (typeof keyboardModifierMatchers)[number];
 
-export const KeyboardModifiers = enumerationFactory(
-  "ctrl",
-  "alt",
-  "shift",
-  "meta",
-);
-export type KeyboardModifier = ReturnType<
-  typeof KeyboardModifiers.values
->[number];
+export const keyboardModifiers = ["ctrl", "alt", "shift", "meta"] as const;
+export type KeyboardModifier = (typeof keyboardModifiers)[number];
 
 export type ActiveModifiers = Partial<{
   [index in KeyboardModifier]: true | undefined;

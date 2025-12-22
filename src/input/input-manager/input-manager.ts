@@ -1,20 +1,20 @@
-import { keyboardController } from "../input-controller/keyboard/keyboard-controller";
 import { Subject, tap } from "rxjs";
-import type { IGameInputCommand } from "../game-inputs/game-input.types";
+import { keyboardController } from "../controllers/keyboard-mouse/keyboard-controller";
+import type { IInputCommand } from "../commands/input-command";
 
 export class InputManager {
-  private readonly _commands$ = new Subject<IGameInputCommand>();
+  private readonly _commands$ = new Subject<IInputCommand>();
   public readonly commands$ = this._commands$.asObservable();
 
   constructor() {
-    keyboardController.inputs$
+    keyboardController.commands$
       // no takeUntil because singleton
-      .pipe(tap((gameInput) => this._commands$.next(gameInput)))
+      .pipe(tap((cmd) => this._commands$.next(cmd)))
       .subscribe();
   }
 
-  triggerFrameDrivenInputs(): void {
-    keyboardController.triggerFrameDrivenInputs();
+  update(): void {
+    keyboardController.update();
   }
 }
 

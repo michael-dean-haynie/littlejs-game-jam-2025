@@ -210,7 +210,7 @@ export class UnitObject extends WorldObject {
       const message = this._messageBuffer.shift()!;
       const postProcessAction = this._getStateObj().processMessage(message);
       switch (postProcessAction) {
-        case "skip":
+        case "defer":
           skippedMessages.push(message);
           break;
         case "requeue":
