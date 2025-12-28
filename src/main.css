@@ -1,3 +1,7 @@
 /* eslint-disable css/no-invalid-at-rules */
 @import "tailwindcss";
 @plugin "daisyui";
+
+lit-ui {
+  color: white;
+}

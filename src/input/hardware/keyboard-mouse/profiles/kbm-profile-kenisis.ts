@@ -19,4 +19,5 @@ export const kbmProfileKenisis: KbmProfile = {
   ],
   attack: [{ ctrl: "mouse0", bindingMode: "fire" }],
   guard: [{ ctrl: "mouse2", bindingMode: "hold" }],
+  toggleInGameMenu: [{ ctrl: "backspace", bindingMode: "toggle" }],
 };

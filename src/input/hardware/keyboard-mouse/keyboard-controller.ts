@@ -1,4 +1,3 @@
-import { Subject } from "rxjs";
 import type {
   KbmBinding,
   KbmModifierMatchMode,
@@ -19,16 +18,14 @@ import {
   type UpOrDown,
 } from "./keyboard-control";
 import { kbmProfileKenisis } from "./profiles/kbm-profile-kenisis";
-import type { IInputCommand } from "../../commands/input-command";
-import { Move } from "../../commands/move";
-import { mouseDelta, mousePos, vec2, type Vector2 } from "littlejsengine";
-import { FacePosition } from "../../commands/face-position";
-import { Attack } from "../../commands/attack";
-import { GuardToggle } from "../../commands/guard-toggle";
+import { mouseDelta } from "littlejsengine";
+import { hardwareInputMessageHandler } from "../hardware-input-message-handler";
+import { ToggleInGameMenu } from "../toggle-in-game-menu";
 
 export class KeyboardController {
-  private readonly _commands$ = new Subject<IInputCommand>();
-  public readonly commands$ = this._commands$.asObservable();
+  // michael: remove
+  // private readonly _commands$ = new Subject<IInputCommand>();
+  // public readonly commands$ = this._commands$.asObservable();
 
   /** Actively pressed keyboard keys / mouse buttons (order matters) */
   private readonly _activeCtrls = new Set<KbmControl>();
@@ -52,7 +49,8 @@ export class KeyboardController {
   update(): void {
     // once a frame, check if the mouse has moved, and reface unit if needed
     if (mouseDelta.length() > 0) {
-      this._commands$.next(new FacePosition(mousePos));
+      // michael: refactor
+      // this._commands$.next(new FacePosition(mousePos));
     }
   }
 
@@ -222,6 +220,7 @@ export class KeyboardController {
   // michael: improve: make decorator pattern for discriminated handlers
   private _onKbmActionEvent(actionEvent: KbmActionEvent): void {
     switch (actionEvent.action) {
+      // movement actions
       case "moveLeft":
       case "moveRight":
       case "moveUp":
@@ -230,10 +229,17 @@ export class KeyboardController {
         break;
 
       case "attack":
-        this._commands$.next(new Attack());
+        // michael: refactor
+        // this._commands$.next(new Attack());
         break;
       case "guard":
-        this._commands$.next(new GuardToggle());
+        // michael: refactor
+        // this._commands$.next(new GuardToggle());
+        break;
+
+      // default pass through mappings?
+      case "toggleInGameMenu":
+        hardwareInputMessageHandler.handle(new ToggleInGameMenu());
         break;
 
       default:
@@ -241,12 +247,13 @@ export class KeyboardController {
     }
   }
 
-  private _movementKeyboardInputVectors = {
-    moveLeft: vec2(-1, 0),
-    moveRight: vec2(1, 0),
-    moveUp: vec2(0, 1),
-    moveDown: vec2(0, -1),
-  } as const satisfies Record<KbmMovementAction, Vector2>;
+  // michael: add back
+  // private _movementKeyboardInputVectors = {
+  //   moveLeft: vec2(-1, 0),
+  //   moveRight: vec2(1, 0),
+  //   moveUp: vec2(0, 1),
+  //   moveDown: vec2(0, -1),
+  // } as const satisfies Record<KbmMovementAction, Vector2>;
 
   private _onMoveActionEvent(activeCtrls: KbmControl[]): void {
     // get all the active move actions
@@ -263,22 +270,23 @@ export class KeyboardController {
       }
     }
 
+    // michael: refactor
     // reduce active move actions to a single vec2
-    const reducedMovementVec: Vector2 = activeMovementActions.reduce(
-      (acc, cur) => {
-        const curVec = this._movementKeyboardInputVectors[cur];
+    // const reducedMovementVec: Vector2 = activeMovementActions.reduce(
+    //   (acc, cur) => {
+    //     const curVec = this._movementKeyboardInputVectors[cur];
 
-        // replace x/y with more recent inputs.
-        // simply summing would make left + right = 0 instead of favoring the most recent
-        return vec2(
-          curVec.x !== 0 ? curVec.x : acc.x,
-          curVec.y !== 0 ? curVec.y : acc.y,
-        );
-      },
-      vec2(0, 0),
-    );
+    //     // replace x/y with more recent inputs.
+    //     // simply summing would make left + right = 0 instead of favoring the most recent
+    //     return vec2(
+    //       curVec.x !== 0 ? curVec.x : acc.x,
+    //       curVec.y !== 0 ? curVec.y : acc.y,
+    //     );
+    //   },
+    //   vec2(0, 0),
+    // );
 
-    this._commands$.next(new Move(reducedMovementVec));
+    // this._commands$.next(new Move(reducedMovementVec));
   }
 }
 

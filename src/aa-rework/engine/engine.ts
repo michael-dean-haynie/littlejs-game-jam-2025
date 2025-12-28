@@ -1,5 +1,3 @@
-import { textures } from "../textures/textures.types";
-import { world } from "../world/world";
 import {
   box2dInit,
   engineInit,
@@ -8,11 +6,24 @@ import {
   setShowSplashScreen,
   vec2,
 } from "littlejsengine";
-import { player } from "../player/player";
-import { inputManager } from "../input/input-manager/input-manager";
+import { textures } from "../../textures/textures.types";
+import { LitUI } from "../ui/lit/components";
+import { keyboardController } from "../../input/hardware/keyboard-mouse/keyboard-controller";
+import type { Game } from "../game/game";
 
-export class Game {
+/**
+ * Represents the game at the level of a web app, powered by littlejs engine.
+ * Might be driving a game, or just the menu or whatever.
+ */
+export class Engine {
+  litUi!: LitUI;
+  game?: Game;
+
   start(): void {
+    // michael: debug
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).engine = this;
+
     // pre-init setup
     setShowSplashScreen(true);
 
@@ -27,6 +38,9 @@ export class Game {
       this._gameRenderPost.bind(this),
       textures,
     );
+
+    // initialize the lit ui overlay (after engineInit() so canvas exists)
+    this.litUi = new LitUI(this);
   }
 
   /**
@@ -36,24 +50,7 @@ export class Game {
     // start up LittleJS Box2D plugin
     await box2dInit();
 
-    world.init();
-
     setCameraPos(vec2(0, 0));
-
-    player.spawnUnit();
-
-    // const enemyUnit = new Skull(vec2(2, 0));
-
-    // to simulate friction on the ground
-    // b2Obj.setLinearDamping(0.1); // icey
-    // b2Obj.setLinearDamping(0.5); // slippery
-    // b2Obj.setLinearDamping(1); // slide
-    // b2Obj.setLinearDamping(2); // scootch
-    // b2Obj.setLinearDamping(3); // budge
-
-    // figuring out physics
-    // b2Obj.applyAcceleration(vec2(1)); // ljs: ignores mass; b2d: impulse
-    // b2Obj.applyForce(vec2(100)); // ljs: does not ignore mass; b2d: force
   }
 
   /**
@@ -61,21 +58,15 @@ export class Game {
    * Handle input and update the game state
    */
   private _gameUpdate(): void {
-    inputManager.update();
-    world.update();
+    keyboardController.update();
+    this.game?.gameState.update();
   }
 
   /**
    * Called after physics and objects are updated
    * Setup camera and prepare for render
    */
-  private _gameUpdatePost(): void {
-    // michael: improve: temp - lock camera to player unit - better place
-    const unit = player.unit;
-    if (unit !== null) {
-      setCameraPos(unit.getPerspectivePos());
-    }
-  }
+  private _gameUpdatePost(): void {}
 
   /**
    * Called before objects are rendered
@@ -87,9 +78,7 @@ export class Game {
    * Called after objects are rendered
    * Draw effects or hud that appear above all objects
    */
-  private _gameRenderPost(): void {
-    world.render();
-  }
+  private _gameRenderPost(): void {}
 }
 
-export const game = new Game();
+export const engine = new Engine();

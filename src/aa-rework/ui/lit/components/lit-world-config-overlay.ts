@@ -1,10 +1,10 @@
 import { customElement } from "lit/decorators.js";
 import { BaseLitElement } from "./base-lit-element";
 import { BehaviorSubject, type Observable } from "rxjs";
-import type { WorldConfig } from "../../world/world.types";
+import type { WorldConfig } from "../../../../world/world.types";
 import { html } from "lit";
-import { noCap } from "../../core/util/no-cap";
-import { range } from "../../core/util/range";
+import { noCap } from "../../../../core/util/no-cap";
+import { range } from "../../../../core/util/range";
 
 @customElement("lit-world-config-overlay")
 export class LitWorldConfigOverlay extends BaseLitElement {

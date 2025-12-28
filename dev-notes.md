@@ -70,6 +70,9 @@ Generally, factories are for instantiating types with normal parameters as well 
 - https://gameprogrammingpatterns.com/state.html
 - https://sc2mapster.fandom.com/wiki/Data/Actors
 - https://refactoring.guru/design-patterns/state
+- Fonts
+  - https://fonts.google.com/specimen/Patrick+Hand
+  - https://fonts.google.com/specimen/MedievalSharp
 
 ## Misc Notes
 

@@ -8,6 +8,12 @@ Little legends
 
 Survival
 Tower Defense
+Adventure
+RTS
+Heroes Clone
+Battlefront
+Extraction
+Mini Games (Rapid Fire)
 
 ## Systems
 
